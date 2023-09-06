@@ -1,0 +1,47 @@
+#image-preview {
+    display: none;
+    max-width: 100%;
+}
+
+.btn-ativa-input {
+    margin-top: 10px;
+}
+
+.custom-file-input {
+    visibility: hidden;
+    width: 0;
+    position: absolute;
+}
+
+.custom-file-label::after {
+    content: 'Selecionar Imagem';
+}
+
+.center-div {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+text-align: center;
+}
+
+.img-container {
+margin-bottom: 10px;
+}
+
+.img-container img {
+height: 180px;
+}
+
+.btn-img {
+padding: 10px 20px;
+background-color: #3498db;
+color: #fff;
+border: none;
+cursor: pointer;
+}
+.text-header{
+font-size: 20px;
+font-weight: bold;
+color: black;
+}
