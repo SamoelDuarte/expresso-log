@@ -15,5 +15,6 @@ class VerifyCsrfToken extends Middleware
        '/gerarPedido',
        '/verify-token',
        '/consulta-cep',
+       '/glf'
     ];
 }

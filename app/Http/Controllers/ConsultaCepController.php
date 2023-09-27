@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Http\Request;
@@ -11,17 +12,112 @@ class ConsultaCepController extends Controller
 {
     public function consultaCep(Request $request)
     {
-
-
         $result['ShippingSevicesArray'][] = $this->calculateShippingDBA($request);
         $result['ShippingSevicesArray'][] = $this->calculateShippingIS($request);
+        $result['ShippingSevicesArray'][] = $this->calculateShippingGlf($request);
 
         echo json_encode($result);
     }
-    
+
+    public function calculateShippingGlf($request)
+    {
+        // Crie uma instância do cliente Guzzle
+        $clientA = new Client();
+
+        // Defina a URL do endpoint
+        $urlA = 'https://grupoastrolog.brudam.com.br/api/v1/acesso/auth/login';
+
+        // Defina os dados que serão enviados no corpo da solicitação
+        $data = [
+            'usuario' => 'f0ea6a089cfbe2063d1f1b95e32aa744',
+            'senha' => '65842d7544889a6b6f6b11aa72fb2826c7d482f2ebde2c777c1658fcaa1fb193',
+        ];
+
+        // Faça a solicitação POST
+        $response = $clientA->post($urlA, [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json',
+            ],
+            'json' => $data, // Os dados são enviados como JSON no corpo da solicitação
+        ]);
+
+
+        $accessKey = null;
+        // Verifique se a solicitação foi bem-sucedida
+        if ($response->getStatusCode() === 200) {
+            $responseData = json_decode($response->getBody(), true); // Decodifique a resposta JSON para um array associativo
+            if (isset($responseData['data']['access_key'])) {
+                $accessKey = $responseData['data']['access_key'];
+                $client = new Client();
+
+                // Dados de solicitação
+                $data = [
+
+                    "nDocEmit" => "17000788000139",
+                    "nDocCli" => "23966188000122",
+                    "nDocRem" => "23966188000122",
+                    "nDocDest" => "37785652813",
+                    "cOrigCalc" => 3550308,
+                    "cDestCalc" => 3550308,
+                    "CEP" => Utils::sanitizeZipcode($request->get('SellerCEP')),
+                    "cTab" => "FRETE BARATO",
+                    "cServ" => "123",
+                    "pBru" => 5,
+                    "qVol" => 3,
+                    "vNF" => number_format($request->get('ShipmentInvoiceValue') / 100, 2, '.', ''),
+                    "volumes" => [
+                        [
+                            "dCom" => 16,
+                            "dLar" => 16,
+                            "dAlt" => 16,
+                            "qVol" => 3,
+                            "pBru" => 5
+                        ]
+                    ]
+                ];
+
+                $headers = [
+                    "Authorization" => "Bearer  " . $accessKey,
+                    "Content-Type" => "application/json",
+                    "accept" => "application/json"
+                ];
+
+
+                $response = $client->post("https://grupoastrolog.brudam.com.br/api/v1/frete/cotacao/calcula", [
+                    'headers' => $headers,
+                    'json' => $data
+                ]);
+
+                $body = $response->getBody()->getContents();
+                $result = json_decode($body, true);
+
+
+                $data = [
+                    "Carrier" =>  "GLf Entrega",
+                    "CarrierCode" =>  "",
+                    "DeliveryTime" => $result['data'][0]['nDias'],
+                    "Msg" => "",
+                    "ServiceCode" => "",
+                    "ServiceDescription" => "",
+                    "ShippingPrice" => $result['data'][0]['vEntrega'],
+                    "OriginalDeliveryTime" => "",
+                    "OriginalShippingPrice" => "",
+                    "Error" => false
+                ];
+
+                // Do something with the response data
+                return $data;
+            } else {
+                echo "A chave 'access_key' não foi encontrada na resposta.\n";
+            }
+        } else {
+            echo "A solicitação não foi bem-sucedida.\n";
+        }
+    }
     public function calculateShippingIs($request)
     {
-      
+
         $apiKey = env('MESH_API_KEY'); // Replace with your actual API key
         $userId = env('MESH_USER_ID');  // Replace with your actual User ID
         $client = new Client();
@@ -67,7 +163,7 @@ class ConsultaCepController extends Controller
                     'X-Api-User' => $userId,
                 ],
             ]);
-            https://apicliente.minha.is/api/v1/Tms/CreateOrder
+            https: //apicliente.minha.is/api/v1/Tms/CreateOrder
             // Define the base URL
             $baseUrl = 'https://apicliente.minha.is/api/v1/Tms/quote';
 
