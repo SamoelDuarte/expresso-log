@@ -322,7 +322,6 @@ Route::get('/teste', function () {
     // var_dump($data);
 });
 
-
 Route::get('/getMesh', function () {
 
 
@@ -448,35 +447,72 @@ Route::get('/updateStatusMesh', function () {
     }
 });
 
-Route::get('/tokenGLF', function () {
+Route::get('/updateAstrlog', function () {
+
+    $deliveryes = Delivery::with('carriers.documents')
+    ->whereHas('carriers', function ($query) {
+        $query->whereHas('documents', function ($documentQuery) {
+            $documentQuery->where('number', '17000788000139');
+        });
+    })
+    ->whereDoesntHave('status', function ($query) {
+        $query->where('status', 'finalizado');
+    })
+    ->orderBy('id')
+    ->get();
+
+
+
+
+    foreach ($deliveryes as $key => $value) {
+        $authResp = authGfl();
+        if ($authResp->getStatusCode() === 200) {
+            $responseData = json_decode($authResp->getBody(), true); // Decodifique a resposta JSON para um array associativo
+            if (isset($responseData['data']['access_key'])) {
+                $client = new Client();
+                $accessKey = $responseData['data']['access_key'];
+                $headers = [
+                    "Authorization" => "Bearer  " . $accessKey
+                ];
+    
+                $response = $client->get("https://grupoastrolog.brudam.com.br/api/v1/tracking/ocorrencias/nfe?chave=" . $value->invoice_key, [
+                    'headers' => $headers
+                ]);
+    
+                $body = $response->getBody()->getContents();
+                $result = json_decode($body, true);
+              
+                StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
+
+            
+                for($i = 0 ; $i < count($result['data'][0]['dados']) ; $i++ ){
+
+                    
+                    StatusHistory::create([
+                        'delivery_id' => $value->id,
+                        'external_code' => $result['data'][0]['documento'],
+                        'status' => $result['data'][0]['dados'][$i]['descricao'],
+                        'observation' => $result['data'][0]['dados'][$i]['obs'],
+                        'detail' => $result['data'][0]['dados'][$i]['obs'],
+                    ]); 
+
+                }
+            }
+        }
+    }
+    
+   
 });
-Route::post('/glf', function () {
-    // Crie uma instância do cliente Guzzle
-    $clientA = new Client();
 
-    // Defina a URL do endpoint
-    $urlA = 'https://grupoastrolog.brudam.com.br/api/v1/acesso/auth/login';
+Route::post('/astralog', function () {
 
-    // Defina os dados que serão enviados no corpo da solicitação
-    $data = [
-        'usuario' => 'f0ea6a089cfbe2063d1f1b95e32aa744',
-        'senha' => '65842d7544889a6b6f6b11aa72fb2826c7d482f2ebde2c777c1658fcaa1fb193',
-    ];
 
-    // Faça a solicitação POST
-    $response = $clientA->post($urlA, [
-        'headers' => [
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ],
-        'json' => $data, // Os dados são enviados como JSON no corpo da solicitação
-    ]);
-
+    $authResp = authGfl();
 
     $accessKey = null;
 
-    if ($response->getStatusCode() === 200) {
-        $responseData = json_decode($response->getBody(), true); // Decodifique a resposta JSON para um array associativo
+    if ($authResp->getStatusCode() === 200) {
+        $responseData = json_decode($authResp->getBody(), true); // Decodifique a resposta JSON para um array associativo
         if (isset($responseData['data']['access_key'])) {
             $accessKey = $responseData['data']['access_key'];
 
@@ -487,6 +523,7 @@ Route::post('/glf', function () {
 
             $xmlContent = file_get_contents('php://input');
             $xmlObj = simplexml_load_string($xmlContent); // Transformar o XML em um objeto SimpleXMLElement
+
 
 
             $data = array(
@@ -524,9 +561,9 @@ Route::post('/glf', function () {
                             "respEntrega" => array(
                                 "tpResp" => 3,
                                 "nDoc" => "16620067808"
-                            ),
-                            "cOrigCalc" => (string)$xmlObj->NFe->infNFe->dest->enderDest->cMun,
-                            "cDestCalc" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->cMun,
+                            ), (string)
+                            "cOrigCalc" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->cMun,
+                            "cDestCalc" => (string)$xmlObj->NFe->infNFe->dest->enderDest->cMun,
                             "xObs" => substr((string)$xmlObj->NFe->infNFe->infAdic->infCpl, 0, 40)
                         ),
                         "toma" => array(
@@ -634,163 +671,9 @@ Route::post('/glf', function () {
                 )
             );
 
-        //    echo json_encode($data);
-        //     exit;
-        //     dd($data);
-            // $data = array(
-            //     "documentos" => array(
-            //         array(
-            //             "minuta" => array(
-            //                 "toma" => (int)$xmlObj->NFe->infNFe->ide->tpNF,
-            //                 "nDocEmit" => "17000788000139",
-            //                 "dEmi" => $formattedDate,
-            //                 "rSeg" => 4,
-            //                 "cSeg" => '33164021000100',
-            //                 "cServ" => "123",
-            //                 "cTab" => "FRETEBARATO",
-            //                 "tpEmi" => (int)$xmlObj->NFe->infNFe->ide->tpEmis,
-            //                 "cAut" => (string)$xmlObj->protNFe->infProt->chNFe,
-            //                 "transf" => array(
-            //                     "cAeroIni" => "sbsp",
-            //                     "cAeroFim" => "sbsp"
-            //                 ),
-            //                 "carga" => array(
-            //                     "pBru" => (float) $xmlObj->NFe->infNFe->det->prod->vFrete,
-            //                     "pCub" => (float) $xmlObj->NFe->infNFe->det->prod->vDesc,
-            //                     "qVol" => (int) $xmlObj->NFe->infNFe->transp->vol->qVol,
-            //                     "vTot" => (float) $xmlObj->NFe->infNFe->total->ICMSTot->vNF
-            //                 ),
-            //                 "volumes" => array(
-            //                     array(
-            //                         "dCom" => 0,
-            //                         "dLar" => 0,
-            //                         "dAlt" => 0,
-            //                         "qVol" => 0,
-            //                         "pBru" => 0,
-            //                         "pCub" => 0,
-            //                         "cEtiq" => "1"
-            //                     )
-            //                 ),
-            //                 "xReferencia" => "string",
-            //                 "xOrdemServico" => "string"
-            //             ),
-            //             "compl" => array(
-            //                 "entrega" => array(
-            //                     "dPrev" => $formattedDate,
-            //                     "hPrev" => "00:00:00"
-            //                 ),
-            //                 "cOrigCalc" => (string)$xmlObj->NFe->infNFe->dest->enderDest->cMun,
-            //                 "cDestCalc" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->cMun,
-            //                 "xObs" => substr((string)$xmlObj->NFe->infNFe->infAdic->infCpl, 0, 40)
-            //             ),
-            //             "toma" => array(
-            //                 "nDoc" => (string)$xmlObj->NFe->infNFe->emit->CNPJ,
-            //                 "IE" => (string)$xmlObj->NFe->infNFe->emit->IE,
-            //                 "cFiscal" => 1,
-            //                 "xNome" => (string)$xmlObj->NFe->infNFe->emit->xNome,
-            //                 "xFant" => (string)$xmlObj->NFe->infNFe->emit->xFant,
-            //                 "nFone" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->fone,
-            //                 "xLgr" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->xLgr,
-            //                 "nro" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->nro,
-            //                 "xBairro" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->xBairro,
-            //                 "cMun" => (int)$xmlObj->NFe->infNFe->emit->enderEmit->cMun,
-            //                 "CEP" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->CEP,
-            //                 "cPais" => (int)$xmlObj->NFe->infNFe->emit->enderEmit->cPais,
-            //                 "email" => 'email@email.com'
-            //             ),
-            //             "rem" => array(
-            //                 "nDoc" => (string)$xmlObj->NFe->infNFe->emit->CNPJ,
-            //                 "IE" => (string)$xmlObj->NFe->infNFe->emit->IE,
-            //                 "cFiscal" => 1,
-            //                 "xNome" => (string)$xmlObj->NFe->infNFe->emit->xNome,
-            //                 "xFant" => (string)$xmlObj->NFe->infNFe->emit->xFant,
-            //                 "nFone" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->fone,
-            //                 "xLgr" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->xLgr,
-            //                 "nro" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->nro,
-            //                 "xBairro" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->xBairro,
-            //                 "cMun" => (int)$xmlObj->NFe->infNFe->emit->enderEmit->cMun,
-            //                 "CEP" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->CEP,
-            //                 "cPais" => (int)$xmlObj->NFe->infNFe->emit->enderEmit->cPais,
-            //                 "email" => 'email@email.com'
-            //             ),
-            //             "exped" => array(
-            //                 "nDoc" => (string)$xmlObj->NFe->infNFe->emit->CNPJ,
-            //                 "IE" => (string)$xmlObj->NFe->infNFe->emit->IE,
-            //                 "cFiscal" => 1,
-            //                 "xNome" => (string)$xmlObj->NFe->infNFe->emit->xNome,
-            //                 "xFant" => (string)$xmlObj->NFe->infNFe->emit->xFant,
-            //                 "nFone" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->fone,
-            //                 "xLgr" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->xLgr,
-            //                 "nro" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->nro,
-            //                 "xBairro" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->xBairro,
-            //                 "cMun" => (int)$xmlObj->NFe->infNFe->emit->enderEmit->cMun,
-            //                 "CEP" => (string)$xmlObj->NFe->infNFe->emit->enderEmit->CEP,
-            //                 "cPais" => (int)$xmlObj->NFe->infNFe->emit->enderEmit->cPais,
-            //                 "email" => 'email@email.com'
-            //             ),
-            //             "receb" => array(
-            //                 "nDoc" => (string)$xmlObj->NFe->infNFe->dest->CPF,
-            //                 "IE" => "ISENTO",
-            //                 "cFiscal" => 1,
-            //                 "xNome" => (string)$xmlObj->NFe->infNFe->dest->xNome,
-            //                 "xFant" => (string)$xmlObj->NFe->infNFe->dest->xFant == "" ? $xmlObj->NFe->infNFe->dest->xNome : $xmlObj->NFe->infNFe->dest->xFant,
-            //                 "nFone" => (string)$xmlObj->NFe->infNFe->dest->enderDest->fone,
-            //                 "xLgr" => (string)$xmlObj->NFe->infNFe->dest->enderDest->xLgr,
-            //                 "nro" => (string)$xmlObj->NFe->infNFe->dest->enderDest->nro,
-            //                 "xBairro" => (string)$xmlObj->NFe->infNFe->dest->enderDest->xBairro,
-            //                 "cMun" => (int)$xmlObj->NFe->infNFe->dest->enderDest->cMun,
-            //                 "CEP" => Utils::sanitizeZipcode($xmlObj->NFe->infNFe->dest->enderDest->CEP),
-            //                 "cPais" => (int)$xmlObj->NFe->infNFe->dest->enderDest->cPais,
-            //                 "email" => (string)$xmlObj->NFe->infNFe->dest->email
-            //             ),
-            //             "dest" => array(
-            //                 "nDoc" => (string)$xmlObj->NFe->infNFe->dest->CPF,
-            //                 "IE" => "ISENTO",
-            //                 "cFiscal" => 1,
-            //                 "xNome" => (string)$xmlObj->NFe->infNFe->dest->xNome,
-            //                 "xFant" => (string)$xmlObj->NFe->infNFe->dest->xFant == "" ? $xmlObj->NFe->infNFe->dest->xNome : $xmlObj->NFe->infNFe->dest->xFant,
-            //                 "nFone" => (string)$xmlObj->NFe->infNFe->dest->enderDest->fone,
-            //                 "xLgr" => (string)$xmlObj->NFe->infNFe->dest->enderDest->xLgr,
-            //                 "nro" => (string)$xmlObj->NFe->infNFe->dest->enderDest->nro,
-            //                 "xBairro" => (string)$xmlObj->NFe->infNFe->dest->enderDest->xBairro,
-            //                 "cMun" => (int)$xmlObj->NFe->infNFe->dest->enderDest->cMun,
-            //                 "CEP" => Utils::sanitizeZipcode($xmlObj->NFe->infNFe->dest->enderDest->CEP),
-            //                 "cPais" => (int)$xmlObj->NFe->infNFe->dest->enderDest->cPais,
-            //                 "email" => (string)$xmlObj->NFe->infNFe->dest->email
-            //             ),
-            //             "documentos" => array(
-            //                 array(
-            //                     "nPed" => $xmlObj->NFe->infNFe->det[0]['nItem'],
-            //                     "serie" => (string)$xmlObj->NFe->infNFe->ide->serie,
-            //                     "nDoc" => (string)$xmlObj->NFe->infNFe->ide->nNF,
-            //                     "dEmi" => $formattedDate,
-            //                     "vBC" => (float)$xmlObj->NFe->infNFe->det[0]->imposto->ICMS->ICMS00->vBC,
-            //                     "vICMS" => (float)$xmlObj->NFe->infNFe->det[0]->imposto->ICMS->ICMS00->vICMS,
-            //                     "vBCST" => (float)$xmlObj->NFe->infNFe->det[0]->imposto->ICMS->ICMS00->vBCST,
-            //                     "vST" => (float)$xmlObj->NFe->infNFe->det[0]->imposto->ICMS->ICMS00->vICMS,
-            //                     "vProd" => (float)$xmlObj->NFe->infNFe->det[0]->prod->vProd,
-            //                     "vNF" => (float)$xmlObj->NFe->infNFe->total->ICMSTot->vNF,
-            //                     "nCFOP" => (string)$xmlObj->NFe->infNFe->det[0]->CFOP,
-            //                     "pBru" => (float)$xmlObj->NFe->infNFe->det[0]->prod->vFrete,
-            //                     "qVol" => (float)$xmlObj->NFe->infNFe->det[0]->prod->qCom,
-            //                     "chave" => (string)$xmlObj->protNFe->infProt->chNFe,
-            //                     "tpDoc" => "00",
-            //                     "xNat" => $xmlObj->NFe->infNFe->ide->natOp
-            //                 ),
-            //             ),
-            //             "docAnt" => array(
-            //                 array(
-            //                     "chCTe" => ""
-            //                 )
-            //             ),
+            // echo json_encode($data);
+            // exit;
 
-            //             "ocorrencia" => "string",
-            //             "cteComp" => array(
-            //                 "chCTe" => ""
-            //             )
-            //         )
-            //     )
-            // );
 
 
 
@@ -818,6 +701,32 @@ Route::post('/glf', function () {
         echo "A solicitação não foi bem-sucedida.\n";
     }
 });
+
+function authGfl()
+{
+    // Crie uma instância do cliente Guzzle
+    $clientA = new Client();
+
+    // Defina a URL do endpoint
+    $urlA = 'https://grupoastrolog.brudam.com.br/api/v1/acesso/auth/login';
+
+    // Defina os dados que serão enviados no corpo da solicitação
+    $data = [
+        'usuario' => 'f0ea6a089cfbe2063d1f1b95e32aa744',
+        'senha' => '65842d7544889a6b6f6b11aa72fb2826c7d482f2ebde2c777c1658fcaa1fb193',
+    ];
+
+    // Faça a solicitação POST
+    $response = $clientA->post($urlA, [
+        'headers' => [
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ],
+        'json' => $data, // Os dados são enviados como JSON no corpo da solicitação
+    ]);
+
+    return $response;
+}
 
 Route::get('/daytonaCotação', function () {
     // URL do serviço web

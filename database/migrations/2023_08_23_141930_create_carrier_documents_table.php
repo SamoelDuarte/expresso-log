@@ -91,6 +91,44 @@ return new class extends Migration
         $document->carrier_id = $carrier1->id;
         $document->number = "37744796000105";
         $document->save();
+
+
+        $carrier2 = new Carrier([
+            'legal_name' => 'ASTROLOG SERVICOS DE TRANSPORTE LTDA',
+            'trade_name' => 'ASTROLOG SERVICOS DE TRANSPORTE LTDA',
+            'state_registration' => 'EXEMPT',
+            'phone' => '4799291-2222',
+            'rntrc' => 'your_rntrc',
+            'opted_for_simples_nacional' => false,
+            'zip_code' => '04180075',
+            'address' => 'Travessa Ernesto Portante',
+            'number' => '55',
+            'complement' => 'your_complement',
+            'neighborhood' => 'Jardim Maria Estela',
+            'city' => 'São Paulo',
+            'state' => 'SP',
+            'landmark' => 'your_landmark',
+            'contact_name' => 'Astralog',
+            'contact_phone1' => '(47) 99291-2222',
+            'contact_phone2' => 'contact_phone_2',
+            'contact_email' => 'astrolog@fretebarato.com',
+            'customer_service_phone' => 'customer_service_phone',
+            'customer_service_email' => 'customer_service_email',
+            'website' => 'company_website',
+            'title' => 'your_title',
+            'message' => 'your_message',
+        ]);
+        
+        $carrier2->save();
+        
+        $document = new CarrierDocument();
+        $document->carrier_id = $carrier2->id;
+        $document->number = "20588287000120";
+        $document->save();
+        $document = new CarrierDocument();
+        $document->carrier_id = $carrier2->id;
+        $document->number = "17000788000139";
+        $document->save();
     }
 
     /**
