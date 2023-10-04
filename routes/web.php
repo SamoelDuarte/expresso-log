@@ -208,7 +208,6 @@ Route::get('/getSim', function () {
     }
 });
 
-
 Route::get('/updateStatusDBA', function () {
 
     $numbersToSearch = ['08982220000170', '50160966000164'];
