@@ -225,6 +225,7 @@ class PedidosController extends Controller
                         'headers' => $headers,
                         'json' => $data
                     ]);
+                    echo json_encode(array('mensagem' => 'sucesso'));
                 } catch (RequestException $e) {
                     if($e->getResponse()->getReasonPhrase() == "Internal Server Error"){
                         Error::create(['erro' => 'Erro servidor interno Astralog'.$e->getMessage()]);
