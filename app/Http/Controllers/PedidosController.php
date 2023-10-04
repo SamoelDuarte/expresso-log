@@ -302,7 +302,7 @@ class PedidosController extends Controller
                     $status->delivery_id = $delivery->id;
                     $status->save();
 
-                    echo json_encode(array("mensagem" => ));
+                    echo json_encode(array("mensagem" => "sucesso"));
                 } catch (Exception $e) {
                     // Verifique se a mensagem de erro contém "SQLSTATE[23000]" (case-sensitive)
                     if (strpos($e->getMessage(), "SQLSTATE[23000]") !== false) {
