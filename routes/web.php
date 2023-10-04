@@ -33,7 +33,7 @@ use App\Models\StatusHistory;
 Route::middleware('auth.token')->group(function () {
 
     Route::prefix('/gerarPedido')->controller(PedidosController::class)->group(function () {
-        Route::post('/', 'gerarPedido');
+        Route::get('/', 'gerarPedido');
     });
 
     Route::prefix('/consulta-cep')->controller(ConsultaCepController::class)->group(function () {
