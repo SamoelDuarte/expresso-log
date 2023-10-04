@@ -227,7 +227,7 @@ class PedidosController extends Controller
                     ]);
                 } catch (RequestException $e) {
                     if($e->getResponse()->getReasonPhrase() == "Internal Server Error"){
-                        Error::create(['erro' => 'Erro servidor interno Astralog']);
+                        Error::create(['erro' => 'Erro servidor interno Astralog'.$e->getMessage()]);
                         exit;
                     }
                 }
