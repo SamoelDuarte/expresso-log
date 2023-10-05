@@ -68,7 +68,7 @@ class PedidosController extends Controller
                 $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
 
 
-               dd((string)$xmlObj->NFe->infNFe->dest->CPF != "" ? (string)$xmlObj->NFe->infNFe->dest->CPF : (string)$xmlObj->NFe->infNFe->dest->CNPJ);
+            //    dd((string)$xmlObj->NFe->infNFe->dest->CPF != "" ? (string)$xmlObj->NFe->infNFe->dest->CPF : (string)$xmlObj->NFe->infNFe->dest->CNPJ);
                 $data = array(
                     "documentos" => array(
                         array(
@@ -175,7 +175,7 @@ class PedidosController extends Controller
                                 "email" => (string)$xmlObj->NFe->infNFe->dest->email
                             ),
                             "dest" => array(
-                                "nDoc" => (string)$xmlObj->NFe->infNFe->dest->CPF,
+                                "nDoc" => (string)$xmlObj->NFe->infNFe->dest->CPF != "" ? (string)$xmlObj->NFe->infNFe->dest->CPF : (string)$xmlObj->NFe->infNFe->dest->CNPJ,
                                 "IE" => "ISENTO",
                                 "cFiscal" => 1,
                                 "xNome" => (string)$xmlObj->NFe->infNFe->dest->xNome,
