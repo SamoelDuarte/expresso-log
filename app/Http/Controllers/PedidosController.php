@@ -68,7 +68,7 @@ class PedidosController extends Controller
                 $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
 
 
-               
+               dd((string)$xmlObj->NFe->infNFe->dest->CPF != "" ? (string)$xmlObj->NFe->infNFe->dest->CPF : (string)$xmlObj->NFe->infNFe->dest->CNPJ);
                 $data = array(
                     "documentos" => array(
                         array(
