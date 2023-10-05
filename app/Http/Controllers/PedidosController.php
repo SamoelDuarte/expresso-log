@@ -67,6 +67,8 @@ class PedidosController extends Controller
                 $XmlArray = json_decode($jsonString, true);
                 $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
 
+
+                dd((string)$xmlObj->NFe->infNFe->dest->CPF);
                 $data = array(
                     "documentos" => array(
                         array(
