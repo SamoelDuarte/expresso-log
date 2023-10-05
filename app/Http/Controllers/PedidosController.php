@@ -157,7 +157,7 @@ class PedidosController extends Controller
                                 "email" => 'email@email.com'
                             ),
                             "receb" => array(
-                                "nDoc" => (string)$xmlObj->NFe->infNFe->dest->CPF,
+                                "nDoc" => empty((string)$xmlObj->NFe->infNFe->dest->CPF) ? (string)$xmlObj->NFe->infNFe->dest->CPF : (string)$xmlObj->NFe->infNFe->dest->CNPJ,
                                 "IE" => "ISENTO",
                                 "cFiscal" => 1,
                                 "xNome" => (string)$xmlObj->NFe->infNFe->dest->xNome,
