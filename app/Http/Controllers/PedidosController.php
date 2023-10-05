@@ -234,9 +234,9 @@ class PedidosController extends Controller
                 }
 
 
-                dd($response);
-                $body = $response->getBody()->getContents();
-                $result = json_decode($body, true);
+                // dd($response);
+                // $body = $response->getBody()->getContents();
+                // $result = json_decode($body, true);
 
 
 
