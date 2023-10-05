@@ -34,6 +34,7 @@ Route::middleware('auth.token')->group(function () {
 
     Route::prefix('/gerarPedido')->controller(PedidosController::class)->group(function () {
         Route::get('/', 'gerarPedido');
+        Route::post('/', 'gerarPedido');
     });
 
     Route::prefix('/consulta-cep')->controller(ConsultaCepController::class)->group(function () {
