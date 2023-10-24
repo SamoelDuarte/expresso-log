@@ -222,20 +222,7 @@ class PedidosController extends Controller
                 ];
 
 
-                try {
-                    $response = $client->post("https://grupoastrolog.brudam.com.br/api/v1/operacional/emissao/minuta", [
-                        'headers' => $headers,
-                        'json' => $data
-                    ]);
-
-
-                    echo json_encode(array('mensagem' => 'sucesso'));
-                } catch (RequestException $e) {
-                    if($e->getResponse()->getReasonPhrase() == "Internal Server Error"){
-                        Error::create(['erro' => 'Erro servidor interno Astralog'.$e->getMessage()]);
-                       
-                    }
-                }
+               
 
 
 
@@ -307,6 +294,21 @@ class PedidosController extends Controller
                     if (strpos($e->getMessage(), "SQLSTATE[23000]") !== false) {
                         Error::create(['erro' => 'Nota já processada']);
                         exit;
+                    }
+                }
+
+                try {
+                    $response = $client->post("https://grupoastrolog.brudam.com.br/api/v1/operacional/emissao/minuta", [
+                        'headers' => $headers,
+                        'json' => $data
+                    ]);
+
+
+                    echo json_encode(array('mensagem' => 'sucesso'));
+                } catch (RequestException $e) {
+                    if($e->getResponse()->getReasonPhrase() == "Internal Server Error"){
+                        Error::create(['erro' => 'Erro servidor interno Astralog'.$e->getMessage()]);
+                       
                     }
                 }
             } else {
