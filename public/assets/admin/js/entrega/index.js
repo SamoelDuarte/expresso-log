@@ -28,7 +28,7 @@ $('#tabela-entrega').DataTable({
     ],
     'rowCallback': function (row, data, index) {
 
-        console.log(data);
+      
         // let btn = 'success';
         // if(data['display_status'] == "Desconectado"){
         //     btn = "danger";

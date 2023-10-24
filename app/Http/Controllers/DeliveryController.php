@@ -16,7 +16,7 @@ class DeliveryController extends Controller
         $entregas = Delivery::with('carriers')
         ->with(['status' => function ($query) {
             $query->orderBy('created_at', 'desc');
-        }])->orderBy('id');
+        }])->orderBy('created_at', 'desc');
         
         return DataTables::of($entregas)->make(true);
     }
