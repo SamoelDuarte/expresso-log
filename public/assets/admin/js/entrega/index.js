@@ -33,7 +33,7 @@ $('#tabela-entrega').DataTable({
         // if(data['display_status'] == "Desconectado"){
         //     btn = "danger";
         // }
-         $('td:eq(0)', row).html(data['display_data']);
+         $('td:eq(0)', row).html(data['display_dat']);
          $('td:eq(1)', row).html(data['carriers'].trade_name);
          $('td:eq(5)', row).html(data['status'][0].status);
         // $('td:eq(2)', row).html('<button class="btn btn-'+btn+'">'+data['display_status']+'</button>');
