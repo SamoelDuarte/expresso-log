@@ -32,7 +32,7 @@ class Delivery  extends Model
     
         $ontem = $hoje->copy()->subDay();
         if ($data->isSameDay($ontem)) {
-            return 'ONTEM as '.$horaFormatada;
+            return 'ONTEM as  '.$horaFormatada;
         }
     
         $diferencaDias = $data->diffInDays($hoje);
