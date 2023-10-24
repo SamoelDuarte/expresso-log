@@ -33,6 +33,7 @@
 
                                 <thead>
                                     <tr>
+                                        <th scope="col">Data</th>
                                         <th scope="col">Transp</th>
                                         <th scope="col">N° Encomenda</th>
                                         <th scope="col">N° NF</th>
