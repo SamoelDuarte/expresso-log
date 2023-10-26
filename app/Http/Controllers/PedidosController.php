@@ -215,6 +215,8 @@ class PedidosController extends Controller
                 );
 
 
+                
+
                 $headers = [
                     "Authorization" => "Bearer  " . $accessKey,
                     "Content-Type" => "application/json",
@@ -315,10 +317,6 @@ class PedidosController extends Controller
                 echo "A chave 'access_key' não foi encontrada na resposta.\n";
             }
         } else {
-
-
-
-
 
             echo "A solicitação não foi bem-sucedida.\n";
         }

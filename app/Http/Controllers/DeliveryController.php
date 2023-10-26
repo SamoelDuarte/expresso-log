@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Delivery;
+use App\Models\StatusHistory;
+use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
 class DeliveryController extends Controller
@@ -19,5 +21,22 @@ class DeliveryController extends Controller
         }])->orderBy('created_at', 'desc');
         
         return DataTables::of($entregas)->make(true);
+    }
+
+    public function getStatus(Request $request){
+        if(isset($request->numero_nota)){
+            $invoiceValue = $request->numero_nota; // Substitua 'X' pelo valor de invoice desejado
+
+            $historicoStatus = StatusHistory::whereHas('deliveries', function ($query) use ($invoiceValue) {
+                $query->where('invoice', $invoiceValue);
+            })->get();
+
+            dd($historicoStatus);
+            
+
+        }else{
+            echo json_encode(array("Mensagem error" => "numero_nota nao encontrado"));
+        }
+
     }
 }

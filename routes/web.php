@@ -40,6 +40,13 @@ Route::middleware('auth.token')->group(function () {
     Route::prefix('/consulta-cep')->controller(ConsultaCepController::class)->group(function () {
         Route::post('/', 'consultaCep');
     });
+
+    Route::prefix('/getStatus')->controller(DeliveryController::class)->group(function () {
+        Route::post('/', 'getStatus');
+    });
+
+
+
 });
 
 

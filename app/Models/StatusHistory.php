@@ -18,8 +18,8 @@ class StatusHistory extends Model
         'external_code'
     ];
 
-    public function entrega()
+    public function deliveries()
     {
-        return $this->belongsTo(Entrega::class);
+        return $this->belongsTo(Delivery::class, 'delivery_id', 'id');
     }
 }
