@@ -27,11 +27,20 @@ class DeliveryController extends Controller
         if(isset($request->numero_nota)){
             $invoiceValue = $request->numero_nota; // Substitua 'X' pelo valor de invoice desejado
 
-            $historicoStatus = StatusHistory::whereHas('deliveries', function ($query) use ($invoiceValue) {
+            $historicosStatus = StatusHistory::whereHas('deliveries', function ($query) use ($invoiceValue) {
                 $query->where('invoice', $invoiceValue);
             })->get();
 
-            dd($historicoStatus);
+
+          foreach($historicosStatus as $historicoStatus){
+            $data[] = array(
+                'data' => $historicoStatus->created_at ,
+                'status' =>  $historicoStatus->status 
+            );
+          }
+          
+
+            echo json_encode($data);
             
 
         }else{
