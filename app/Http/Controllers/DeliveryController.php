@@ -30,21 +30,26 @@ class DeliveryController extends Controller
             $historicosStatus = StatusHistory::whereHas('deliveries', function ($query) use ($invoiceValue) {
                 $query->where('invoice', $invoiceValue);
             })->get();
+            if ($historicosStatus->isEmpty()) {
+                echo json_encode(array("Mensagem error" => "Nota nao encrontrada no sistema"));
+            }else{
+                foreach($historicosStatus as $historicoStatus){
+                    $data[] = array(
+                        'data' => $historicoStatus->created_at ,
+                        'status' =>  $historicoStatus->status 
+                    );
+                  }
+                  
+        
+                    echo json_encode($data);
 
+            }
 
-          foreach($historicosStatus as $historicoStatus){
-            $data[] = array(
-                'data' => $historicoStatus->created_at ,
-                'status' =>  $historicoStatus->status 
-            );
-          }
-          
-
-            echo json_encode($data);
+         
             
 
         }else{
-            echo json_encode(array("Mensagem error" => "numero_nota nao encontrado"));
+            echo json_encode(array("Mensagem error" => "enviar numero_nota"));
         }
 
     }
