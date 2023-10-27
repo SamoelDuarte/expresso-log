@@ -36,7 +36,9 @@ class DeliveryController extends Controller
                 foreach($historicosStatus as $historicoStatus){
                     $data[] = array(
                         'data' => $historicoStatus->created_at ,
-                        'status' =>  $historicoStatus->status 
+                        'status' =>  $historicoStatus->status ,
+                        'observation' => $historicoStatus->observation ,
+                        'detail' => $historicoStatus->detail ,
                     );
                   }
                   
