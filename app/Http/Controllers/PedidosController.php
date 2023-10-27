@@ -207,7 +207,8 @@ class PedidosController extends Controller
                                     "qVol" => (float)$xmlObj->NFe->infNFe->det[0]->prod->qCom,
                                     "chave" => (string)$xmlObj->protNFe->infProt->chNFe,
                                     "tpDoc" => "00",
-                                    "xNat" => $xmlObj->NFe->infNFe->ide->natOp
+                                    "xEsp" => "string",
+                                    "xNat" => "string"
                                 ),
                             ),
                         )
@@ -224,7 +225,22 @@ class PedidosController extends Controller
                 ];
 
 
-               
+                try {
+                    $response = $client->post("https://grupoastrolog.brudam.com.br/api/v1/operacional/emissao/minuta", [
+                        'headers' => $headers,
+                        'json' => $data
+                    ]);
+
+
+
+
+                    echo json_encode(array('mensagem' => 'sucesso'));
+                } catch (RequestException $e) {
+                    if($e->getResponse()->getReasonPhrase() == "Internal Server Error"){
+                        Error::create(['erro' => 'Erro servidor interno Astralog'.$e->getMessage()]);
+                       
+                    }
+                }
 
 
 
@@ -299,20 +315,7 @@ class PedidosController extends Controller
                     }
                 }
 
-                try {
-                    $response = $client->post("https://grupoastrolog.brudam.com.br/api/v1/operacional/emissao/minuta", [
-                        'headers' => $headers,
-                        'json' => $data
-                    ]);
-
-
-                    echo json_encode(array('mensagem' => 'sucesso'));
-                } catch (RequestException $e) {
-                    if($e->getResponse()->getReasonPhrase() == "Internal Server Error"){
-                        Error::create(['erro' => 'Erro servidor interno Astralog'.$e->getMessage()]);
-                       
-                    }
-                }
+              
             } else {
                 echo "A chave 'access_key' não foi encontrada na resposta.\n";
             }
