@@ -8,7 +8,7 @@
 
 @section('content')
     <div class="container">
-        {{-- <h1>Painel de Erros</h1>
+        {{-- <h1>Painel de Erro</h1>
 
     <!-- Filtro de Data -->
     <div class="form-group">
