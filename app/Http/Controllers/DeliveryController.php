@@ -27,14 +27,23 @@ class DeliveryController extends Controller
         if(isset($request->numero_nota)){
             $invoiceValue = $request->numero_nota; // Substitua 'X' pelo valor de invoice desejado
 
-            $historicosStatus = StatusHistory::whereHas('deliveries', function ($query) use ($invoiceValue) {
+            $historicosStatus = StatusHistory::with('deliveries')->whereHas('deliveries', function ($query) use ($invoiceValue) {
                 $query->where('invoice', $invoiceValue);
             })->get();
             if ($historicosStatus->isEmpty()) {
                 echo json_encode(array("Mensagem error" => "Nota nao encrontrada no sistema"));
             }else{
+             //   dd($historicosStatus[0]->deliveries);
+                $data["Pedidos"] = array(
+                    "NrCnpj" => "23966188000122",
+                    "NrNota" => $historicosStatus[0]->deliveries->invoice,
+                    "serie" => $historicosStatus[0]->deliveries->serie ,
+                    "id" => $historicosStatus[0]->deliveries->id 
+                );
+                
                 foreach($historicosStatus as $historicoStatus){
-                    $data[] = array(
+                   
+                    $data["Ocorrencias"][] = array(
                         'data' => $historicoStatus->created_at ,
                         'status' =>  $historicoStatus->status ,
                         'observation' => $historicoStatus->observation ,

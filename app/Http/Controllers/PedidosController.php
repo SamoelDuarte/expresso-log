@@ -29,23 +29,30 @@ class PedidosController extends Controller
         $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
 
         switch ($documento) {
-                // tranportadora DBA
+                // Transportadora DBA
             case "50160966000164":
                 $this->gerarPedidoDBA($xmlContent);
                 break;
 
             case "37744796000105":
+            case "08982220000170":
                 $this->gerarPedidoMesh($xmlContent);
                 break;
+
             case "17000788000139":
+            case "20588287000120":
+             
                 $this->gerarPedidoAstralog($xmlContent);
                 break;
+
             default:
                 Error::create(['erro' => 'Transportadora não Integrada']);
         }
     }
     public function gerarPedidoAstralog($xmlContent)
     {
+
+
         $authResp = authGfl();
 
         $accessKey = null;
@@ -67,8 +74,8 @@ class PedidosController extends Controller
                 $XmlArray = json_decode($jsonString, true);
                 $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
 
-
-            //    dd((string)$xmlObj->NFe->infNFe->dest->CPF != "" ? (string)$xmlObj->NFe->infNFe->dest->CPF : (string)$xmlObj->NFe->infNFe->dest->CNPJ);
+               
+                //    dd((string)$xmlObj->NFe->infNFe->dest->CPF != "" ? (string)$xmlObj->NFe->infNFe->dest->CPF : (string)$xmlObj->NFe->infNFe->dest->CNPJ);
                 $data = array(
                     "documentos" => array(
                         array(
@@ -163,7 +170,7 @@ class PedidosController extends Controller
                                 "IE" => "ISENTO",
                                 "cFiscal" => 1,
                                 "xNome" => (string)$xmlObj->NFe->infNFe->dest->xNome,
-                                "xFant" =>  "ERC PRATO",
+                                "xFant" => (string)$xmlObj->NFe->infNFe->dest->xNome,
                                 "nFone" => (string)$xmlObj->NFe->infNFe->dest->enderDest->fone,
                                 "xLgr" => (string)$xmlObj->NFe->infNFe->dest->enderDest->xLgr,
                                 "nro" => (string)$xmlObj->NFe->infNFe->dest->enderDest->nro,
@@ -179,7 +186,7 @@ class PedidosController extends Controller
                                 "IE" => "ISENTO",
                                 "cFiscal" => 1,
                                 "xNome" => (string)$xmlObj->NFe->infNFe->dest->xNome,
-                                "xFant" => "ERC PRATO",
+                                "xFant" => (string)$xmlObj->NFe->infNFe->dest->xNome,
                                 "nFone" => (string)$xmlObj->NFe->infNFe->dest->enderDest->fone,
                                 "xLgr" => (string)$xmlObj->NFe->infNFe->dest->enderDest->xLgr,
                                 "nro" => (string)$xmlObj->NFe->infNFe->dest->enderDest->nro,
@@ -215,8 +222,14 @@ class PedidosController extends Controller
                     )
                 );
 
+                 echo json_encode($data);
+                 exit;
+                 dd($data);
 
-                
+
+
+
+
 
                 $headers = [
                     "Authorization" => "Bearer  " . $accessKey,
@@ -236,9 +249,8 @@ class PedidosController extends Controller
 
                     echo json_encode(array('mensagem' => 'sucesso'));
                 } catch (RequestException $e) {
-                    if($e->getResponse()->getReasonPhrase() == "Internal Server Error"){
-                        Error::create(['erro' => 'Erro servidor interno Astralog'.$e->getMessage()]);
-                       
+                    if ($e->getResponse()->getReasonPhrase() == "Internal Server Error") {
+                        Error::create(['erro' => 'Erro servidor interno Astralog' . $e->getMessage()]);
                     }
                 }
 
@@ -252,6 +264,7 @@ class PedidosController extends Controller
 
 
                 $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
+                $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
                 $ufUnidadeDestino = $transp->estado;
                 $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
                 $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
@@ -296,6 +309,7 @@ class PedidosController extends Controller
                 $delivery->destination_number = $destNumero;
                 $delivery->destination_neighborhood = $destBairro;
                 $delivery->destination_city = $destCidade;
+                $delivery->serie = $serie;
                 $delivery->destination_state = $destEstado;
 
 
@@ -314,8 +328,6 @@ class PedidosController extends Controller
                         exit;
                     }
                 }
-
-              
             } else {
                 echo "A chave 'access_key' não foi encontrada na resposta.\n";
             }
@@ -370,6 +382,7 @@ class PedidosController extends Controller
 
 
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
+            $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
             $ufUnidadeDestino = $transp->estado;
             $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
             $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
@@ -413,6 +426,7 @@ class PedidosController extends Controller
             $delivery->destination_address = $destLogradouro;
             $delivery->destination_number = $destNumero;
             $delivery->destination_neighborhood = $destBairro;
+            $delivery->serie = $serie;
             $delivery->destination_city = $destCidade;
             $delivery->destination_state = $destEstado;
 
@@ -433,7 +447,7 @@ class PedidosController extends Controller
             }
         }
     }
-    
+
     public function gerarPedidoMesh($xmlContent)
     {
         $xmlObject = simplexml_load_string($xmlContent); // Transformar o XML em um objeto SimpleXMLElement
@@ -450,6 +464,7 @@ class PedidosController extends Controller
 
         $dateTime = new DateTime();
         $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
+        $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
         $ufUnidadeDestino = $transp->estado;
         $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
         $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
@@ -588,6 +603,7 @@ class PedidosController extends Controller
         $delivery->destination_number = $destNumero;
         $delivery->destination_neighborhood = $destBairro;
         $delivery->destination_city = $destCidade;
+        $delivery->serie = $serie;
         $delivery->destination_state = $destEstado;
 
 
