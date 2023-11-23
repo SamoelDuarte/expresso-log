@@ -222,9 +222,9 @@ class PedidosController extends Controller
                     )
                 );
 
-                 echo json_encode($data);
-                 exit;
-                 dd($data);
+                //  echo json_encode($data);
+                //  exit;
+                //  dd($data);
 
 
 
