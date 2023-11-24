@@ -46,7 +46,7 @@ class PedidosController extends Controller
                 break;
 
             default:
-                Error::create(['erro' => 'Transportadora não Integrada']);
+                Error::create(['erro' => 'Transportadora não Integrada CNPJ:'.$documento]);
         }
     }
     public function gerarPedidoAstralog($xmlContent)
@@ -324,7 +324,7 @@ class PedidosController extends Controller
                 } catch (Exception $e) {
                     // Verifique se a mensagem de erro contém "SQLSTATE[23000]" (case-sensitive)
                     if (strpos($e->getMessage(), "SQLSTATE[23000]") !== false) {
-                        Error::create(['erro' => 'Nota já processada']);
+                        Error::create(['erro' => 'Nota já processada'.$numNota]);
                         exit;
                     }
                 }
@@ -441,7 +441,7 @@ class PedidosController extends Controller
             } catch (Exception $e) {
                 // Verifique se a mensagem de erro contém "SQLSTATE[23000]" (case-sensitive)
                 if (strpos($e->getMessage(), "SQLSTATE[23000]") !== false) {
-                    Error::create(['erro' => 'Nota já processada']);
+                    Error::create(['erro' => 'Nota já processada'.$numNota]);
                     exit;
                 }
             }
@@ -617,7 +617,7 @@ class PedidosController extends Controller
         } catch (Exception $e) {
             // Verifique se a mensagem de erro contém "SQLSTATE[23000]" (case-sensitive)
             if (strpos($e->getMessage(), "SQLSTATE[23000]") !== false) {
-                Error::create(['erro' => 'Nota já processada']);
+                Error::create(['erro' => 'Nota já processada'.$numNota]);
                 exit;
             }
         }
