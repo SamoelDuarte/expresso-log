@@ -231,13 +231,14 @@ Route::get('/updateStatusDBA', function () {
             $query->where('status', 'finalizado');
         })
         ->orderBy('id')
+        ->limit(10)
         ->get();
 
 
       
 
     foreach ($deliveryes as $key => $value) {
-        dd($key);
+        // dd($key);
         // Chave da API
         $apiKey = env('DBA_API_KEY');
 
