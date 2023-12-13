@@ -46,9 +46,6 @@ Route::middleware('auth.token')->group(function () {
     Route::prefix('/getStatus')->controller(DeliveryController::class)->group(function () {
         Route::post('/', 'getStatus');
     });
-
-
-
 });
 
 
@@ -223,33 +220,35 @@ Route::get('/updateStatusDBA', function () {
     $numbersToSearch = ['08982220000170', '50160966000164'];
 
     $deliveryes = Delivery::with('carriers.documents')
-    ->whereHas('carriers', function ($query) use ($numbersToSearch) {
-        $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
-            $documentQuery->whereIn('number', $numbersToSearch);
-        });
-    })
-    ->whereDoesntHave('status', function ($query) {
-        $query->where('status', 'finalizado');
-    })
-    ->where('updated_at', '<=', Carbon::now()->subHour()) // Adicione esta linha
-    ->orderBy('id')
-    ->limit(7)
-    ->get(); 
+        ->whereHas('carriers', function ($query) use ($numbersToSearch) {
+            $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
+                $documentQuery->whereIn('number', $numbersToSearch);
+            });
+        })
+        ->whereDoesntHave('status', function ($query) {
+            $query->where('status', 'finalizado');
+        })
+        ->where(function ($query) {
+            $query->whereNull('updated_at')
+                ->orWhere('updated_at', '<=', Carbon::now()->subHour());
+        })
+        ->orderBy('id')
+        ->limit(7)
+        ->get();
 
 
-      
 
     foreach ($deliveryes as $key => $value) {
         // dd($key);
         // Chave da API
         $apiKey = env('DBA_API_KEY');
-   
+
 
 
         // Chave da NF-e
         $chaveNfe = $value->invoice_key;
 
-        echo $chaveNfe."<br>";
+        echo $chaveNfe . "<br>";
         $client = new Client();
 
         $uri = new Uri("https://englobasistemas.com.br/arquivos/api/PegarOcorrencias/RastreamentoChaveNfe");
@@ -465,16 +464,16 @@ Route::get('/updateStatusMesh', function () {
 Route::get('/updateAstrlog', function () {
 
     $deliveryes = Delivery::with('carriers.documents')
-    ->whereHas('carriers', function ($query) {
-        $query->whereHas('documents', function ($documentQuery) {
-            $documentQuery->where('number', '17000788000139');
-        });
-    })
-    ->whereDoesntHave('status', function ($query) {
-        $query->where('status', 'finalizado');
-    })
-    ->orderBy('id')
-    ->get();
+        ->whereHas('carriers', function ($query) {
+            $query->whereHas('documents', function ($documentQuery) {
+                $documentQuery->where('number', '17000788000139');
+            });
+        })
+        ->whereDoesntHave('status', function ($query) {
+            $query->where('status', 'finalizado');
+        })
+        ->orderBy('id')
+        ->get();
 
 
 
@@ -489,34 +488,31 @@ Route::get('/updateAstrlog', function () {
                 $headers = [
                     "Authorization" => "Bearer  " . $accessKey
                 ];
-    
+
                 $response = $client->get("https://grupoastrolog.brudam.com.br/api/v1/tracking/ocorrencias/nfe?chave=" . $value->invoice_key, [
                     'headers' => $headers
                 ]);
-    
+
                 $body = $response->getBody()->getContents();
                 $result = json_decode($body, true);
-              
+
                 StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
 
-            
-                for($i = 0 ; $i < count($result['data'][0]['dados']) ; $i++ ){
 
-                    
+                for ($i = 0; $i < count($result['data'][0]['dados']); $i++) {
+
+
                     StatusHistory::create([
                         'delivery_id' => $value->id,
                         'external_code' => $result['data'][0]['documento'],
                         'status' => $result['data'][0]['dados'][$i]['descricao'],
                         'observation' => $result['data'][0]['dados'][$i]['obs'],
                         'detail' => $result['data'][0]['dados'][$i]['obs'],
-                    ]); 
-
+                    ]);
                 }
             }
         }
     }
-    
-   
 });
 
 Route::post('/astralog', function () {
