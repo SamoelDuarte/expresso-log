@@ -231,16 +231,10 @@ Route::get('/updateStatusDBA', function () {
     ->whereDoesntHave('status', function ($query) {
         $query->where('status', 'finalizado');
     })
-    ->where(function ($query) {
-        $query->whereNull('updated_at')
-            ->orWhere(function ($subQuery) {
-                $subQuery->where('updated_at', '<=', Carbon::now()->subHour());
-            });
-    })
     ->where('updated_at', '<=', Carbon::now()->subHour()) // Adicione esta linha
     ->orderBy('id')
     ->limit(7)
-    ->get();
+    ->get(); 
 
 
       
