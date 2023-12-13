@@ -10,6 +10,9 @@ class Delivery  extends Model
 {
     use HasFactory;
 
+    protected $table = "deliveries";
+
+
     protected $appends = [
         'display_data',
         
@@ -17,8 +20,8 @@ class Delivery  extends Model
     protected $fillable = [
         'update_at',
     ];
-    protected $table = "deliveries";
 
+    public $timestamps = false;
 
     public function status()
     {
