@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\Utils;
 use App\Models\Delivery;
+use App\Models\Error;
 use App\Models\StatusHistory;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -227,9 +228,8 @@ Route::get('/updateStatusDBA', function () {
         })
         ->whereDoesntHave('status', function ($query) {
             $query->where('status', 'finalizado')
-            ->orWhere('status', 'entregue')
-            ->orWhere('status', 'devolvido')
-            ;;
+                ->orWhere('status', 'entregue')
+                ->orWhere('status', 'devolvido');;
         })
         ->where(function ($query) {
             $query->whereNull('updated_at')
@@ -252,7 +252,7 @@ Route::get('/updateStatusDBA', function () {
         $chaveNfe = $value->invoice_key;
 
         // dd($value);
-        echo $chaveNfe . "------- horaValue".$value->updated_at."------- horaAtual".Carbon::now()->format('Y-m-d H:i:s')."<br>";
+        echo $chaveNfe . "------- horaValue" . $value->updated_at . "------- horaAtual" . Carbon::now()->format('Y-m-d H:i:s') . "<br>";
         $client = new Client();
 
         $uri = new Uri("https://englobasistemas.com.br/arquivos/api/PegarOcorrencias/RastreamentoChaveNfe");
@@ -263,31 +263,34 @@ Route::get('/updateStatusDBA', function () {
             $response = $client->request('POST', $uri);
 
             $responseArray = json_decode($response->getBody()->getContents(), true);
-        
-            $occurrences =  $responseArray[1];
 
+            $occurrences = isset($responseArray[1]) ? $responseArray[1] : null;
 
-            foreach ($occurrences as $key => $occurrence) {
+            if ($occurrences !== null) {
+                foreach ($occurrences as $key => $occurrence) {
 
-                Log::info("Iteração do loop externo: " . $key);
-                $codigo = $occurrence['codigo'];
+                    Log::info("Iteração do loop externo: " . $key);
+                    $codigo = $occurrence['codigo'];
 
-                // Verifique se o código já existe na tabela status_history.
-                $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
-             
-                if (!$existeRegistro) {
-                   
-                    // O código não existe, então você pode inserir o registro.
-                    StatusHistory::create([
-                        'delivery_id' => $value->id,
-                        'external_code' => $codigo,
-                        'status' => $occurrence['ocorrencia'],
-                        'observation' => $occurrence['obs'],
-                    ]);
+                    // Verifique se o código já existe na tabela status_history.
+                    $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
+
+                    if (!$existeRegistro) {
+
+                        // O código não existe, então você pode inserir so registro.
+                        StatusHistory::create([
+                            'delivery_id' => $value->id,
+                            'external_code' => $codigo,
+                            'status' => $occurrence['ocorrencia'],
+                            'observation' => $occurrence['obs'],
+                        ]);
+                    }
                 }
-              
+                $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
+            } else {
+                Error::create(['erro' => 'Nota da DBA nã consta no sistema :' .$chaveNfe ]);
+                $value->delete();
             }
-            $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
         } catch (Exception $e) {
             Log::error("Error: " . $e->getMessage());
             echo "Error: " . $e->getMessage() . "\n";
