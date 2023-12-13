@@ -286,6 +286,7 @@ Route::get('/updateStatusDBA', function () {
                     ]);
                 }
             }
+            $value->update(['updated_at' => Carbon::now()]);
         } catch (Exception $e) {
             Log::error("Error: " . $e->getMessage());
             echo "Error: " . $e->getMessage() . "\n";
