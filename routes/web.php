@@ -231,7 +231,7 @@ Route::get('/updateStatusDBA', function () {
             $query->where('status', 'finalizado');
         })
         ->orderBy('id')
-        ->limit(7)
+        ->limit(15)
         ->get();
 
 
