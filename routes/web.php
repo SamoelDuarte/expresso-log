@@ -263,9 +263,8 @@ Route::get('/updateStatusDBA', function () {
             $response = $client->request('POST', $uri);
 
             $responseArray = json_decode($response->getBody()->getContents(), true);
-            $occurrences =  $responseArray[1];
-
-
+            if(isset( $responseArray[1])){
+                
             foreach ($occurrences as $key => $occurrence) {
 
                 Log::info("Iteração do loop externo: " . $key);
@@ -287,6 +286,11 @@ Route::get('/updateStatusDBA', function () {
               
             }
             $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
+
+            }
+            $occurrences =  $responseArray[1];
+
+
         } catch (Exception $e) {
             Log::error("Error: " . $e->getMessage());
             echo "Error: " . $e->getMessage() . "\n";
