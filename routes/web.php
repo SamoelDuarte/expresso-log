@@ -270,7 +270,7 @@ Route::get('/updateStatusDBA', function () {
 
                 // Verifique se o código já existe na tabela status_history.
                 $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
-
+             
                 if (!$existeRegistro) {
                    
                     // O código não existe, então você pode inserir o registro.
@@ -280,8 +280,11 @@ Route::get('/updateStatusDBA', function () {
                         'status' => $occurrence['ocorrencia'],
                         'observation' => $occurrence['obs'],
                     ]);
+                }else{
+                    $stauHistory = StatusHistory::where('external_code', $codigo)->first();
+                    dd($stauHistory);
                 }
-                dd($existeRegistro);
+              
             }
             $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
         } catch (Exception $e) {
