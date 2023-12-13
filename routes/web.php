@@ -248,6 +248,7 @@ Route::get('/updateStatusDBA', function () {
         // Chave da NF-e
         $chaveNfe = $value->invoice_key;
 
+        dd($value);
         echo $chaveNfe . "------- ".$value->update_at."<br>";
         $client = new Client();
 
