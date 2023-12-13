@@ -272,7 +272,7 @@ Route::get('/updateStatusDBA', function () {
                 $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
 
                 if (!$existeRegistro) {
-                    dd("aki");
+                   
                     // O código não existe, então você pode inserir o registro.
                     StatusHistory::create([
                         'delivery_id' => $value->id,
@@ -281,6 +281,7 @@ Route::get('/updateStatusDBA', function () {
                         'observation' => $occurrence['obs'],
                     ]);
                 }
+                dd("aki");
             }
             $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
         } catch (Exception $e) {
