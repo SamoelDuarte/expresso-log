@@ -15,6 +15,7 @@ use App\Http\Controllers\TokenController;
 use App\Http\Controllers\Utils;
 use App\Models\Delivery;
 use App\Models\StatusHistory;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 /*
@@ -227,8 +228,15 @@ Route::get('/updateStatusDBA', function () {
                 $documentQuery->whereIn('number', $numbersToSearch);
             });
         })
-        ->whereDoesntHave('status', function ($query) {
+        ->whereDoesntHave('
+        ', function ($query) {
             $query->where('status', 'finalizado');
+        })
+        ->where(function ($query) {
+            $query->whereNull('updated_at') // Garante que 'updated_at' não seja nulo
+                ->orWhere(function ($subQuery) {
+                    $subQuery->where('updated_at', '<=', Carbon::now()->subHour());
+                });
         })
         ->orderBy('id')
         ->limit(7)
@@ -241,12 +249,13 @@ Route::get('/updateStatusDBA', function () {
         // dd($key);
         // Chave da API
         $apiKey = env('DBA_API_KEY');
+     
 
 
         // Chave da NF-e
         $chaveNfe = $value->invoice_key;
 
-      
+        echo $chaveNfe ."<br>";
         $client = new Client();
 
         $uri = new Uri("https://englobasistemas.com.br/arquivos/api/PegarOcorrencias/RastreamentoChaveNfe");
