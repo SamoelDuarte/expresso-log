@@ -272,6 +272,7 @@ Route::get('/updateStatusDBA', function () {
                 $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
 
                 if (!$existeRegistro) {
+                    dd("aki");
                     // O código não existe, então você pode inserir o registro.
                     StatusHistory::create([
                         'delivery_id' => $value->id,
