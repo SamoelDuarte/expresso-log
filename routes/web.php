@@ -263,33 +263,31 @@ Route::get('/updateStatusDBA', function () {
             $response = $client->request('POST', $uri);
 
             $responseArray = json_decode($response->getBody()->getContents(), true);
-            if(isset( $responseArray[1])){
-                $occurrences =  $responseArray[1];
+        
+            $occurrences =  $responseArray[1];
 
 
-                foreach ($occurrences as $key => $occurrence) {
-    
-                    Log::info("Iteração do loop externo: " . $key);
-                    $codigo = $occurrence['codigo'];
-    
-                    // Verifique se o código já existe na tabela status_history.
-                    $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
-                 
-                    if (!$existeRegistro) {
-                       
-                        // O código não existe, então você pode inserir o registro.
-                        StatusHistory::create([
-                            'delivery_id' => $value->id,
-                            'external_code' => $codigo,
-                            'status' => $occurrence['ocorrencia'],
-                            'observation' => $occurrence['obs'],
-                        ]);
-                    }
-                  
+            foreach ($occurrences as $key => $occurrence) {
+
+                Log::info("Iteração do loop externo: " . $key);
+                $codigo = $occurrence['codigo'];
+
+                // Verifique se o código já existe na tabela status_history.
+                $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
+             
+                if (!$existeRegistro) {
+                   
+                    // O código não existe, então você pode inserir o registro.
+                    StatusHistory::create([
+                        'delivery_id' => $value->id,
+                        'external_code' => $codigo,
+                        'status' => $occurrence['ocorrencia'],
+                        'observation' => $occurrence['obs'],
+                    ]);
                 }
-                $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
+              
             }
-            
+            $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
         } catch (Exception $e) {
             Log::error("Error: " . $e->getMessage());
             echo "Error: " . $e->getMessage() . "\n";
