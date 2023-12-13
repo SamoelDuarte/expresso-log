@@ -11,7 +11,8 @@ class Delivery  extends Model
     use HasFactory;
 
     protected $appends = [
-        'display_data'
+        'display_data',
+        'updated_at',
     ];
 
     protected $table = "deliveries";
