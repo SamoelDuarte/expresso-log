@@ -230,7 +230,7 @@ Route::get('/updateStatusDBA', function () {
         })
         ->where(function ($query) {
             $query->whereNull('updated_at')
-                ->orWhere('updated_at', '<=', Carbon::now()->subHour());
+                ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'));
         })
         ->orderBy('id')
         ->limit(7)
