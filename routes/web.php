@@ -228,8 +228,7 @@ Route::get('/updateStatusDBA', function () {
                 $documentQuery->whereIn('number', $numbersToSearch);
             });
         })
-        ->whereDoesntHave('
-        ', function ($query) {
+        ->whereDoesntHave('status', function ($query) {
             $query->where('status', 'finalizado');
         })
         ->where(function ($query) {
@@ -249,13 +248,13 @@ Route::get('/updateStatusDBA', function () {
         // dd($key);
         // Chave da API
         $apiKey = env('DBA_API_KEY');
-     
+   
 
 
         // Chave da NF-e
         $chaveNfe = $value->invoice_key;
 
-        echo $chaveNfe ."<br>";
+        echo $chaveNfe."<br>";
         $client = new Client();
 
         $uri = new Uri("https://englobasistemas.com.br/arquivos/api/PegarOcorrencias/RastreamentoChaveNfe");
