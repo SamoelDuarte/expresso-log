@@ -21,7 +21,6 @@ class Delivery  extends Model
         'update_at',
     ];
 
-    public $timestamps = false;
 
     public function status()
     {
