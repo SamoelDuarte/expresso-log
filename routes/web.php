@@ -245,6 +245,7 @@ Route::get('/updateStatusDBA', function () {
         // Chave da NF-e
         $chaveNfe = $value->invoice_key;
 
+        dd($chaveNfe);
         $client = new Client();
 
         $uri = new Uri("https://englobasistemas.com.br/arquivos/api/PegarOcorrencias/RastreamentoChaveNfe");
