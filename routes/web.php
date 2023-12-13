@@ -223,23 +223,24 @@ Route::get('/updateStatusDBA', function () {
     $numbersToSearch = ['08982220000170', '50160966000164'];
 
     $deliveryes = Delivery::with('carriers.documents')
-        ->whereHas('carriers', function ($query) use ($numbersToSearch) {
-            $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
-                $documentQuery->whereIn('number', $numbersToSearch);
+    ->whereHas('carriers', function ($query) use ($numbersToSearch) {
+        $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
+            $documentQuery->whereIn('number', $numbersToSearch);
+        });
+    })
+    ->whereDoesntHave('status', function ($query) {
+        $query->where('status', 'finalizado');
+    })
+    ->where(function ($query) {
+        $query->whereNull('updated_at')
+            ->orWhere(function ($subQuery) {
+                $subQuery->where('updated_at', '<=', Carbon::now()->subHour());
             });
-        })
-        ->whereDoesntHave('status', function ($query) {
-            $query->where('status', 'finalizado');
-        })
-        ->where(function ($query) {
-            $query->whereNull('updated_at') // Garante que 'updated_at' não seja nulo
-                ->orWhere(function ($subQuery) {
-                    $subQuery->where('updated_at', '<=', Carbon::now()->subHour());
-                });
-        })
-        ->orderBy('id')
-        ->limit(7)
-        ->get();
+    })
+    ->where('updated_at', '<=', Carbon::now()->subHour()) // Adicione esta linha
+    ->orderBy('id')
+    ->limit(7)
+    ->get();
 
 
       
