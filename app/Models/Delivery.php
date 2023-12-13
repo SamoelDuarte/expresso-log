@@ -12,9 +12,11 @@ class Delivery  extends Model
 
     protected $appends = [
         'display_data',
-        'updated_at',
+        
     ];
-
+    protected $fillable = [
+        'update_at',
+    ];
     protected $table = "deliveries";
 
 
