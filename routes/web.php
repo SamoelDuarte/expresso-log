@@ -281,7 +281,7 @@ Route::get('/updateStatusDBA', function () {
                         'observation' => $occurrence['obs'],
                     ]);
                 }
-                dd("aki");
+                dd($existeRegistro);
             }
             $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
         } catch (Exception $e) {
