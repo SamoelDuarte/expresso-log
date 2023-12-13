@@ -226,7 +226,10 @@ Route::get('/updateStatusDBA', function () {
             });
         })
         ->whereDoesntHave('status', function ($query) {
-            $query->where('status', 'finalizado')->orWhere('status', 'entregue');;
+            $query->where('status', 'finalizado')
+            ->orWhere('status', 'entregue')
+            ->orWhere('status', 'devolvido')
+            ;;
         })
         ->where(function ($query) {
             $query->whereNull('updated_at')
@@ -282,6 +285,8 @@ Route::get('/updateStatusDBA', function () {
                     ]);
                 }else{
                     $stauHistory = StatusHistory::where('external_code', $codigo)->first();
+
+
                     dd($stauHistory);
                 }
               
