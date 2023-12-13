@@ -252,7 +252,7 @@ Route::get('/updateStatusDBA', function () {
         $chaveNfe = $value->invoice_key;
 
         // dd($value);
-        echo $chaveNfe . "------- ".$value->updated_at."<br>";
+        echo $chaveNfe . "------- ".$value->updated_at."---------------- atual".Carbon::now()->format('Y-m-d H:i:s')."<br>";
         $client = new Client();
 
         $uri = new Uri("https://englobasistemas.com.br/arquivos/api/PegarOcorrencias/RastreamentoChaveNfe");
