@@ -18,7 +18,7 @@ class Delivery  extends Model
         
     ];
     protected $fillable = [
-        'update_at',
+        'updated_at',
     ];
 
     public $timestamps = false;
