@@ -236,7 +236,7 @@ Route::get('/updateStatusDBA', function () {
                 ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'));
         })
         ->orderBy('id')
-        ->limit(10)
+        ->limit(15)
         ->get();
 
 
