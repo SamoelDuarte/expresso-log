@@ -283,11 +283,6 @@ Route::get('/updateStatusDBA', function () {
                         'status' => $occurrence['ocorrencia'],
                         'observation' => $occurrence['obs'],
                     ]);
-                }else{
-                    $stauHistory = StatusHistory::where('external_code', $codigo)->first();
-
-
-                    dd($stauHistory);
                 }
               
             }
