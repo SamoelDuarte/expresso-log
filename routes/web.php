@@ -15,6 +15,7 @@ use App\Http\Controllers\TokenController;
 use App\Http\Controllers\Utils;
 use App\Models\Delivery;
 use App\Models\StatusHistory;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -259,7 +260,7 @@ Route::get('/updateStatusDBA', function () {
 
             foreach ($occurrences as $key => $occurrence) {
 
-
+                Log::info("Iteração do loop externo: " . $key);
                 $codigo = $occurrence['codigo'];
 
                 // Verifique se o código já existe na tabela status_history.
@@ -276,6 +277,7 @@ Route::get('/updateStatusDBA', function () {
                 }
             }
         } catch (Exception $e) {
+            Log::error("Error: " . $e->getMessage());
             echo "Error: " . $e->getMessage() . "\n";
         }
     }
