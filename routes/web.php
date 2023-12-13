@@ -226,7 +226,7 @@ Route::get('/updateStatusDBA', function () {
             });
         })
         ->whereDoesntHave('status', function ($query) {
-            $query->where('status', 'finalizado');
+            $query->where('status', 'finalizado')->orWhere('status', 'entregue');;
         })
         ->where(function ($query) {
             $query->whereNull('updated_at')
