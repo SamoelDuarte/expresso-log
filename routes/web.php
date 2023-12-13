@@ -234,10 +234,10 @@ Route::get('/updateStatusDBA', function () {
         ->get();
 
 
-        dd($deliveryes);
+      
 
     foreach ($deliveryes as $key => $value) {
-
+        dd($key);
         // Chave da API
         $apiKey = env('DBA_API_KEY');
 
