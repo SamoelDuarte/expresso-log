@@ -49,7 +49,6 @@ Route::middleware('auth.token')->group(function () {
     });
 });
 
-
 Route::prefix('/admin')->controller(AdminController::class)->group(function () {
     Route::get('/login', 'login')->name('admin.login');
     Route::get('/sair', 'sair')->name('admin.sair');
@@ -60,9 +59,6 @@ Route::prefix('/admin')->controller(AdminController::class)->group(function () {
 Route::prefix('/')->controller(AdminController::class)->group(function () {
     Route::get('/', 'login');
 });
-
-
-
 
 Route::middleware('auth.admin')->group(function () {
 
@@ -76,6 +72,9 @@ Route::middleware('auth.admin')->group(function () {
     Route::prefix('/transportadora')->controller(CarrierController::class)->group(function () {
         Route::get('/', 'index')->name('admin.transp.index');
         Route::get('/novo', 'create')->name('admin.transp.create');
+        Route::get('/edit/{transportadora}', 'edit')->name('admin.transp.edit');
+        Route::put('/update/{transportadora}', 'update')->name('admin.transp.update'); // Adicione esta linha
+        Route::delete('/delete/{transportadora}', 'destroy')->name('admin.transp.destroy');
         Route::post('/store', 'store')->name('admin.transp.store');
     });
 
@@ -183,27 +182,31 @@ Route::get('/createSim', function () {
 });
 
 Route::get('/getSim', function () {
-    // Código do item a ser substituído na URL
-    $codigoItem = $_GET['cod'];
-
-
-
     // URL base do endpoint
-    $baseUrl = 'https://gflapi.sinclog.app.br/api/solicitacoes/etiquetas/';
+    $baseUrl = 'http://gflapi.sinclog.app.br:8103/Api/Ocorrencias/OcorrenciaNotaFiscalDePara/';
 
     // Criação de uma instância do cliente Guzzle
     $client = new Client();
 
-    // Montagem da URL completa com o código do item
-    $url = $baseUrl . $codigoItem;
+    // Montagem do JSON com os dados da solicitação
+    $requestData = [
+        "cnpjEmbarcador" => "23966188000122",
+        "cnpjRemetente" => "23966188000122",
+        "dtInicioBusca" => "2023-02-07",
+        "dtFimBusca" => "2024-02-07",
+    ];
 
+    // Converte o array de dados em JSON
+    $jsonData = json_encode($requestData);
 
     try {
-        // Fazendo a requisição GET com o cabeçalho de autorização
-        $response = $client->get($url, [
+        // Fazendo a requisição POST com o cabeçalho de autorização e corpo JSON
+        $response = $client->post($baseUrl, [
             'headers' => [
-                'Authorization' => 'Basic ' . env('DBA_KEY_ACESS'),
+                'Authorization' => 'Basic ' . env('GFL_KEY_ACESS'),
+                'Content-Type' => 'application/json', // Especifique o tipo de conteúdo como JSON
             ],
+            'body' => $jsonData, // Passa o JSON como corpo da requisição
         ]);
 
         // Obtendo o corpo da resposta como string
@@ -213,87 +216,6 @@ Route::get('/getSim', function () {
         echo $responseBody;
     } catch (Exception $e) {
         echo "Ocorreu um erro: " . $e->getMessage();
-    }
-});
-
-Route::get('/updateStatusDBA', function () {
-
-    $numbersToSearch = ['08982220000170', '50160966000164'];
-
-    $deliveryes = Delivery::with('carriers.documents')
-        ->whereHas('carriers', function ($query) use ($numbersToSearch) {
-            $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
-                $documentQuery->whereIn('number', $numbersToSearch);
-            });
-        })
-        ->whereDoesntHave('status', function ($query) {
-            $query->where('status', 'finalizado')
-                ->orWhere('status', 'entregue')
-                ->orWhere('status', 'devolvido');;
-        })
-        ->where(function ($query) {
-            $query->whereNull('updated_at')
-                ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'));
-        })
-        ->orderBy('id')
-        ->limit(15)
-        ->get();
-
-
-
-    foreach ($deliveryes as $key => $value) {
-        // dd($key);
-        // Chave da API
-        $apiKey = env('DBA_API_KEY');
-
-
-
-        // Chave da NF-e
-        $chaveNfe = $value->invoice_key;
-
-        // dd($value);
-        echo $chaveNfe . "------- horaValue" . $value->updated_at . "------- horaAtual" . Carbon::now()->format('Y-m-d H:i:s') . "<br>";
-        $client = new Client();
-
-        $uri = new Uri("https://englobasistemas.com.br/arquivos/api/PegarOcorrencias/RastreamentoChaveNfe");
-        $uri = Uri::withQueryValue($uri, 'apikey', $apiKey);
-        $uri = Uri::withQueryValue($uri, 'chaveNfe', $chaveNfe);
-
-        try {
-            $response = $client->request('POST', $uri);
-
-            $responseArray = json_decode($response->getBody()->getContents(), true);
-
-            $occurrences = isset($responseArray[1]) ? $responseArray[1] : null;
-
-            if ($occurrences !== null) {
-                foreach ($occurrences as $key => $occurrence) {
-
-                    Log::info("Iteração do loop externo: " . $key);
-                    $codigo = $occurrence['codigo'];
-
-                    // Verifique se o código já existe na tabela status_history.
-                    $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
-
-                    if (!$existeRegistro) {
-
-                        // O código não existe, então você pode inserir so registro.
-                        StatusHistory::create([
-                            'delivery_id' => $value->id,
-                            'external_code' => $codigo,
-                            'status' => $occurrence['ocorrencia'],
-                            'observation' => $occurrence['obs'],
-                        ]);
-                    }
-                }
-                $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
-            } else {
-                $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
-            }
-        } catch (Exception $e) {
-            Log::error("Error: " . $e->getMessage());
-            echo "Error: " . $e->getMessage() . "\n";
-        }
     }
 });
 
@@ -387,141 +309,6 @@ Route::get('/getMesh', function () {
 
     // // Do something with the response data
     // var_dump($data);
-});
-
-Route::get('/updateStatusMesh', function () {
-
-    $deliveryes = Delivery::with('carriers.documents')
-        ->whereHas('carriers', function ($query) {
-            $query->whereHas('documents', function ($documentQuery) {
-                $documentQuery->where('number', '37744796000105');
-            });
-        })
-        ->whereDoesntHave('status', function ($query) {
-            $query->where('status', 'finalizado');
-        })
-        ->orderBy('id')
-        ->get();
-
-
-
-
-    foreach ($deliveryes as $key => $value) {
-        $apiKey = env('MESH_API_KEY'); // Replace with your actual API key
-        $userId = env('MESH_USER_ID');  // Replace with your actual User ID
-
-        // Define the parameters in an array
-        $params = [
-            'SearchText' => $value->invoice_key,
-            'DeliveryZipCode' => '07072010',
-            'SearchTextEnum' => 4,
-        ];
-
-
-        // Create a query string from the parameters
-        $queryString = http_build_query($params);
-
-        // Create a new Guzzle client with the API Key and User ID in the header
-        $client = new Client([
-            'headers' => [
-                'X-Api-Key' => $apiKey,
-                'X-Api-User' => $userId,
-            ],
-        ]);
-
-        // Define the base URL
-        $baseUrl = 'https://apicliente.minha.is/api/v1/Tms/GetTrackingInfo';
-
-        // Construct the full URL
-        $url = $baseUrl . '?' . $queryString;
-
-        // Make a GET request with the API Key and User ID in the header
-        $response = $client->get($url);
-
-        // Get the response body as a string
-        $responseBody = $response->getBody()->getContents();
-
-        $responseArray = json_decode($responseBody, true);
-
-
-
-
-        $occurrences = $responseArray['content']['result']['occurrences'];
-
-        foreach ($occurrences as $key => $occurrence) {
-
-
-            $codigo = $occurrence['id'];
-
-            // Verifique se o código já existe na tabela status_history.
-            $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
-
-            if (!$existeRegistro) {
-                // O código não existe, então você pode inserir o registro.
-                StatusHistory::create([
-                    'delivery_id' => $value->id,
-                    'external_code' => $codigo,
-                    'status' => $occurrence['occurrenceStatusCategoryTypeName'],
-                    'observation' => $occurrence['observation'],
-                    'detail' => $occurrence['nameProtocolToUser'],
-                ]);
-            }
-        }
-    }
-});
-
-Route::get('/updateAstrlog', function () {
-
-    $deliveryes = Delivery::with('carriers.documents')
-        ->whereHas('carriers', function ($query) {
-            $query->whereHas('documents', function ($documentQuery) {
-                $documentQuery->where('number', '17000788000139');
-            });
-        })
-        ->whereDoesntHave('status', function ($query) {
-            $query->where('status', 'finalizado');
-        })
-        ->orderBy('id')
-        ->get();
-
-
-
-
-    foreach ($deliveryes as $key => $value) {
-        $authResp = authGfl();
-        if ($authResp->getStatusCode() === 200) {
-            $responseData = json_decode($authResp->getBody(), true); // Decodifique a resposta JSON para um array associativo
-            if (isset($responseData['data']['access_key'])) {
-                $client = new Client();
-                $accessKey = $responseData['data']['access_key'];
-                $headers = [
-                    "Authorization" => "Bearer  " . $accessKey
-                ];
-
-                $response = $client->get("https://grupoastrolog.brudam.com.br/api/v1/tracking/ocorrencias/nfe?chave=" . $value->invoice_key, [
-                    'headers' => $headers
-                ]);
-
-                $body = $response->getBody()->getContents();
-                $result = json_decode($body, true);
-
-                StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
-
-
-                for ($i = 0; $i < count($result['data'][0]['dados']); $i++) {
-
-
-                    StatusHistory::create([
-                        'delivery_id' => $value->id,
-                        'external_code' => $result['data'][0]['documento'],
-                        'status' => $result['data'][0]['dados'][$i]['descricao'],
-                        'observation' => $result['data'][0]['dados'][$i]['obs'],
-                        'detail' => $result['data'][0]['dados'][$i]['obs'],
-                    ]);
-                }
-            }
-        }
-    }
 });
 
 Route::post('/astralog', function () {
@@ -747,7 +534,6 @@ function authGfl()
 
     return $response;
 }
-
 Route::get('/daytonaCotação', function () {
     // URL do serviço web
     $wsdl = 'http://daytona.azurewebsites.net/WS/V1/WSDaytonaV1.asmx?wsdl';
@@ -829,5 +615,540 @@ Route::get('/daytonaCotação2', function () {
     } catch (SoapFault $e) {
         // Trate erros de SOAP aqui
         dd($e->getMessage());
+    }
+});
+
+Route::get('/getStatusJT', function () {
+
+    // Definindo parâmetros
+    $privateKey = '65b24f925e2443ea83243083b2b2c5da';
+    $apiAccount = '615978675254329386';
+
+    // Montando o JSON do envio
+    $pedido = [
+        "billCodes" => 'U88030006595435',
+
+    ];
+
+    $pedido = json_encode($pedido);
+
+    // Codificando o pedido para envio
+    $req_pedido = rawurlencode($pedido);
+
+    // Montando o digest do header
+    $headerDigest = base64_encode(md5($pedido . $privateKey, true));
+
+    // Criando um carimbo de data/hora (timestamp)
+    $timestamp = round(microtime(true) * 1000);
+
+    // URL da API
+    $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
+    // $url = 'https://openapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
+
+    // Iniciando uma sessão cURL
+    $curl = curl_init();
+
+    // Configurando as opções da requisição cURL
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS => 'bizContent=' . $req_pedido,
+        CURLOPT_HTTPHEADER => array(
+            'timestamp:' . $timestamp,
+            'apiAccount:' . $apiAccount,
+            'digest:' . $headerDigest,
+            'Content-Type: application/x-www-form-urlencoded'
+        ),
+    ));
+
+    // Enviando a requisição e obtendo a resposta
+    $response = curl_exec($curl);
+
+    // Verificando se ocorreu algum erro na requisição
+    if (curl_errno($curl)) {
+        echo 'Erro cURL: ' . curl_error($curl);
+    }
+
+    // Fechando a requisição cURL
+    curl_close($curl);
+
+    // Exibindo a resposta
+    echo '<br><br>' . $response;
+});
+
+Route::get('/getFreteJT', function () {
+
+
+    //Definindo parâmetros
+    $privateKey = '65b24f925e2443ea83243083b2b2c5da';
+    $apiAccuont = '615978675254329386';
+
+
+    // dd($headerSignature);
+    //Montando o JSON do envio
+    $pedido = '{
+		"customerCode":"J0086025107",
+		"digest":"FuriWZepWBao9l9eHFy/+A==",
+		"txlogisticId":"12879542",
+		"expressType":"EZ",
+		"orderType":"2",
+		"serviceType":"02",
+		"deliveryType":"03",
+		"sender":{
+		"name":"COMERCIO DE MOVEIS DIGITAL - AMO MOVEIS LTDA",
+		"company":"AMO MOVEIS",
+		"postCode":"86701474",
+		"mailBox":"no-email@mail.com.br",
+		"taxNumber":"06275524000171",
+		"mobile":"43991090707",
+		"phone":"43991090707",
+		"prov":"PR",
+		"city":"Arapongas",
+		"street":"Rua Drongo",
+		"streetNumber":"162",
+		"address":"Rua Drongo, 162, Sala 4",
+		"areaCode":"43",
+		"ieNumber":"9085799417",
+		"area":"Vila Cascata"
+		},
+		"receiver":{
+		"name":"Rubia Pedrodo",
+		"postCode":"86701474",
+		"mailBox":"no-email@mail.com.br",
+		"taxNumber":"87862239920",
+		"mobile":"43988664740",
+		"phone":"43988664740",
+		"prov":"PR",
+		"city":"Arapongas",
+		"street":"Rua Drongo",
+		"streetNumber":"162",
+		"address":"Rua Drongo, 162",
+		"areaCode":"43",
+		"ieNumber":"0000000",
+		"area":"Vila Cascata"
+		},
+		"translate":{
+		"name":"COMERCIO DE MOVEIS DIGITAL - AMO MOVEIS LTDA",
+		"company":"AMO MOVEIS",
+		"postCode":"86701474",
+		"mailBox":"no-email@mail.com.br",
+		"taxNumber":"06275524000171",
+		"mobile":"43991090707",
+		"phone":"43991090707",
+		"prov":"PR",
+		"city":"Arapongas",
+		"street":"Rua Drongo",
+		"streetNumber":"251",
+		"address":"Rua Drongo, 162, Sala 4",
+		"areaCode":"43",
+		"ieNumber":"9085799417",
+		"area":"Vila Cascata"
+		},
+		"goodsType":"bm000008",
+		"weight":"8.00",
+		"totalQuantity":1,
+		"invoiceMoney":"149.99",
+		"remark":"CTE emitido para validacao conforme solicitado pelo cliente. Valor de frete informado para fins de referencia. Documento emitido por ME optante pelo simples nacional, nao gera direito a credito de ISS e IPI",
+		"items":[
+		{
+			"itemType":"bm000008",
+			"itemName":"DIVERSOS",
+			"number":"1",
+			"itemValue":"149.99",
+			"priceCurrency":"BRL",
+			"desc":"DIVERSOS",
+			"itemNcm":"00000000"
+		}
+		],
+		"invoiceNumber":"434",
+		"invoiceSerialNumber":"1",
+		"invoiceMoney":"149.99",
+		"taxCode":"0000000000000",
+		"invoiceAccessKey":"41230506275524000171550010000004341557749290",
+		"invoiceIssueDate":"2023-05-19 15:24:23"
+	}';
+
+    //Codificando o pedido para envio
+    $req_pedido = rawurlencode($pedido);
+
+
+
+    //Montando o digest do header
+    $headerDigest = base64_encode(md5($pedido . $privateKey, true));
+
+
+    //  dd($headerDigest);
+    //Instanciando e enviando a requisição
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => 'https://demogw.jtjms-br.com/webopenplatformapi/api/order/addOrder',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS => 'bizContent=' . $req_pedido,
+        CURLOPT_HTTPHEADER => array(
+            'timestamp:1565238848921',
+            'apiAccount:' . $apiAccuont,
+            'digest:' . $headerDigest,
+            'Content-Type: application/x-www-form-urlencoded'
+        ),
+    ));
+
+    //Enviando a requisição e gravando a resposta
+    $response = curl_exec($curl);
+
+    //Fechando a requisição
+    curl_close($curl);
+
+    //Exibindo a resposta
+    echo '<br><br>' . $response;
+});
+
+Route::get('/getOrdes', function () {
+
+    // Definindo parâmetros
+    $privateKey = '65b24f925e2443ea83243083b2b2c5da';
+    $apiAccount = '615978675254329386';
+
+    // Parametro de negócio
+    $pedido = [
+        "serialNumber" => "U88030006595435",
+        "digest" => "FuriWZepWBao9l9eHFy/+A==",
+        "customerCode" => "J0086025107",
+        "command" => 2,
+        
+
+    ];
+
+    $pedido = json_encode($pedido);
+
+    // Codificando o pedido para envio
+    $req_pedido = rawurlencode($pedido);
+
+    // Montando o digest do header
+    $headerDigest = base64_encode(md5($pedido . $privateKey, true));
+
+    // Criando um carimbo de data/hora (timestamp)
+    $timestamp = round(microtime(true) * 1000);
+
+    // URL da API
+    // $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
+    $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/order/getOrders';
+
+    // Iniciando uma sessão cURL
+    $curl = curl_init();
+
+    // Configurando as opções da requisição cURL
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS => 'bizContent=' . $req_pedido,
+        CURLOPT_HTTPHEADER => array(
+            'timestamp:' . $timestamp,
+            'apiAccount:' . $apiAccount,
+            'digest:' . $headerDigest,
+            'Content-Type: application/x-www-form-urlencoded'
+        ),
+    ));
+
+    // Enviando a requisição e obtendo a resposta
+    $response = curl_exec($curl);
+
+    // Verificando se ocorreu algum erro na requisição
+    if (curl_errno($curl)) {
+        echo 'Erro cURL: ' . curl_error($curl);
+    }
+
+    // Fechando a requisição cURL
+    curl_close($curl);
+
+    // Exibindo a resposta
+    echo '<br><br>' . $response;
+});
+
+Route::get('/updateStatusDBA', function () {
+
+    $numbersToSearch = ['08982220000170', '50160966000164'];
+
+    $deliveryes = Delivery::with('carriers.documents')
+        ->whereHas('carriers', function ($query) use ($numbersToSearch) {
+            $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
+                $documentQuery->whereIn('number', $numbersToSearch);
+            });
+        })
+        ->whereDoesntHave('status', function ($query) {
+            $query->where('status', 'finalizado')
+                ->orWhere('status', 'entregue')
+                ->orWhere('status', 'devolvido');;
+        })
+        ->where(function ($query) {
+            $query->whereNull('updated_at')
+                ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'));
+        })
+        ->orderBy('id')
+        ->limit(15)
+        ->get();
+
+
+
+    foreach ($deliveryes as $key => $value) {
+        // dd($key);
+        // Chave da API
+        $apiKey = env('DBA_API_KEY');
+
+
+
+        // Chave da NF-e
+        $chaveNfe = $value->invoice_key;
+
+        // dd($value);
+        echo $chaveNfe . "------- horaValue" . $value->updated_at . "------- horaAtual" . Carbon::now()->format('Y-m-d H:i:s') . "<br>";
+        $client = new Client();
+
+        $uri = new Uri("https://englobasistemas.com.br/arquivos/api/PegarOcorrencias/RastreamentoChaveNfe");
+        $uri = Uri::withQueryValue($uri, 'apikey', $apiKey);
+        $uri = Uri::withQueryValue($uri, 'chaveNfe', $chaveNfe);
+
+        try {
+            $response = $client->request('POST', $uri);
+
+            $responseArray = json_decode($response->getBody()->getContents(), true);
+
+            $occurrences = isset($responseArray[1]) ? $responseArray[1] : null;
+
+            if ($occurrences !== null) {
+                foreach ($occurrences as $key => $occurrence) {
+
+                    Log::info("Iteração do loop externo: " . $key);
+                    $codigo = $occurrence['codigo'];
+
+                    // Verifique se o código já existe na tabela status_history.
+                    $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
+
+                    if (!$existeRegistro) {
+                        // O código não existe, então você pode inserir so registro.
+                        StatusHistory::create([
+                            'delivery_id' => $value->id,
+                            'external_code' => $codigo,
+                            'status' => $occurrence['ocorrencia'],
+                            'observation' => $occurrence['obs'],
+                        ]);
+                    }
+                }
+                $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
+            } else {
+                $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
+            }
+        } catch (Exception $e) {
+            Log::error("Error: " . $e->getMessage());
+            echo "Error: " . $e->getMessage() . "\n";
+        }
+    }
+});
+
+Route::get('/updateStatusMesh', function () {
+
+    $deliveryes = Delivery::with('carriers.documents')
+        ->whereHas('carriers', function ($query) {
+            $query->whereHas('documents', function ($documentQuery) {
+                $documentQuery->where('number', '37744796000105');
+            });
+        })
+        ->whereDoesntHave('status', function ($query) {
+            $query->where('status', 'finalizado');
+        })
+        ->orderBy('id')
+        ->get();
+
+
+
+
+    foreach ($deliveryes as $key => $value) {
+        $apiKey = env('MESH_API_KEY'); // Replace with your actual API key
+        $userId = env('MESH_USER_ID');  // Replace with your actual User ID
+
+        // Define the parameters in an array
+        $params = [
+            'SearchText' => $value->invoice_key,
+            'DeliveryZipCode' => '07072010',
+            'SearchTextEnum' => 4,
+        ];
+
+
+        // Create a query string from the parameters
+        $queryString = http_build_query($params);
+
+        // Create a new Guzzle client with the API Key and User ID in the header
+        $client = new Client([
+            'headers' => [
+                'X-Api-Key' => $apiKey,
+                'X-Api-User' => $userId,
+            ],
+        ]);
+
+        // Define the base URL
+        $baseUrl = 'https://apicliente.minha.is/api/v1/Tms/GetTrackingInfo';
+
+        // Construct the full URL
+        $url = $baseUrl . '?' . $queryString;
+
+        // Make a GET request with the API Key and User ID in the header
+        $response = $client->get($url);
+
+        // Get the response body as a string
+        $responseBody = $response->getBody()->getContents();
+
+        $responseArray = json_decode($responseBody, true);
+
+
+
+
+        $occurrences = $responseArray['content']['result']['occurrences'];
+
+        foreach ($occurrences as $key => $occurrence) {
+
+
+            $codigo = $occurrence['id'];
+
+            // Verifique se o código já existe na tabela status_history.
+            $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
+
+            if (!$existeRegistro) {
+                // O código não existe, então você pode inserir o registro.
+                StatusHistory::create([
+                    'delivery_id' => $value->id,
+                    'external_code' => $codigo,
+                    'status' => $occurrence['occurrenceStatusCategoryTypeName'],
+                    'observation' => $occurrence['observation'],
+                    'detail' => $occurrence['nameProtocolToUser'],
+                ]);
+            }
+        }
+    }
+});
+
+Route::get('/updateAstrlog', function () {
+
+    $deliveryes = Delivery::with('carriers.documents')
+        ->whereHas('carriers', function ($query) {
+            $query->whereHas('documents', function ($documentQuery) {
+                $documentQuery->where('number', '17000788000139');
+            });
+        })
+        ->whereDoesntHave('status', function ($query) {
+            $query->where('status', 'finalizado');
+        })
+        ->orderBy('id')
+        ->get();
+
+
+
+
+    foreach ($deliveryes as $key => $value) {
+        $authResp = authGfl();
+        if ($authResp->getStatusCode() === 200) {
+            $responseData = json_decode($authResp->getBody(), true); // Decodifique a resposta JSON para um array associativo
+            if (isset($responseData['data']['access_key'])) {
+                $client = new Client();
+                $accessKey = $responseData['data']['access_key'];
+                $headers = [
+                    "Authorization" => "Bearer  " . $accessKey
+                ];
+
+                $response = $client->get("https://grupoastrolog.brudam.com.br/api/v1/tracking/ocorrencias/nfe?chave=" . $value->invoice_key, [
+                    'headers' => $headers
+                ]);
+
+                $body = $response->getBody()->getContents();
+                $result = json_decode($body, true);
+
+                StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
+
+
+                for ($i = 0; $i < count($result['data'][0]['dados']); $i++) {
+
+
+                    StatusHistory::create([
+                        'delivery_id' => $value->id,
+                        'external_code' => $result['data'][0]['documento'],
+                        'status' => $result['data'][0]['dados'][$i]['descricao'],
+                        'observation' => $result['data'][0]['dados'][$i]['obs'],
+                        'detail' => $result['data'][0]['dados'][$i]['obs'],
+                    ]);
+                }
+            }
+        }
+    }
+});
+
+Route::get('/updateJ&G', function () {
+
+    $deliveryes = Delivery::with('carriers.documents')
+        ->whereHas('carriers', function ($query) {
+            $query->whereHas('documents', function ($documentQuery) {
+                $documentQuery->where('number', '17000788000139');
+            });
+        })
+        ->whereDoesntHave('status', function ($query) {
+            $query->where('status', 'finalizado');
+        })
+        ->orderBy('id')
+        ->get();
+
+        
+
+
+
+
+    foreach ($deliveryes as $key => $value) {
+        $authResp = authGfl();
+        if ($authResp->getStatusCode() === 200) {
+            $responseData = json_decode($authResp->getBody(), true); // Decodifique a resposta JSON para um array associativo
+            if (isset($responseData['data']['access_key'])) {
+                $client = new Client();
+                $accessKey = $responseData['data']['access_key'];
+                $headers = [
+                    "Authorization" => "Bearer  " . $accessKey
+                ];
+
+                $response = $client->get("https://grupoastrolog.brudam.com.br/api/v1/tracking/ocorrencias/nfe?chave=" . $value->invoice_key, [
+                    'headers' => $headers
+                ]);
+
+                $body = $response->getBody()->getContents();
+                $result = json_decode($body, true);
+
+                StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
+
+
+                for ($i = 0; $i < count($result['data'][0]['dados']); $i++) {
+
+
+                    StatusHistory::create([
+                        'delivery_id' => $value->id,
+                        'external_code' => $result['data'][0]['documento'],
+                        'status' => $result['data'][0]['dados'][$i]['descricao'],
+                        'observation' => $result['data'][0]['dados'][$i]['obs'],
+                        'detail' => $result['data'][0]['dados'][$i]['obs'],
+                    ]);
+                }
+            }
+        }
     }
 });

@@ -14,7 +14,7 @@ class Carrier extends Model
         'id',
         'legal_name',
         'trade_name',
-        'cnpj',
+        'image_path',
         'state_registration',
         'phone',
         'rntrc',

@@ -2,7 +2,7 @@
 
 
 @section('css')
-    {{-- <link href="{{ asset('/assets/admin/css/device.css') }}" rel="stylesheet"> --}}
+    <link href="{{ asset('/assets/css/transp.css') }}" rel="stylesheet">
 @endsection
 
 @section('content')
@@ -36,12 +36,37 @@
 
                                 <thead>
                                     <tr>
-                                        <th scope="col">img</th>
+                                        <th scope="col" class="text-center">IMG</th>
                                         <th scope="col">Nome</th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Ações</th>
                                     </tr>
                                 </thead>
+
+                                <tbody>
+                                    @foreach ($transportadoras as $transportadora)
+                                        <tr>
+                                            <td class="text-center"> {{-- Classe align-middle centraliza verticalmente o conteúdo --}}
+                                                @if ($transportadora->image_path)
+                                                    <img class="img-transp-index" src="{{ asset($transportadora->image_path) }}" alt="Imagem da Transportadora">
+                                                @endif
+                                            </td>
+                                            <td>{{ $transportadora->trade_name }}</td>
+                                            <td>{{ $transportadora->status }}</td>
+                                            <td>
+                                                {{-- Aqui você pode colocar botões de ação ou links, como editar ou excluir --}}
+                                                {{-- Por exemplo, você pode adicionar botões para editar e excluir --}}
+                                                <a href="{{ route('admin.transp.edit', ['transportadora' => $transportadora->id]) }}" class="btn btn-primary">Editar</a>
+                                                <form action="{{ route('admin.transp.destroy', ['transportadora' => $transportadora->id]) }}" method="POST" style="display: inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger">Excluir</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                
 
                             </table>
                         </div>
