@@ -28,8 +28,6 @@ class PedidosController extends Controller
         $XmlArray = json_decode($jsonString, true);
         $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
 
-
-
         switch ($documento) {
                 // Transportadora DBA
             case "50160966000164":
@@ -42,6 +40,10 @@ class PedidosController extends Controller
 
             case "23820639001352":
                 $this->gerarPedidoGFL($xmlContent);
+                break;
+
+            case "24217653000195":
+                $this->gerarPedidoLoggi($xmlContent);
                 break;
 
             case "37744796000105":
@@ -57,6 +59,197 @@ class PedidosController extends Controller
 
             default:
                 Error::create(['erro' => 'Transportadora não Integrada CNPJ:' . $documento]);
+        }
+    }
+    public function gerarPedidoLoggi($xmlContent)
+    {
+        $token = $this->authLoggi();
+        $xmlObject = simplexml_load_string($xmlContent);
+        $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
+        $XmlArray = json_decode($jsonString, true);
+        $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
+
+        // Extrair os dados relevantes do XML
+        $enderecoDestinatario = $xmlObject->NFe->infNFe->dest->enderDest;
+        $enderecoRemetente = $xmlObject->NFe->infNFe->emit->enderEmit;
+        $dadosDestinatario = $xmlObject->NFe->infNFe->dest;
+        $dadosRemetente = $xmlObject->NFe->infNFe->emit;
+
+
+        //  dd();
+        // Construir o corpo da requisição para a API da Loggi
+        $requestData = [
+            'shipFrom' => [
+                'address' => [
+                    'correiosAddress' => [
+                        'logradouro' => (string) $enderecoRemetente->xLgr,
+                        'cep' => (string) $enderecoRemetente->CEP,
+                        'cidade' => (string) $enderecoRemetente->xMun,
+                        'uf' => (string) $enderecoRemetente->UF,
+                    ]
+                ],
+                'name' => (string) $dadosRemetente->xNome,
+                'federalTaxId' => (string) $dadosRemetente->CNPJ,
+            ],
+            'shipTo' => [
+                'address' => [
+                    'correiosAddress' => [
+                        'logradouro' => (string) $enderecoDestinatario->xLgr,
+                        'cep' => (string) $enderecoDestinatario->CEP,
+                        'cidade' => (string) $enderecoDestinatario->xMun,
+                        'uf' => (string) $enderecoDestinatario->UF,
+                    ]
+                ],
+                'name' => (string) $dadosDestinatario->xNome,
+                'federalTaxId' => (string) $dadosDestinatario->CPF ?: (string) $dadosDestinatario->CNPJ,
+            ],
+            'pickupType' => 'PICKUP_TYPE_SPOT',
+            'packages' => [
+                [
+                    'freightType' => 'FREIGHT_TYPE_ECONOMIC',
+                    'documentType' => [
+                        'invoice' => [
+                            'icms' => 'ICMS_NOT_TAXED',
+                            'key' => (string) $xmlObject->protNFe->infProt->chNFe,
+                            'series' => '4',
+                            'number' => (string) $xmlObject->NFe->infNFe->ide->nNF,
+                            'totalValue' => (string) $xmlObject->NFe->infNFe->total->ICMSTot->vNF,
+                        ],
+                    ],
+                    'weightG' => round((float) $xmlObject->NFe->infNFe->transp->vol->pesoB * 1000),
+                    'lengthCm' =>  (int) $xmlObject->NFe->infNFe->transp->vol->qVol,
+                    'widthCm' => '30', // Valor padrão ou apropriado
+                    'heightCm' => '16', // Valor padrão ou apropriado
+                ],
+            ]
+        ];
+
+        // $json = '{"shipFrom":{"address":{"correiosAddress":{"logradouro":"aki","cep":"89111081","cidade":"aki","uf":"ak","numero":"aki","complemento":"aki","bairro":"aki"},"instructions":"Instruções de envio do de"},"name":"MIRANTE IND. E COM. ","federalTaxId":"23966188000122"},"shipTo":{"address":{"correiosAddress":{"cep":"17065211","logradouro":"RUA IRENE PRE","uf":"SP","cidade":"BAURU"},"instructions":"Instruções "},"name":"LUCAS CRUZ","federalTaxId":"47144406833","email":"aki","phoneNumber":"aki","stateTaxId":"aki"},"pickupType":"PICKUP_TYPE_SPOT","packages":[{"freightType":"FREIGHT_TYPE_ECONOMIC","documentType":{"invoice":{"icms":"ICMS_NOT_TAXED","key":"42240223966188000122550010002676491520151416","series":"1","number":"1306","totalValue":"884"}},"weightG":100,"lengthCm":16,"widthCm":30,"heightCm":16}]}';
+        // echo json_encode($requestData);
+        //  dd($requestData);
+
+        // Enviar a requisição para a API da Loggi
+        try {
+            // Enviar a requisição para a API da Loggi
+            $client = new \GuzzleHttp\Client();
+            $response = $client->request('POST', 'https://api.loggi.com/v1/companies/394829/shipments', [
+                'json' => $requestData,
+                'headers' => [
+                    'accept' => 'application/json',
+                    'authorization' => 'Bearer ' . $token['idToken'],
+                ],
+            ]);
+
+            // Lidar com a resposta da API da Loggi conforme necessário
+            $statusCode = $response->getStatusCode();
+            $responseBody = $response->getBody()->getContents();
+            // Exibir o corpo da resposta da API da Loggi
+            // echo $responseBody;
+
+            $responseData = json_decode($responseBody, true);
+            $trackingCode = "";
+            // Verifica se a chave 'success' está presente no array retornado
+            if (isset($responseData['success'])) {
+                // Acessa o array de sucesso
+                $successData = $responseData['success'];
+                // Verifica se há pacotes na resposta
+                if (isset($successData['packages']) && !empty($successData['packages'])) {
+                    // Como só há um pacote, podemos acessá-lo diretamente no índice 0
+                    $package = $successData['packages'][0];
+                    // Verifica se o 'trackingCode' está presente no pacote
+                    if (isset($package['trackingCode'])) {
+                        $trackingCode = $package['trackingCode'];
+                    }
+                }
+            }
+
+            $transp = Carrier::whereHas('documents', function ($query) use ($documento) {
+                $query->where('number', $documento);
+            })->first();
+
+
+
+
+            $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
+            $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
+            $ufUnidadeDestino = $transp->estado;
+            $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
+            $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
+            $peso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoL'];
+            $totalPeso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'];
+            $chaveNf = $XmlArray['protNFe']['infProt']['chNFe'];
+            $destNome = $XmlArray['NFe']['infNFe']['dest']['xNome'];
+            $destCpfCnpj = isset($XmlArray['NFe']['infNFe']['dest']['CPF']) ? $XmlArray['NFe']['infNFe']['dest']['CPF'] : $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
+            $destTelefone = $XmlArray['NFe']['infNFe']['dest']['enderDest']['fone'];
+            $destEmail = $XmlArray['NFe']['infNFe']['dest']['email'];
+            $destCep = $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'];
+            $destLogradouro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xLgr'];
+            $destNumero = $XmlArray['NFe']['infNFe']['dest']['enderDest']['nro'];
+            $destBairro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xBairro'];
+            $destCidade = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xMun'];
+            $destEstado = $XmlArray['NFe']['infNFe']['dest']['enderDest']['UF'];
+
+
+
+            $embarcador = Shipper::first();
+            $delivery = new Delivery();
+
+            $delivery->carrier_id = $transp->id; // Replace with the actual carrier ID
+            $delivery->shipper_id = $embarcador->id; // Replace with the actual shipper ID
+            $delivery->parcel = Utils::createTwoFactorCode();
+            $delivery->received = '2023-08-28';
+            $delivery->scheduled = '2023-08-29';
+            $delivery->estimated_delivery = '2023-08-30';
+            $delivery->invoice = $numNota;
+            $delivery->destination_state = $ufUnidadeDestino;
+            $delivery->quantity_of_packages = $qtdVolume;
+            $delivery->invoice_key = $chaveNf;
+            $delivery->package_number = $numeroDoVolume;
+            $delivery->weight = $peso;
+            $delivery->external_code = $trackingCode;
+            $delivery->total_weight = $totalPeso;
+            $delivery->destination_name = $destNome;
+            $delivery->destination_tax_id = $destCpfCnpj;
+            $delivery->destination_phone = $destTelefone;
+            $delivery->destination_email = $destEmail;
+            $delivery->destination_zip_code = $destCep;
+            $delivery->destination_address = $destLogradouro;
+            $delivery->destination_number = $destNumero;
+            $delivery->destination_neighborhood = $destBairro;
+            $delivery->destination_city = $destCidade;
+            $delivery->serie = $serie;
+            $delivery->destination_state = $destEstado;
+
+
+            try {
+                $delivery->save();
+                $status = new StatusHistory();
+                $status->status = "Arquivo Recebido";
+                $status->delivery_id = $delivery->id;
+                $status->save();
+
+                echo json_encode(array("mensagem" => "sucesso"));
+            } catch (Exception $e) {
+                // Verifique se a mensagem de erro contém "SQLSTATE[23000]" (case-sensitive)
+                if (strpos($e->getMessage(), "SQLSTATE[23000]") !== false) {
+                    Error::create(['erro' => 'Nota já processada' . $numNota]);
+                    exit;
+                }
+            }
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            // Capturar a exceção do Guzzle para obter o corpo da resposta da API da Loggi
+            $response = $e->getResponse();
+            if ($response) {
+                $responseBody = $response->getBody()->getContents();
+                // Exibir o corpo da resposta da API da Loggi
+                echo $responseBody;
+            } else {
+                // Exibir uma mensagem de erro genérica caso não seja possível obter o corpo da resposta
+                echo "Erro ao chamar a API da Loggi: " . $e->getMessage();
+            }
+        } catch (\Exception $e) {
+            // Exibir qualquer outra exceção que possa ocorrer
+            echo "Erro: " . $e->getMessage();
         }
     }
     public function gerarPedidoAstralog($xmlContent)
@@ -377,35 +570,147 @@ class PedidosController extends Controller
         $qtdeVolumes = 1; // Você pode ajustar a quantidade de volumes conforme necessário
 
         // Preencher o array com os dados extraídos do XML
-        $solicitacaoArray = array(
-            "cnpjEmbarcadorOrigem" => $cnpjEmbarcadorOrigem,
-            "listaSolicitacoes" => array(
-                array(
-                    "idSolicitacaoInterno" => $idSolicitacaoInterno,
-                    "idServico" => $idServico,
-                    "Destinatario" => array(
-                        "cpf" => $cpfDestinatario,
-                        "Endereco" => array(
-                            "cep" => $cepDestinatario,
-                            "logradouro" => $logradouroDestinatario,
-                            "numero" => $numeroDestinatario,
-                            "bairro" => $bairroDestinatario,
-                            "nomeCidade" => $cidadeDestinatario,
-                            "siglaEstado" => $estadoDestinatario
-                        )
-                    ),
-                    "listaOperacoes" => array(
-                        array(
-                            "idTipoDocumento" => $idTipoDocumento,
-                            "nroNotaFiscal" => $nroNotaFiscal,
-                            "serieNotaFiscal" => $serieNotaFiscal,
-                            "qtdeVolumes" => $qtdeVolumes
-                        )
-                    )
-                )
-            )
-        );
+        // $solicitacaoArray = array(
+        //     "cnpjEmbarcadorOrigem" => $cnpjEmbarcadorOrigem,
+        //     "listaSolicitacoes" => array(
+        //         array(
+        //             "idSolicitacaoInterno" => $idSolicitacaoInterno,
+        //             "idServico" => $idServico,
+        //             "Destinatario" => array(
+        //                 "cpf" => $cpfDestinatario,
+        //                 "Endereco" => array(
+        //                     "cep" => $cepDestinatario,
+        //                     "logradouro" => $logradouroDestinatario,
+        //                     "numero" => $numeroDestinatario,
+        //                     "bairro" => $bairroDestinatario,
+        //                     "nomeCidade" => $cidadeDestinatario,
+        //                     "siglaEstado" => $estadoDestinatario
+        //                 )
+        //             ),
+        //             "listaOperacoes" => array(
+        //                 array(
+        //                     "idTipoDocumento" => $idTipoDocumento,
+        //                     "nroNotaFiscal" => $nroNotaFiscal,
+        //                     "serieNotaFiscal" => $serieNotaFiscal,
+        //                     "qtdeVolumes" => $qtdeVolumes
+        //                 )
+        //             )
+        //         )
+        //     )
+        // );
+        // dd($XmlArray['NFe']['infNFe']['transp']['vol']);
 
+        $data = [
+            "cnpjEmbarcadorOrigem" => $cnpjEmbarcadorOrigem,
+            "listaSolicitacoes" => [
+                [
+                    "idSolicitacaoInterno" => $idSolicitacaoInterno,
+                    "idServico" => 4,
+                    "flagLiberacaoEmbarcador" => null,
+                    "dtPrazoInicio" => null,
+                    "dtPrazoFim" => null,
+                    "TomadorServico" => [
+                        "cpf" => null,
+                        "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
+                        "inscricaoEstadual" => null,
+                        "nome" => null,
+                        "razaoSocial" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
+                        "telefone" => null,
+                        "email" => null,
+                        "Endereco" => null
+                    ],
+                    "Remetente" => [
+                        "cpf" => null,
+                        "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
+                        "inscricaoEstadual" => null,
+                        "nome" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
+                        "razaoSocial" => null,
+                        "telefone" => null,
+                        "email" => null,
+                        "Endereco" => [
+                            "cep" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['CEP'],
+                            "logradouro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xLgr'],
+                            "numero" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['nro'],
+                            "pontoReferencia" => null,
+                            "bairro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xBairro'],
+                            "nomeCidade" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xMun'],
+                            "siglaEstado" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['UF'],
+                            "idCidadeIBGE" => null
+                        ]
+                    ],
+                    "Destinatario" => [
+                        "cpf" => empty($XmlArray['NFe']['infNFe']['emit']['CPF']) ? null : $XmlArray['NFe']['infNFe']['emit']['CPF'],
+                        "cnpj" => empty($XmlArray['NFe']['infNFe']['emit']['CNPJ']) ? null : $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
+                        "nome" => $XmlArray['NFe']['infNFe']['dest']['xNome'],
+                        "Endereco" => [
+                            "cep" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'],
+                            "logradouro" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xLgr'],
+                            "numero" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['nro'],
+                            "complemento" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xCpl'],
+                            "pontoReferencia" => null,
+                            "bairro" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xBairro'],
+                            "nomeCidade" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xMun'],
+                            "siglaEstado" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['UF'],
+                            "idCidadeIBGE" => null
+                        ]
+                    ],
+                    "Expedidor" => [
+                        "cpf" => null,
+                        "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
+                        "inscricaoEstadual" => null,
+                        "nome" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
+                        "razaoSocial" => null,
+                        "telefone" => null,
+                        "email" => null,
+                        "Endereco" => [
+                            "cep" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['CEP'],
+                            "logradouro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xLgr'],
+                            "numero" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['nro'],
+                            "pontoReferencia" => null,
+                            "bairro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xBairro'],
+                            "nomeCidade" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xMun'],
+                            "siglaEstado" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['UF'],
+                            "idCidadeIBGE" => null
+                        ]
+                    ],
+                    "LogisticaReversa" => null,
+                    "DadosAgendamento" => null,
+                    "listaOperacoes" => [
+                        [
+                            "nroNotaFiscal" => $XmlArray['NFe']['infNFe']['ide']['nNF'],
+                            "serieNotaFiscal" => $XmlArray['NFe']['infNFe']['ide']['serie'],
+                            "dtEmissaoNotaFiscal" => $XmlArray['NFe']['infNFe']['ide']['dhEmi'],
+                            "chaveNotaFiscal" => $XmlArray['protNFe']['infProt']['chNFe'],
+                            "nroCarga" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                            "nroPedido" => $XmlArray['NFe']['infNFe']['ide']['nNF'],
+                            "nroEntrega" => $XmlArray['NFe']['infNFe']['ide']['nNF'],
+                            "qtdeVolumes" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                            "qtdeItens" => count($XmlArray['NFe']['infNFe']['det']),
+                            "pesoTotal" => $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'],
+                            "valorMercadoria" => $XmlArray['NFe']['infNFe']['total']['ICMSTot']['vProd'],
+                            "valorICMS" => $XmlArray['NFe']['infNFe']['total']['ICMSTot']['vICMS'],
+                            "listaVolumes" => [
+                                [
+                                    "idVolume" => null,
+                                    "nroEtiqueta" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                                    "altura" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                                    "largura" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                                    "comprimento" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                                    "descricaoVolumes" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol']
+                                ]
+                            ],
+
+                        ]
+                    ],
+                    "linkCTe" => null,
+                    "base64CTe" => null,
+                    "xmlCTeAnterior" => "",
+                    "chaveCTeAnterior" => null
+                ]
+            ]
+        ];
+
+        // dd($data);
         try {
             // Criação de uma instância do cliente Guzzle
             $client = new Client();
@@ -416,21 +721,22 @@ class PedidosController extends Controller
                     'Authorization' => 'Basic ' . $chaveAcesso,
                     'Content-Type' => 'application/json',
                 ],
-                'body' => json_encode($solicitacaoArray),
+                'body' => json_encode($data),
             ]);
 
             // Obtendo o corpo da resposta como string
             $responseBody = $response->getBody()->getContents();
 
+            dd(json_decode($responseBody, true));
             // Imprimindo a resposta
-            // echo $responseBody;
+            echo $responseBody;
 
             $transp = Carrier::whereHas('documents', function ($query) use ($documento) {
                 $query->where('number', $documento);
             })->first();
 
 
-// dd($documento);
+            // dd($documento);
 
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
             $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
@@ -1078,7 +1384,7 @@ class PedidosController extends Controller
         }
     }
 
-    function authGfl()
+    public function authGfl()
     {
         // Crie uma instância do cliente Guzzle
         $clientA = new Client();
@@ -1102,5 +1408,23 @@ class PedidosController extends Controller
         ]);
 
         return $response;
+    }
+    public function authLoggi()
+    {
+        // Crie uma instância do cliente Guzzle
+        $client = new Client();
+
+
+        $response = $client->request('POST', 'https://api.loggi.com/oauth2/token', [
+            'body' => '{"client_secret":"FWqnbmAnJ84tw-N-_XG34SQF3qCKLwRHBHJgzPjKTAE","client_id":"mirante-service-account"}',
+            'headers' => [
+                'accept' => 'application/json',
+                'content-type' => 'application/json',
+            ],
+        ]);
+
+
+        dd(json_decode($response->getBody(), true));
+        return json_decode($response->getBody(), true);
     }
 }

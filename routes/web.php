@@ -1152,3 +1152,6 @@ Route::get('/updateJ&G', function () {
         }
     }
 });
+
+
+

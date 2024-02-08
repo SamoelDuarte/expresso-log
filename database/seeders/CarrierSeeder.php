@@ -116,55 +116,85 @@ class CarrierSeeder extends Seeder
 
 
 
-        $carrier4 = Carrier::create([
-            'legal_name' => 'J&T EXPRESS BRAZIL LTDA.',
-            'trade_name' => 'J&T EXPRESS',
-            'state_registration' => '123456',
-            'phone' => '4733974281',
-            'rntrc' => 'your_rntrc',
-            'opted_for_simples_nacional' => false,
-            'zip_code' => '89111081',
-            'address' => 'RUA ANFILOQUIO NUNES PIRES',
-            'number' => '5021',
-            'complement' => 'your_complement',
-            'neighborhood' => 'BELA VISTA',
-            'city' => 'GASPAR',
-            'state' => 'SC',
-            'landmark' => 'your_landmark',
-            'contact_name' => 'J&T EXPRESS',
-            'contact_phone1' => '4733974281',
-            'contact_phone2' => 'contact_phone_2',
-            'contact_email' => 'jtexpress@example.com',
-            'customer_service_phone' => 'customer_service_phone',
-            'customer_service_email' => 'customer_service_email',
-            'website' => 'www.jtexpress.com.br',
-            'title' => 'your_title',
-            'message' => 'your_message',
-        ]);
+        // $carrier4 = Carrier::create([
+        //     'legal_name' => 'J&T EXPRESS BRAZIL LTDA.',
+        //     'trade_name' => 'J&T EXPRESS',
+        //     'state_registration' => '123456',
+        //     'phone' => '4733974281',
+        //     'rntrc' => 'your_rntrc',
+        //     'opted_for_simples_nacional' => false,
+        //     'zip_code' => '89111081',
+        //     'address' => 'RUA ANFILOQUIO NUNES PIRES',
+        //     'number' => '5021',
+        //     'complement' => 'your_complement',
+        //     'neighborhood' => 'BELA VISTA',
+        //     'city' => 'GASPAR',
+        //     'state' => 'SC',
+        //     'landmark' => 'your_landmark',
+        //     'contact_name' => 'J&T EXPRESS',
+        //     'contact_phone1' => '4733974281',
+        //     'contact_phone2' => 'contact_phone_2',
+        //     'contact_email' => 'jtexpress@example.com',
+        //     'customer_service_phone' => 'customer_service_phone',
+        //     'customer_service_email' => 'customer_service_email',
+        //     'website' => 'www.jtexpress.com.br',
+        //     'title' => 'your_title',
+        //     'message' => 'your_message',
+        // ]);
         
-        $carrier4->documents()->createMany([
-            ['number' => '42584754001077'],
-        ]);
+        // $carrier4->documents()->createMany([
+        //     ['number' => '42584754001077'],
+        // ]);
 
-        $carrier5 = Carrier::create([
-            'legal_name' => 'GFL LOGISTICA LTDA',
-            'trade_name' => 'GFL LOGISTICA',
-            'state_registration' => '261527584',
-            'phone' => '4733974281',
+        // $carrier5 = Carrier::create([
+        //     'legal_name' => 'GFL LOGISTICA LTDA',
+        //     'trade_name' => 'GFL LOGISTICA',
+        //     'state_registration' => '261527584',
+        //     'phone' => '4733974281',
+        //     'rntrc' => 'your_rntrc',
+        //     'opted_for_simples_nacional' => false,
+        //     'zip_code' => '88310-000',
+        //     'address' => 'R DOMINGOS RAMPELOTTI, 3501',
+        //     'number' => '',
+        //     'complement' => '',
+        //     'neighborhood' => '',
+        //     'city' => 'ITAJAI',
+        //     'state' => 'SC',
+        //     'landmark' => '',
+        //     'contact_name' => 'GFL LOGISTICA LTDA',
+        //     'contact_phone1' => '4733974281',
+        //     'contact_phone2' => '',
+        //     'contact_email' => 'gfllogistica@example.com',
+        //     'customer_service_phone' => '',
+        //     'customer_service_email' => '',
+        //     'website' => '',
+        //     'title' => '',
+        //     'message' => '',
+        // ]);
+        
+        // $carrier5->documents()->createMany([
+        //     ['number' => '23820639001352'], // CNPJ do transportador
+        // ]);
+        
+        $carrier6 = Carrier::create([
+            'legal_name' => 'L4B LOGISTICA LTDA.',
+            'trade_name' => 'L4B LOGISTICA',
+            'state_registration' => '140538606113',
+            'phone' => '', // Preencha com o número de telefone correto
             'rntrc' => 'your_rntrc',
             'opted_for_simples_nacional' => false,
-            'zip_code' => '88310-000',
-            'address' => 'R DOMINGOS RAMPELOTTI, 3501',
+            'zip_code' => '', // Preencha com o CEP correto
+            'address' => 'AL SANTOS, 2400',
             'number' => '',
             'complement' => '',
             'neighborhood' => '',
-            'city' => 'ITAJAI',
-            'state' => 'SC',
+            'city' => 'SAO PAULO',
+            'state' => 'SP',
             'landmark' => '',
-            'contact_name' => 'GFL LOGISTICA LTDA',
-            'contact_phone1' => '4733974281',
+            'contact_name' => 'L4B LOGISTICA LTDA.',
+            'contact_phone1' => '', // Preencha com o número de telefone correto
             'contact_phone2' => '',
-            'contact_email' => 'gfllogistica@example.com',
+            'contact_email' => '',
             'customer_service_phone' => '',
             'customer_service_email' => '',
             'website' => '',
@@ -172,11 +202,9 @@ class CarrierSeeder extends Seeder
             'message' => '',
         ]);
         
-        $carrier5->documents()->createMany([
-            ['number' => '23820639001352'], // CNPJ do transportador
+        $carrier6->documents()->createMany([
+            ['number' => '24217653000195'], // CNPJ do transportador
         ]);
-        
-
         
 
     }
