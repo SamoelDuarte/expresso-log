@@ -710,7 +710,7 @@ class PedidosController extends Controller
             ]
         ];
 
-        // dd($data);
+        //  dd(json_encode($data));
         try {
             // Criação de uma instância do cliente Guzzle
             $client = new Client();
@@ -727,7 +727,7 @@ class PedidosController extends Controller
             // Obtendo o corpo da resposta como string
             $responseBody = $response->getBody()->getContents();
 
-            dd(json_decode($responseBody, true));
+            // dd(json_decode($responseBody, true));
             // Imprimindo a resposta
             echo $responseBody;
 
@@ -1424,7 +1424,7 @@ class PedidosController extends Controller
         ]);
 
 
-        dd(json_decode($response->getBody(), true));
+        // dd(json_decode($response->getBody(), true));
         return json_decode($response->getBody(), true);
     }
 }
