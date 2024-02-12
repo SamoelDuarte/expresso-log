@@ -125,8 +125,8 @@ class PedidosController extends Controller
         ];
 
         // $json = '{"shipFrom":{"address":{"correiosAddress":{"logradouro":"aki","cep":"89111081","cidade":"aki","uf":"ak","numero":"aki","complemento":"aki","bairro":"aki"},"instructions":"Instruções de envio do de"},"name":"MIRANTE IND. E COM. ","federalTaxId":"23966188000122"},"shipTo":{"address":{"correiosAddress":{"cep":"17065211","logradouro":"RUA IRENE PRE","uf":"SP","cidade":"BAURU"},"instructions":"Instruções "},"name":"LUCAS CRUZ","federalTaxId":"47144406833","email":"aki","phoneNumber":"aki","stateTaxId":"aki"},"pickupType":"PICKUP_TYPE_SPOT","packages":[{"freightType":"FREIGHT_TYPE_ECONOMIC","documentType":{"invoice":{"icms":"ICMS_NOT_TAXED","key":"42240223966188000122550010002676491520151416","series":"1","number":"1306","totalValue":"884"}},"weightG":100,"lengthCm":16,"widthCm":30,"heightCm":16}]}';
-        // echo json_encode($requestData);
-        //  dd($requestData);
+        //  echo json_encode($requestData);
+     //    dd(json_encode($requestData));
 
         // Enviar a requisição para a API da Loggi
         try {
@@ -144,8 +144,9 @@ class PedidosController extends Controller
             $statusCode = $response->getStatusCode();
             $responseBody = $response->getBody()->getContents();
             // Exibir o corpo da resposta da API da Loggi
-            // echo $responseBody;
+            //  echo $responseBody;
 
+           
             $responseData = json_decode($responseBody, true);
             $trackingCode = "";
             // Verifica se a chave 'success' está presente no array retornado
@@ -727,7 +728,7 @@ class PedidosController extends Controller
             // Obtendo o corpo da resposta como string
             $responseBody = $response->getBody()->getContents();
 
-            // dd(json_decode($responseBody, true));
+            dd(json_decode($responseBody, true));
             // Imprimindo a resposta
             echo $responseBody;
 
@@ -1409,20 +1410,22 @@ class PedidosController extends Controller
 
         return $response;
     }
-    public function authLoggi()
+    public static function authLoggi()
     {
         // Crie uma instância do cliente Guzzle
         $client = new Client();
 
 
         $response = $client->request('POST', 'https://api.loggi.com/oauth2/token', [
-            'body' => '{"client_secret":"FWqnbmAnJ84tw-N-_XG34SQF3qCKLwRHBHJgzPjKTAE","client_id":"mirante-service-account"}',
+            'body' => json_encode([
+                'client_secret' => env('LOGGI_CLIENT_SECRET'),
+                'client_id' => env('LOGGI_CLIENT_ID'),
+            ]),
             'headers' => [
                 'accept' => 'application/json',
                 'content-type' => 'application/json',
             ],
         ]);
-
 
         // dd(json_decode($response->getBody(), true));
         return json_decode($response->getBody(), true);

@@ -534,6 +534,7 @@ function authGfl()
 
     return $response;
 }
+
 Route::get('/daytonaCotação', function () {
     // URL do serviço web
     $wsdl = 'http://daytona.azurewebsites.net/WS/V1/WSDaytonaV1.asmx?wsdl';
@@ -826,7 +827,7 @@ Route::get('/getOrdes', function () {
         "digest" => "FuriWZepWBao9l9eHFy/+A==",
         "customerCode" => "J0086025107",
         "command" => 2,
-        
+
 
     ];
 
@@ -1111,7 +1112,7 @@ Route::get('/updateJ&G', function () {
         ->orderBy('id')
         ->get();
 
-        
+
 
 
 
@@ -1154,4 +1155,71 @@ Route::get('/updateJ&G', function () {
 });
 
 
+Route::get('/updateLoggi', function () {
 
+    $token = PedidosController::authLoggi();
+    dd($token);
+    $client = new \GuzzleHttp\Client();
+
+    $response = $client->request('GET', 'https://api.loggi.com/v1/companies/394829/packages/PJMXAMKC/tracking', [
+        'headers' => [
+            'accept' => 'application/json',
+            'authorization' => 'Bearer eyJraWQiOiJpOFo2dlpqQlZRT3FkRjFqMEY4TzhWcWl3eEpnXC9jRWR1SjMzd25WMW80UT0iLCJhbGciOiJSUzI1NiJ9.eyJjdXN0b206YWNjZXNzIjoi45yK8KGLjeSQmOGUhSIsInN1YiI6ImM0MTljYTRmLTUyM2YtNDY5OS05NzE3LTZkYWUyYTNjOGVjMyIsImF1ZCI6IjU2Z2ZzNGsxajY0MjN2bjUwM2FlNTA0NGJxIiwiZXZlbnRfaWQiOiI5OWQzYjg1MS00NTU1LTQ0MTMtYTdkOC01NjczM2I5M2MwMTkiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTcwNzQ4NDcxMiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tXC91cy1lYXN0LTFfcEdKYkx6TERvIiwiY29nbml0bzp1c2VybmFtZSI6Im1pcmFudGUtc2VydmljZS1hY2NvdW50IiwiZXhwIjoxNzA3NTcxMTEyLCJpYXQiOjE3MDc0ODQ3MTJ9.We30EKdy6TnQ1XoFRE75d_-v-3JNBRLnfpHdU6JP_TQzt4oazLNh03oF33uA8stGZBm8htoo8QFsTsKZ0lJPTnt-wFBC8PES5loAXaB2RHSoAezrLrof4q8-BsL7OqftLnuUkkGum-Ll-BI4EwKMqF9mus7BuJhsagxgxakMoDWM_EuG7BFbJCJQyUu5tCeRoV-1R04p7YqtIeIoR3cqep_eJDOBbRC79qt7nlrRchU9B3l7TnzF2ujlVtn4lb4B_gMvintxX056ajyA4pkex6MQ1w0RthQtZpmhi3lIzy8jUFv8vq-mMC_GDbCxWbhOIMeb3jNoA1sR-fEQvZ6z2g',
+        ],
+    ]);
+
+    echo $response->getBody();
+
+    $deliveryes = Delivery::with('carriers.documents')
+        ->whereHas('carriers', function ($query) {
+            $query->whereHas('documents', function ($documentQuery) {
+                $documentQuery->where('number', '17000788000139');
+            });
+        })
+        ->whereDoesntHave('status', function ($query) {
+            $query->where('status', 'finalizado');
+        })
+        ->orderBy('id')
+        ->get();
+
+
+
+
+
+
+    foreach ($deliveryes as $key => $value) {
+        $authResp = authGfl();
+        if ($authResp->getStatusCode() === 200) {
+            $responseData = json_decode($authResp->getBody(), true); // Decodifique a resposta JSON para um array associativo
+            if (isset($responseData['data']['access_key'])) {
+                $client = new Client();
+                $accessKey = $responseData['data']['access_key'];
+                $headers = [
+                    "Authorization" => "Bearer  " . $accessKey
+                ];
+
+                $response = $client->get("https://grupoastrolog.brudam.com.br/api/v1/tracking/ocorrencias/nfe?chave=" . $value->invoice_key, [
+                    'headers' => $headers
+                ]);
+
+                $body = $response->getBody()->getContents();
+                $result = json_decode($body, true);
+
+                StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
+
+
+                for ($i = 0; $i < count($result['data'][0]['dados']); $i++) {
+
+
+                    StatusHistory::create([
+                        'delivery_id' => $value->id,
+                        'external_code' => $result['data'][0]['documento'],
+                        'status' => $result['data'][0]['dados'][$i]['descricao'],
+                        'observation' => $result['data'][0]['dados'][$i]['obs'],
+                        'detail' => $result['data'][0]['dados'][$i]['obs'],
+                    ]);
+                }
+            }
+        }
+    }
+});
