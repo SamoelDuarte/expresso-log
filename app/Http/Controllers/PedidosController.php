@@ -126,7 +126,7 @@ class PedidosController extends Controller
 
         // $json = '{"shipFrom":{"address":{"correiosAddress":{"logradouro":"aki","cep":"89111081","cidade":"aki","uf":"ak","numero":"aki","complemento":"aki","bairro":"aki"},"instructions":"Instruções de envio do de"},"name":"MIRANTE IND. E COM. ","federalTaxId":"23966188000122"},"shipTo":{"address":{"correiosAddress":{"cep":"17065211","logradouro":"RUA IRENE PRE","uf":"SP","cidade":"BAURU"},"instructions":"Instruções "},"name":"LUCAS CRUZ","federalTaxId":"47144406833","email":"aki","phoneNumber":"aki","stateTaxId":"aki"},"pickupType":"PICKUP_TYPE_SPOT","packages":[{"freightType":"FREIGHT_TYPE_ECONOMIC","documentType":{"invoice":{"icms":"ICMS_NOT_TAXED","key":"42240223966188000122550010002676491520151416","series":"1","number":"1306","totalValue":"884"}},"weightG":100,"lengthCm":16,"widthCm":30,"heightCm":16}]}';
         //  echo json_encode($requestData);
-     //    dd(json_encode($requestData));
+        //    dd(json_encode($requestData));
 
         // Enviar a requisição para a API da Loggi
         try {
@@ -146,7 +146,7 @@ class PedidosController extends Controller
             // Exibir o corpo da resposta da API da Loggi
             //  echo $responseBody;
 
-           
+
             $responseData = json_decode($responseBody, true);
             $trackingCode = "";
             // Verifica se a chave 'success' está presente no array retornado
@@ -548,7 +548,7 @@ class PedidosController extends Controller
         $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
         $XmlArray = json_decode($jsonString, true);
         $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
-        $endpointUrl = 'http://gflapi.sinclog.app.br/Api/Solicitacoes/RegistrarNovaSolicitacao';
+
 
         // Chave de acesso fornecida pelo transportador
         $chaveAcesso = 'xP7aTUnqZe';
@@ -556,19 +556,8 @@ class PedidosController extends Controller
         $exeternalCode = time() . mt_rand(1000, 9999);
         // Extrair os dados relevantes do XML
         $cnpjEmbarcadorOrigem = (string) $xmlObject->NFe->infNFe->emit->CNPJ;
-        $cpfDestinatario = (string) $xmlObject->NFe->infNFe->dest->CPF;
-        $cepDestinatario = (string) $xmlObject->NFe->infNFe->dest->enderDest->CEP;
-        $logradouroDestinatario = (string) $xmlObject->NFe->infNFe->dest->enderDest->xLgr;
-        $numeroDestinatario = (string) $xmlObject->NFe->infNFe->dest->enderDest->nro;
-        $bairroDestinatario = (string) $xmlObject->NFe->infNFe->dest->enderDest->xBairro;
-        $cidadeDestinatario = (string) $xmlObject->NFe->infNFe->dest->enderDest->xMun;
-        $estadoDestinatario = (string) $xmlObject->NFe->infNFe->dest->enderDest->UF;
         $idSolicitacaoInterno = $exeternalCode; // Você pode definir o ID de solicitação interno conforme necessário
-        $idServico = 4; // Você pode definir o ID de serviço conforme necessário
-        $idTipoDocumento = 55; // Você pode definir o ID do tipo de documento conforme necessário
-        $nroNotaFiscal = (int) $xmlObject->NFe->infNFe->det[0]->prod->nItem; // Supondo que você quer pegar o número da primeira nota fiscal no XML
-        $serieNotaFiscal = (int) $xmlObject->NFe->infNFe->ide->serie;
-        $qtdeVolumes = 1; // Você pode ajustar a quantidade de volumes conforme necessário
+
 
         // Preencher o array com os dados extraídos do XML
         // $solicitacaoArray = array(
@@ -600,7 +589,7 @@ class PedidosController extends Controller
         //     )
         // );
         // dd($XmlArray['NFe']['infNFe']['transp']['vol']);
-
+        $endpointUrl = 'http://gflapi.sinclog.app.br/Api/Solicitacoes/RegistrarNovaSolicitacao';
         $data = [
             "cnpjEmbarcadorOrigem" => $cnpjEmbarcadorOrigem,
             "listaSolicitacoes" => [
@@ -710,8 +699,8 @@ class PedidosController extends Controller
                 ]
             ]
         ];
-
-        //  dd(json_encode($data));
+        //o payload que enviei no email
+        //   dd(json_encode($data));
         try {
             // Criação de uma instância do cliente Guzzle
             $client = new Client();
@@ -1161,8 +1150,8 @@ class PedidosController extends Controller
             // dd($headerSignature);
             //Montando o JSON do envio
             $pedido = [
-                "customerCode" => 'J0086025107',
-                "digest" => 'FuriWZepWBao9l9eHFy/+A==',
+                "customerCode" => 'J0086026981',
+                "digest" => 'Zy+vQdOi9CKk8snUA517nA==',
                 "txlogisticId" => "12879542", // Você pode definir este valor conforme necessário
                 "expressType" => "EZ", // Você pode definir este valor conforme necessário
                 "orderType" => "1", // Você pode definir este valor conforme necessário
@@ -1268,7 +1257,7 @@ class PedidosController extends Controller
                 //Instanciando e enviando a requisição
                 $curl = curl_init();
                 curl_setopt_array($curl, array(
-                    CURLOPT_URL => 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/order/addOrder',
+                    CURLOPT_URL => 'https://openapi.jtjms-br.com/webopenplatformapi/api/order/addOrder',
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_ENCODING => '',
                     CURLOPT_MAXREDIRS => 10,
@@ -1292,6 +1281,7 @@ class PedidosController extends Controller
                 //Fechando a requisição
                 curl_close($curl);
 
+                // dd($responseArray);
                 $billcode = $responseArray['data']['orderList'][0]['billCode'];
                 //Exibindo a resposta
                 echo '<br><br>' . $response;

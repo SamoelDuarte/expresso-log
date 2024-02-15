@@ -1223,3 +1223,29 @@ Route::get('/updateLoggi', function () {
         }
     }
 });
+
+
+Route::get('/JT', function () {
+
+    function generateBusinessParameterSignature($customerCode, $pwd, $privateKey) {
+        // Concatenate customerCode, pwd, and privateKey
+        $concatenatedString = $customerCode . $pwd . $privateKey;
+        
+        // Generate MD5 hash of the concatenated string
+        $md5Hash = md5($concatenatedString, true);
+        
+        // Encode the MD5 hash using Base64
+        $base64Encoded = base64_encode($md5Hash);
+        
+        return $base64Encoded;
+    }
+    
+    // Example usage:
+    $customerCode = "J0086026981";
+    $plainTextPwd = "G3H0b644";
+    $encryptedPwd = strtoupper(md5($plainTextPwd . "jadada236t2")); // Assuming pwd is in uppercase MD5 format
+    $privateKey = "bccf1dc5e47a4cb7a69d644d8c597c3a";
+    
+    $businessParameterSignature = generateBusinessParameterSignature($customerCode, $encryptedPwd, $privateKey);
+    echo "Business Parameter Signature Digest: " . $businessParameterSignature;
+});
