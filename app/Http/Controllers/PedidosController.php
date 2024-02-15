@@ -41,6 +41,7 @@ class PedidosController extends Controller
                 break;
 
             case "23820639001352":
+            case "24230747094913":
                 $this->gerarPedidoGFL($xmlContent,$dataEntrega);
                 break;
 
