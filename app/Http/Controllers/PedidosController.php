@@ -594,7 +594,7 @@ class PedidosController extends Controller
         //     )
         // );
         // dd($XmlArray['NFe']['infNFe']['transp']['vol']);
-        $endpointUrl = 'http://gflapi.sinclog.app.br/Api/Solicitacoes/RegistrarNovaSolicitacao';
+        $endpointUrl = 'https://gflapi.sinclog.app.br/Api/Solicitacoes/RegistrarNovaSolicitacao';
         $data = [
             "cnpjEmbarcadorOrigem" => $cnpjEmbarcadorOrigem,
             "listaSolicitacoes" => [
