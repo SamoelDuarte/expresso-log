@@ -81,6 +81,7 @@ Route::middleware('auth.admin')->group(function () {
     Route::prefix('/entregas')->controller(DeliveryController::class)->group(function () {
         Route::get('/', 'index')->name('admin.entrega.index');
         Route::get('/getEntregas', 'getEntregas');
+        Route::get('/getinfoEntrega/{id}', 'show');
     });
 });
 
@@ -621,13 +622,14 @@ Route::get('/daytonaCotação2', function () {
 
 Route::get('/getStatusJT', function () {
 
-    // Definindo parâmetros
-    $privateKey = '65b24f925e2443ea83243083b2b2c5da';
-    $apiAccount = '615978675254329386';
+    
+     //Definindo parâmetros
+     $privateKey = env('PRIVATE_KEY_JT');
+     $apiAccount = env('API_ACCOUNT_JT');
 
     // Montando o JSON do envio
     $pedido = [
-        "billCodes" => 'U88030006595435',
+        "billCodes" => '888030034335191',
 
     ];
 
@@ -643,8 +645,8 @@ Route::get('/getStatusJT', function () {
     $timestamp = round(microtime(true) * 1000);
 
     // URL da API
-    $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
-    // $url = 'https://openapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
+    // $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
+    $url = 'https://openapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
 
     // Iniciando uma sessão cURL
     $curl = curl_init();
@@ -1114,9 +1116,6 @@ Route::get('/updateJ&G', function () {
 
 
 
-
-
-
     foreach ($deliveryes as $key => $value) {
         $authResp = authGfl();
         if ($authResp->getStatusCode() === 200) {
@@ -1134,6 +1133,8 @@ Route::get('/updateJ&G', function () {
 
                 $body = $response->getBody()->getContents();
                 $result = json_decode($body, true);
+
+                // dd($result);
 
                 StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
 

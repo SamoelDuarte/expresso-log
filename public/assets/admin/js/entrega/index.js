@@ -8,17 +8,25 @@ $('#tabela-entrega').DataTable({
     },
     "columns": [{
         "data": "created_at"
-    },{
+    }, {
         "data": "id"
-    },{
+    }, {
         "data": "parcel"
-    },{
+    }, {
         "data": "invoice"
-    },{
+    }, {
         "data": "destination_state"
-    },{
+    }, {
         "data": "id"
     },
+    {
+        "data": "id",
+        "render": function (data, type, row) {
+            // Adiciona um botão de visualização (olho) para cada entrega
+            return '<button class="btn btn-sm btn-primary" onclick="openModal(' + data + ')"><i class="fas fa-eye"></i></button>';
+        }
+    },
+
     ],
     'columnDefs': [
         {
@@ -28,18 +36,36 @@ $('#tabela-entrega').DataTable({
     ],
     'rowCallback': function (row, data, index) {
 
-      
+
         // let btn = 'success';
         // if(data['display_status'] == "Desconectado"){
         //     btn = "danger";
         // }
-         $('td:eq(0)', row).html(data['display_data']);
-         $('td:eq(1)', row).html(data['carriers'].trade_name);
-         $('td:eq(5)', row).html(data['status'][0].status);
+        $('td:eq(0)', row).html(data['display_data']);
+        $('td:eq(1)', row).html(data['carriers'].trade_name);
+        $('td:eq(5)', row).html(data['status'][0].status);
+
         // $('td:eq(2)', row).html('<button class="btn btn-'+btn+'">'+data['display_status']+'</button>');
         // $('td:eq(3)', row).html( '<a href="javascript:;" data-toggle="modal" onClick="configModalDelete(' + data["id"] + ')" data-target="#modalDelete" class="btn btn-sm btn-danger delete"><i class="far fa-trash-alt"></i></a>');
 
 
     },
 });
+
+function openModal(id) {
+    // Requisição AJAX para buscar informações da entrega pelo ID
+    $.ajax({
+        url: '/entregas/getinfoEntrega/' + id, // Rota para buscar os detalhes da entrega
+        type: 'GET',
+        success: function(response) {
+            // Preencher os campos do modal com as informações retornadas
+            $('#modalDetalhes .modal-body').html(response);
+            // Abrir o modal
+            $('#modalDetalhes').modal('show');
+        },
+        error: function(xhr, status, error) {
+            console.error(error);
+        }
+    });
+}
 

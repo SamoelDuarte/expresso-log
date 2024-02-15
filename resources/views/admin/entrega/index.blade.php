@@ -3,7 +3,6 @@
 
 @section('css')
     {{-- <link href="{{ asset('/assets/admin/css/device.css') }}" rel="stylesheet"> --}}
-
 @endsection
 
 @section('content')
@@ -39,6 +38,7 @@
                                         <th scope="col">N° NF</th>
                                         <th scope="col">UF Destinatario</th>
                                         <th scope="col">Status</th>
+                                        <th scope="col">Ações</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -48,12 +48,26 @@
             </div>
         </div>
     </section>
+    <!-- Modal -->
+    <div class="modal fade" id="modalDetalhes" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <!-- Aqui serão exibidas as informações detalhadas da entrega via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <!-- Modal -->
     <div class="modal fade" id="modalDelete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-dialog-centered " role="document">
             <div class="modal-content">
                 <div class="modal-body text-center">
                     <h5 class="py-3 m-0">Tem certeza que deseja excluir este Dispositivo?</h5>
@@ -69,9 +83,7 @@
             </div>
         </div>
     </div>
-
-  
 @endsection
 @section('scripts')
-<script src="{{ asset('/assets/admin/js/entrega/index.js') }}"></script>
+    <script src="{{ asset('/assets/admin/js/entrega/index.js') }}"></script>
 @endsection
