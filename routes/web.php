@@ -819,15 +819,15 @@ Route::get('/getFreteJT', function () {
 
 Route::get('/getOrdes', function () {
 
-    // Definindo parâmetros
-    $privateKey = '65b24f925e2443ea83243083b2b2c5da';
-    $apiAccount = '615978675254329386';
+     //Definindo parâmetros
+     $privateKey = env('PRIVATE_KEY_JT');
+     $apiAccount = env('API_ACCOUNT_JT');
 
     // Parametro de negócio
     $pedido = [
-        "serialNumber" => "U88030006595435",
-        "digest" => "FuriWZepWBao9l9eHFy/+A==",
-        "customerCode" => "J0086025107",
+        "serialNumber" => "888030034335191",
+        "digest" => "Zy+vQdOi9CKk8snUA517nA==",
+        "customerCode" => "J0086026981",
         "command" => 2,
 
 
@@ -846,7 +846,7 @@ Route::get('/getOrdes', function () {
 
     // URL da API
     // $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
-    $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/order/getOrders';
+    $url = 'https://openapi.jtjms-br.com/webopenplatformapi/api/order/getOrders';
 
     // Iniciando uma sessão cURL
     $curl = curl_init();
@@ -1100,7 +1100,7 @@ Route::get('/updateAstrlog', function () {
     }
 });
 
-Route::get('/updateJ&G', function () {
+Route::get('/updateJ&T', function () {
 
     $deliveryes = Delivery::with('carriers.documents')
         ->whereHas('carriers', function ($query) {
