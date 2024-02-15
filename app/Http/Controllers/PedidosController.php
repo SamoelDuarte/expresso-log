@@ -22,6 +22,8 @@ class PedidosController extends Controller
     public function gerarPedido(Request $request)
     {
 
+        $dataEntrega = $request->dataprevista;
+
         $xmlContent = $request->getContent();
         $xmlObject = simplexml_load_string($xmlContent); // Transformar o XML em um objeto SimpleXMLElement
         $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
@@ -31,37 +33,37 @@ class PedidosController extends Controller
         switch ($documento) {
                 // Transportadora DBA
             case "50160966000164":
-                $this->gerarPedidoDBA($xmlContent);
+                $this->gerarPedidoDBA($xmlContent,$dataEntrega);
                 break;
 
             case "42584754001077":
-                $this->gerarPedidoJT($xmlContent);
+                $this->gerarPedidoJT($xmlContent,$dataEntrega);
                 break;
 
             case "23820639001352":
-                $this->gerarPedidoGFL($xmlContent);
+                $this->gerarPedidoGFL($xmlContent,$dataEntrega);
                 break;
 
             case "24217653000195":
-                $this->gerarPedidoLoggi($xmlContent);
+                $this->gerarPedidoLoggi($xmlContent,$dataEntrega);
                 break;
 
             case "37744796000105":
             case "08982220000170":
-                $this->gerarPedidoMesh($xmlContent);
+                $this->gerarPedidoMesh($xmlContent,$dataEntrega);
                 break;
 
             case "17000788000139":
             case "20588287000120":
 
-                $this->gerarPedidoAstralog($xmlContent);
+                $this->gerarPedidoAstralog($xmlContent,$dataEntrega);
                 break;
 
             default:
                 Error::create(['erro' => 'Transportadora não Integrada CNPJ:' . $documento]);
         }
     }
-    public function gerarPedidoLoggi($xmlContent)
+    public function gerarPedidoLoggi($xmlContent,$dataEntrega)
     {
         $token = $this->authLoggi();
         $xmlObject = simplexml_load_string($xmlContent);
@@ -201,9 +203,9 @@ class PedidosController extends Controller
             $delivery->carrier_id = $transp->id; // Replace with the actual carrier ID
             $delivery->shipper_id = $embarcador->id; // Replace with the actual shipper ID
             $delivery->parcel = Utils::createTwoFactorCode();
-            $delivery->received = '2023-08-28';
-            $delivery->scheduled = '2023-08-29';
-            $delivery->estimated_delivery = '2023-08-30';
+            $delivery->received = $dataEntrega;
+            $delivery->scheduled = $dataEntrega;
+            $delivery->estimated_delivery = $dataEntrega;
             $delivery->invoice = $numNota;
             $delivery->destination_state = $ufUnidadeDestino;
             $delivery->quantity_of_packages = $qtdVolume;
@@ -256,7 +258,7 @@ class PedidosController extends Controller
             echo "Erro: " . $e->getMessage();
         }
     }
-    public function gerarPedidoAstralog($xmlContent)
+    public function gerarPedidoAstralog($xmlContent,$dataEntrega)
     {
 
 
@@ -497,9 +499,9 @@ class PedidosController extends Controller
                 $delivery->carrier_id = $transp->id; // Replace with the actual carrier ID
                 $delivery->shipper_id = $embarcador->id; // Replace with the actual shipper ID
                 $delivery->parcel = Utils::createTwoFactorCode();
-                $delivery->received = '2023-08-28';
-                $delivery->scheduled = '2023-08-29';
-                $delivery->estimated_delivery = '2023-08-30';
+                $delivery->received = $dataEntrega;
+                $delivery->scheduled = $dataEntrega;
+                $delivery->estimated_delivery = $dataEntrega;
                 $delivery->invoice = $numNota;
                 $delivery->destination_state = $ufUnidadeDestino;
                 $delivery->quantity_of_packages = $qtdVolume;
@@ -543,7 +545,7 @@ class PedidosController extends Controller
             echo "A solicitação não foi bem-sucedida.\n";
         }
     }
-    public function gerarPedidoGFL($xmlContent)
+    public function gerarPedidoGFL($xmlContent,$dataEntrega)
     {
         // URL do endpoint
 
@@ -758,9 +760,9 @@ class PedidosController extends Controller
             $delivery->carrier_id = $transp->id; // Replace with the actual carrier ID
             $delivery->shipper_id = $embarcador->id; // Replace with the actual shipper ID
             $delivery->parcel = Utils::createTwoFactorCode();
-            $delivery->received = '2023-08-28';
-            $delivery->scheduled = '2023-08-29';
-            $delivery->estimated_delivery = '2023-08-30';
+            $delivery->received = $dataEntrega;
+            $delivery->scheduled = $dataEntrega;
+            $delivery->estimated_delivery = $dataEntrega;
             $delivery->invoice = $numNota;
             $delivery->destination_state = $ufUnidadeDestino;
             $delivery->quantity_of_packages = $qtdVolume;
@@ -800,7 +802,7 @@ class PedidosController extends Controller
             echo "Ocorreu um erro: " . $e->getMessage();
         }
     }
-    public function gerarPedidoDBA($xmlContent)
+    public function gerarPedidoDBA($xmlContent,$dataEntrega)
     {
         $xmlObject = simplexml_load_string($xmlContent); // Transformar o XML em um objeto SimpleXMLElement
         $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
@@ -871,9 +873,9 @@ class PedidosController extends Controller
             $delivery->carrier_id = $transp->id; // Replace with the actual carrier ID
             $delivery->shipper_id = $embarcador->id; // Replace with the actual shipper ID
             $delivery->parcel = Utils::createTwoFactorCode();
-            $delivery->received = '2023-08-28';
-            $delivery->scheduled = '2023-08-29';
-            $delivery->estimated_delivery = '2023-08-30';
+            $delivery->received = $dataEntrega;
+            $delivery->scheduled = $dataEntrega;
+            $delivery->estimated_delivery = $dataEntrega;
             $delivery->invoice = $numNota;
             $delivery->destination_state = $ufUnidadeDestino;
             $delivery->quantity_of_packages = $qtdVolume;
@@ -910,7 +912,7 @@ class PedidosController extends Controller
             }
         }
     }
-    public function gerarPedidoMesh($xmlContent)
+    public function gerarPedidoMesh($xmlContent,$dataEntrega)
     {
         $xmlObject = simplexml_load_string($xmlContent); // Transformar o XML em um objeto SimpleXMLElement
         $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
@@ -1046,9 +1048,9 @@ class PedidosController extends Controller
         $delivery->carrier_id = $transp->id; // Replace with the actual carrier ID
         $delivery->shipper_id = $embarcador->id; // Replace with the actual shipper ID
         $delivery->parcel = Utils::createTwoFactorCode();
-        $delivery->received = '2023-08-28';
-        $delivery->scheduled = '2023-08-29';
-        $delivery->estimated_delivery = '2023-08-30';
+        $delivery->received = $dataEntrega;
+        $delivery->scheduled = $dataEntrega;
+        $delivery->estimated_delivery = $dataEntrega;
         $delivery->invoice = $numNota;
         $delivery->destination_state = $ufUnidadeDestino;
         $delivery->quantity_of_packages = $qtdVolume;
@@ -1115,7 +1117,7 @@ class PedidosController extends Controller
         echo $responseData;
     }
 
-    public function gerarPedidoJT($xmlContent)
+    public function gerarPedidoJT($xmlContent,$dataEntrega)
     {
         $client = new Client();
         $dateTime = new DateTime();
@@ -1270,7 +1272,7 @@ class PedidosController extends Controller
                     CURLOPT_CUSTOMREQUEST => 'POST',
                     CURLOPT_POSTFIELDS => 'bizContent=' . $req_pedido,
                     CURLOPT_HTTPHEADER => array(
-                        'timestamp:1565238848921',
+                        'timestamp: '.time(),
                         'apiAccount:' . $apiAccount,
                         'digest:' . $headerDigest,
                         'Content-Type: application/x-www-form-urlencoded'
@@ -1334,9 +1336,9 @@ class PedidosController extends Controller
             $delivery->carrier_id = $transp->id; // Replace with the actual carrier ID
             $delivery->shipper_id = $embarcador->id; // Replace with the actual shipper ID
             $delivery->parcel = Utils::createTwoFactorCode();
-            $delivery->received = '2023-08-28';
-            $delivery->scheduled = '2023-08-29';
-            $delivery->estimated_delivery = '2023-08-30';
+            $delivery->received = $dataEntrega;
+            $delivery->scheduled = $dataEntrega;
+            $delivery->estimated_delivery = $dataEntrega;
             $delivery->invoice = $numNota;
             $delivery->external_code = $billcode;
             $delivery->destination_state = $ufUnidadeDestino;
