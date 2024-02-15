@@ -629,8 +629,8 @@ class PedidosController extends Controller
                         ]
                     ],
                     "Destinatario" => [
-                        "cpf" => empty($XmlArray['NFe']['infNFe']['emit']['CPF']) ? null : $XmlArray['NFe']['infNFe']['emit']['CPF'],
-                        "cnpj" => empty($XmlArray['NFe']['infNFe']['emit']['CNPJ']) ? null : $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
+                        "cpf" => empty($XmlArray['NFe']['infNFe']['dest']['CPF']) ? null : $XmlArray['NFe']['infNFe']['dest']['CPF'],
+                        "cnpj" => empty($XmlArray['NFe']['infNFe']['dest']['CNPJ']) ? null : $XmlArray['NFe']['infNFe']['dest']['CNPJ'],
                         "nome" => $XmlArray['NFe']['infNFe']['dest']['xNome'],
                         "Endereco" => [
                             "cep" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'],
