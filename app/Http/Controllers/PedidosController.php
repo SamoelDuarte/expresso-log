@@ -103,6 +103,7 @@ class PedidosController extends Controller
                 'name' => (string) $dadosDestinatario->xNome,
                 'federalTaxId' => (string) $dadosDestinatario->CPF ?: (string) $dadosDestinatario->CNPJ,
             ],
+           
             'pickupType' => 'PICKUP_TYPE_SPOT',
             'packages' => [
                 [
@@ -116,6 +117,8 @@ class PedidosController extends Controller
                             'totalValue' => (string) $xmlObject->NFe->infNFe->total->ICMSTot->vNF,
                         ],
                     ],
+                    'trackingCode' => (string) $xmlObject->protNFe->infProt->chNFe,
+                    'barcode' => (string) $xmlObject->protNFe->infProt->chNFe,
                     'weightG' => round((float) $xmlObject->NFe->infNFe->transp->vol->pesoB * 1000),
                     'lengthCm' =>  (int) $xmlObject->NFe->infNFe->transp->vol->qVol,
                     'widthCm' => '30', // Valor padrão ou apropriado
