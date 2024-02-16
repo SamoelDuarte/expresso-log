@@ -1174,7 +1174,7 @@ Route::get('/updateStatusGFL', function () {
 });
 
 
-Route::get('/updateLoggi', function () {
+Route::get('/updateStatusLoggi', function () {
 
 
 
