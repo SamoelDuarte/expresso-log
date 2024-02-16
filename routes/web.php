@@ -1270,14 +1270,14 @@ Route::get('/JT', function () {
     echo "Business Parameter Signature Digest: " . $businessParameterSignature;
 });
 
-Route::get('/insert', function () {
-    $transp = Carrier::whereHas('documents', function ($query) {
-        $query->where('number', '23820639001352');
-    })->first();
+// Route::get('/insert', function () {
+//     $transp = Carrier::whereHas('documents', function ($query) {
+//         $query->where('number', '23820639001352');
+//     })->first();
     
-    $transp->documents()->createMany([
-        ['number' => '24230747094913'], // CNPJ do transportador
-    ]);
+//     $transp->documents()->createMany([
+//         ['number' => '24230747094913'], // CNPJ do transportador
+//     ]);
     
-});
+// });
   
