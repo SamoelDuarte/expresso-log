@@ -247,7 +247,7 @@ Route::get('/updateStatusGFL', function () {
                 //  dd( $ocorrencia);
             }
             // Imprimindo a resposta
-            echo $responseBody;
+            // echo $responseBody;
         } catch (Exception $e) {
             echo "Ocorreu um erro: " . $e->getMessage();
         }
