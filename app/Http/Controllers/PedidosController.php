@@ -675,6 +675,78 @@ class PedidosController extends Controller
                 ]
             ]
         ];
+        $transp = Carrier::whereHas('documents', function ($query) use ($documento) {
+            $query->where('number', $documento);
+        })->first();
+
+
+        // dd($documento);
+
+        $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
+        $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
+        $ufUnidadeDestino = $transp->state;
+        $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
+        $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
+        $peso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoL'];
+        $totalPeso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'];
+        $chaveNf = $XmlArray['protNFe']['infProt']['chNFe'];
+        $destNome = $XmlArray['NFe']['infNFe']['dest']['xNome'];
+        $destCpfCnpj = isset($XmlArray['NFe']['infNFe']['dest']['CPF']) ? $XmlArray['NFe']['infNFe']['dest']['CPF'] : $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
+        $destTelefone = $XmlArray['NFe']['infNFe']['dest']['enderDest']['fone'];
+        $destEmail = $XmlArray['NFe']['infNFe']['dest']['email'];
+        $destCep = $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'];
+        $destLogradouro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xLgr'];
+        $destNumero = $XmlArray['NFe']['infNFe']['dest']['enderDest']['nro'];
+        $destBairro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xBairro'];
+        $destCidade = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xMun'];
+        $destEstado = $XmlArray['NFe']['infNFe']['dest']['enderDest']['UF'];
+
+
+
+        $embarcador = Shipper::first();
+        $delivery = new Delivery();
+
+        $delivery->carrier_id = $transp->id; // Replace with the actual carrier ID
+        $delivery->shipper_id = $embarcador->id; // Replace with the actual shipper ID
+        $delivery->parcel = Utils::createTwoFactorCode();
+        $delivery->received = $dataEntrega;
+        $delivery->scheduled = $dataEntrega;
+        $delivery->estimated_delivery = $dataEntrega;
+        $delivery->invoice = $numNota;
+        $delivery->destination_state = $ufUnidadeDestino;
+        $delivery->quantity_of_packages = $qtdVolume;
+        $delivery->invoice_key = $chaveNf;
+        $delivery->package_number = $numeroDoVolume;
+        $delivery->weight = $peso;
+        $delivery->external_code = $exeternalCode;
+        $delivery->total_weight = $totalPeso;
+        $delivery->destination_name = $destNome;
+        $delivery->destination_tax_id = $destCpfCnpj;
+        $delivery->destination_phone = $destTelefone;
+        $delivery->destination_email = $destEmail;
+        $delivery->destination_zip_code = $destCep;
+        $delivery->destination_address = $destLogradouro;
+        $delivery->destination_number = $destNumero;
+        $delivery->destination_neighborhood = $destBairro;
+        $delivery->serie = $serie;
+        $delivery->destination_city = $destCidade;
+        $delivery->destination_state = $destEstado;
+
+
+        try {
+            $delivery->save();
+            $status = new StatusHistory();
+            $status->status = "Arquivo Recebido";
+            $status->delivery_id = $delivery->id;
+            $status->save();
+            echo json_encode(array('mensagem' => 'sucesso'));
+        } catch (Exception $e) {
+            // Verifique se a mensagem de erro contém "SQLSTATE[23000]" (case-sensitive)
+            if (strpos($e->getMessage(), "SQLSTATE[23000]") !== false) {
+                Error::create(['erro' => 'Nota já processada' . $numNota]);
+                exit;
+            }
+        }
       
         try {
             // Criação de uma instância do cliente Guzzle
@@ -698,78 +770,7 @@ class PedidosController extends Controller
             
         } catch (Exception $e) {
             Error::create(['erro' => 'Erro GFL ' . $e->getMessage()]);
-            $transp = Carrier::whereHas('documents', function ($query) use ($documento) {
-                $query->where('number', $documento);
-            })->first();
-
-
-            // dd($documento);
-
-            $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
-            $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
-            $ufUnidadeDestino = $transp->state;
-            $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
-            $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
-            $peso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoL'];
-            $totalPeso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'];
-            $chaveNf = $XmlArray['protNFe']['infProt']['chNFe'];
-            $destNome = $XmlArray['NFe']['infNFe']['dest']['xNome'];
-            $destCpfCnpj = isset($XmlArray['NFe']['infNFe']['dest']['CPF']) ? $XmlArray['NFe']['infNFe']['dest']['CPF'] : $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
-            $destTelefone = $XmlArray['NFe']['infNFe']['dest']['enderDest']['fone'];
-            $destEmail = $XmlArray['NFe']['infNFe']['dest']['email'];
-            $destCep = $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'];
-            $destLogradouro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xLgr'];
-            $destNumero = $XmlArray['NFe']['infNFe']['dest']['enderDest']['nro'];
-            $destBairro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xBairro'];
-            $destCidade = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xMun'];
-            $destEstado = $XmlArray['NFe']['infNFe']['dest']['enderDest']['UF'];
-
-
-
-            $embarcador = Shipper::first();
-            $delivery = new Delivery();
-
-            $delivery->carrier_id = $transp->id; // Replace with the actual carrier ID
-            $delivery->shipper_id = $embarcador->id; // Replace with the actual shipper ID
-            $delivery->parcel = Utils::createTwoFactorCode();
-            $delivery->received = $dataEntrega;
-            $delivery->scheduled = $dataEntrega;
-            $delivery->estimated_delivery = $dataEntrega;
-            $delivery->invoice = $numNota;
-            $delivery->destination_state = $ufUnidadeDestino;
-            $delivery->quantity_of_packages = $qtdVolume;
-            $delivery->invoice_key = $chaveNf;
-            $delivery->package_number = $numeroDoVolume;
-            $delivery->weight = $peso;
-            $delivery->external_code = $exeternalCode;
-            $delivery->total_weight = $totalPeso;
-            $delivery->destination_name = $destNome;
-            $delivery->destination_tax_id = $destCpfCnpj;
-            $delivery->destination_phone = $destTelefone;
-            $delivery->destination_email = $destEmail;
-            $delivery->destination_zip_code = $destCep;
-            $delivery->destination_address = $destLogradouro;
-            $delivery->destination_number = $destNumero;
-            $delivery->destination_neighborhood = $destBairro;
-            $delivery->serie = $serie;
-            $delivery->destination_city = $destCidade;
-            $delivery->destination_state = $destEstado;
-
-
-            try {
-                $delivery->save();
-                $status = new StatusHistory();
-                $status->status = "Arquivo Recebido";
-                $status->delivery_id = $delivery->id;
-                $status->save();
-                echo json_encode(array('mensagem' => 'sucesso'));
-            } catch (Exception $e) {
-                // Verifique se a mensagem de erro contém "SQLSTATE[23000]" (case-sensitive)
-                if (strpos($e->getMessage(), "SQLSTATE[23000]") !== false) {
-                    Error::create(['erro' => 'Nota já processada' . $numNota]);
-                    exit;
-                }
-            }
+          
         }
     }
     public function gerarPedidoDBA($xmlContent, $dataEntrega)
