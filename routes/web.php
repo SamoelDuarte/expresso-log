@@ -184,7 +184,7 @@ Route::get('/createSim', function () {
 
 Route::get('/getSim', function () {
     // URL base do endpoint
-    $baseUrl = 'http://gflapi.sinclog.app.br:8103/Api/Ocorrencias/OcorrenciaNotaFiscalDePara/';
+    $baseUrl = 'http://gflapi.sinclog.app.br/Api/Ocorrencias/OcorrenciaNotaFiscalDePara/';
 
     // Criação de uma instância do cliente Guzzle
     $client = new Client();
@@ -193,8 +193,7 @@ Route::get('/getSim', function () {
     $requestData = [
         "cnpjEmbarcador" => "23966188000122",
         "cnpjRemetente" => "23966188000122",
-        "dtInicioBusca" => "2023-02-07",
-        "dtFimBusca" => "2024-02-07",
+        "listaNotasFiscais" => ["258959/1"],
     ];
 
     // Converte o array de dados em JSON
@@ -817,7 +816,7 @@ Route::get('/getFreteJT', function () {
     echo '<br><br>' . $response;
 });
 
-Route::get('/getOrdes', function () {
+Route::get('/getOrdesJT', function () {
 
      //Definindo parâmetros
      $privateKey = env('PRIVATE_KEY_JT');

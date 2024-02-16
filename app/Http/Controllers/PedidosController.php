@@ -565,36 +565,7 @@ class PedidosController extends Controller
         $idSolicitacaoInterno = $exeternalCode; // Você pode definir o ID de solicitação interno conforme necessário
 
 
-        // Preencher o array com os dados extraídos do XML
-        // $solicitacaoArray = array(
-        //     "cnpjEmbarcadorOrigem" => $cnpjEmbarcadorOrigem,
-        //     "listaSolicitacoes" => array(
-        //         array(
-        //             "idSolicitacaoInterno" => $idSolicitacaoInterno,
-        //             "idServico" => $idServico,
-        //             "Destinatario" => array(
-        //                 "cpf" => $cpfDestinatario,
-        //                 "Endereco" => array(
-        //                     "cep" => $cepDestinatario,
-        //                     "logradouro" => $logradouroDestinatario,
-        //                     "numero" => $numeroDestinatario,
-        //                     "bairro" => $bairroDestinatario,
-        //                     "nomeCidade" => $cidadeDestinatario,
-        //                     "siglaEstado" => $estadoDestinatario
-        //                 )
-        //             ),
-        //             "listaOperacoes" => array(
-        //                 array(
-        //                     "idTipoDocumento" => $idTipoDocumento,
-        //                     "nroNotaFiscal" => $nroNotaFiscal,
-        //                     "serieNotaFiscal" => $serieNotaFiscal,
-        //                     "qtdeVolumes" => $qtdeVolumes
-        //                 )
-        //             )
-        //         )
-        //     )
-        // );
-        // dd($XmlArray['NFe']['infNFe']['transp']['vol']);
+      
         $endpointUrl = 'https://gflapi.sinclog.app.br/Api/Solicitacoes/RegistrarNovaSolicitacao';
         $data = [
             "cnpjEmbarcadorOrigem" => $cnpjEmbarcadorOrigem,
@@ -704,8 +675,7 @@ class PedidosController extends Controller
                 ]
             ]
         ];
-        //o payload que enviei no email
-        //   dd(json_encode($data));
+      
         try {
             // Criação de uma instância do cliente Guzzle
             $client = new Client();
@@ -722,23 +692,12 @@ class PedidosController extends Controller
             // Obtendo o corpo da resposta como string
             $responseBody = $response->getBody()->getContents();
 
-            // // Obtendo o código de status da resposta
-            // $status = $response->getStatusCode();
-            // dd( $status );
-            // // Se for um erro 400, trate-o de acordo
-            // if ($status === 400) {
-            //     $responseBody = $response->getBody()->getContents();
-            //     // Aqui você pode manipular a resposta de erro conforme necessário
-            //     dd('aki');
-            //     echo "Erro 400: " . $responseBody;
-            // } else {
-            //     // Caso contrário, apenas imprima o corpo da resposta normalmente
-            //     $responseBody = $response->getBody()->getContents();
-            //     dd('aki2');
-            //     echo $responseBody;
-            // }
+           
 
 
+            
+        } catch (Exception $e) {
+            Error::create(['erro' => 'Erro GFL ' . $e->getMessage()]);
             $transp = Carrier::whereHas('documents', function ($query) use ($documento) {
                 $query->where('number', $documento);
             })->first();
@@ -755,7 +714,7 @@ class PedidosController extends Controller
             $totalPeso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'];
             $chaveNf = $XmlArray['protNFe']['infProt']['chNFe'];
             $destNome = $XmlArray['NFe']['infNFe']['dest']['xNome'];
-            $destCpfCnpj = $XmlArray['NFe']['infNFe']['dest']['CPF'];
+            $destCpfCnpj = isset($XmlArray['NFe']['infNFe']['dest']['CPF']) ? $XmlArray['NFe']['infNFe']['dest']['CPF'] : $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
             $destTelefone = $XmlArray['NFe']['infNFe']['dest']['enderDest']['fone'];
             $destEmail = $XmlArray['NFe']['infNFe']['dest']['email'];
             $destCep = $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'];
@@ -811,8 +770,6 @@ class PedidosController extends Controller
                     exit;
                 }
             }
-        } catch (Exception $e) {
-            Error::create(['erro' => 'Erro GFL ' . $e->getMessage()]);
         }
     }
     public function gerarPedidoDBA($xmlContent, $dataEntrega)
