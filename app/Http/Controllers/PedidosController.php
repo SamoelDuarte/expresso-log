@@ -642,7 +642,6 @@ class PedidosController extends Controller
                             "cep" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'],
                             "logradouro" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xLgr'],
                             "numero" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['nro'],
-                            "complemento" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xCpl'],
                             "pontoReferencia" => null,
                             "bairro" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xBairro'],
                             "nomeCidade" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xMun'],
