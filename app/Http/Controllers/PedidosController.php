@@ -1256,8 +1256,8 @@ class PedidosController extends Controller
                 //Fechando a requisição
                 curl_close($curl);
 
-                // dd($responseArray);
-                $billcode = $responseArray['data']['orderList'][0]['billCode'];
+                //  dd($responseArray);
+                $billcode = $responseArray['data']['orderList'][0]['txlogisticId'];
                 //Exibindo a resposta
                 echo '<br><br>' . $response;
 
