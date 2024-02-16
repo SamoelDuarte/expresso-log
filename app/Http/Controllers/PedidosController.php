@@ -1124,7 +1124,7 @@ class PedidosController extends Controller
             $pedido = [
                 "customerCode" => 'J0086026981',
                 "digest" => 'Zy+vQdOi9CKk8snUA517nA==',
-                "txlogisticId" => "12879542", // Você pode definir este valor conforme necessário
+                "txlogisticId" => (string)$xmlObj->NFe->infNFe->ide->nNF,
                 "expressType" => "EZ", // Você pode definir este valor conforme necessário
                 "orderType" => "1", // Você pode definir este valor conforme necessário
                 "serviceType" => "02", // Você pode definir este valor conforme necessário

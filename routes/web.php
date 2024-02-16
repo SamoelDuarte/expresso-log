@@ -183,78 +183,6 @@ Route::get('/createSim', function () {
     }
 });
 
-Route::get('/updateStatusGFL', function () {
-    $numbersToSearch = ['23820639001352', '24230747094913'];
-
-    $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
-
-
-    // dd($deliveryes);
-    foreach ($deliveryes as $key => $value) {
-
-
-
-        // URL base do endpoint
-        $baseUrl = 'http://gflapi.sinclog.app.br/Api/Ocorrencias/OcorrenciaNotaFiscalDePara/';
-
-        // Criação de uma instância do cliente Guzzle
-        $client = new Client();
-
-        // Montagem do JSON com os dados da solicitação
-        $requestData = [
-            "cnpjEmbarcador" => "23966188000122",
-            "cnpjRemetente" => "23966188000122",
-            "listaNotasFiscais" => [$value->invoice . "/" . $value->serie],
-        ];
-
-        try {
-            // Fazendo a requisição POST com o cabeçalho de autorização e corpo JSON
-            $response = $client->post($baseUrl, [
-                'headers' => [
-                    'Authorization' => 'Basic ' . env('GFL_KEY_ACESS'),
-                    'Content-Type' => 'application/json', // Especifique o tipo de conteúdo como JSON
-                ],
-                'body' => json_encode($requestData), // Passa o JSON como corpo da requisição
-            ]);
-
-            // Obtendo o corpo da resposta como string
-            $responseBody = $response->getBody()->getContents();
-
-            $responseArray = json_decode($responseBody, true);
-
-            // Reverte a ordem dos índices
-            $arrayReversed = array_reverse($responseArray['listaResultados']);
-
-            //  dd($arrayReversed);
-
-            foreach ($arrayReversed as $ocorrencia) {
-
-                
-
-                $row = StatusHistory::where('external_code', $ocorrencia['idOcorrencia'])->exists();
-
-
-                if (!$row) {
-                    $row = new StatusHistory();
-                    $row->delivery_id  = $value->id;
-                    $row->status = $ocorrencia['descricaoOcorrencia'];
-                    $row->detail = $ocorrencia['unidadeOcorrencia'] ? $ocorrencia['unidadeOcorrencia'] : "";
-                    $row->observation = $ocorrencia['nomeCidade'] ? $ocorrencia['nomeCidade'] : "";
-                    $row->external_code = $ocorrencia['idOcorrencia'] ? $ocorrencia['idOcorrencia'] : "";
-
-                    $row->save();
-                }
-                // dd($row);
-                //  dd( $ocorrencia);
-            }
-            // Imprimindo a resposta
-            // echo $responseBody;
-        } catch (Exception $e) {
-            echo "Ocorreu um erro: " . $e->getMessage();
-        }
-    }
-});
-
 Route::get('/teste', function () {
 
 
@@ -1173,26 +1101,87 @@ Route::get('/updateJ&T', function () {
     }
 });
 
+Route::get('/updateStatusGFL', function () {
+    $numbersToSearch = ['23820639001352', '24230747094913'];
+
+    $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
+
+
+    // dd($deliveryes);
+    foreach ($deliveryes as $key => $value) {
+
+
+
+        // URL base do endpoint
+        $baseUrl = 'http://gflapi.sinclog.app.br/Api/Ocorrencias/OcorrenciaNotaFiscalDePara/';
+
+        // Criação de uma instância do cliente Guzzle
+        $client = new Client();
+
+        // Montagem do JSON com os dados da solicitação
+        $requestData = [
+            "cnpjEmbarcador" => "23966188000122",
+            "cnpjRemetente" => "23966188000122",
+            "listaNotasFiscais" => [$value->invoice . "/" . $value->serie],
+        ];
+
+        try {
+            // Fazendo a requisição POST com o cabeçalho de autorização e corpo JSON
+            $response = $client->post($baseUrl, [
+                'headers' => [
+                    'Authorization' => 'Basic ' . env('GFL_KEY_ACESS'),
+                    'Content-Type' => 'application/json', // Especifique o tipo de conteúdo como JSON
+                ],
+                'body' => json_encode($requestData), // Passa o JSON como corpo da requisição
+            ]);
+
+            // Obtendo o corpo da resposta como string
+            $responseBody = $response->getBody()->getContents();
+
+            $responseArray = json_decode($responseBody, true);
+
+            // Reverte a ordem dos índices
+            $arrayReversed = array_reverse($responseArray['listaResultados']);
+
+            //  dd($arrayReversed);
+
+            foreach ($arrayReversed as $ocorrencia) {
+
+
+
+                $row = StatusHistory::where('external_code', $ocorrencia['idOcorrencia'])->exists();
+
+
+                if (!$row) {
+                    $row = new StatusHistory();
+                    $row->delivery_id  = $value->id;
+                    $row->status = $ocorrencia['descricaoOcorrencia'];
+                    $row->detail = $ocorrencia['unidadeOcorrencia'] ? $ocorrencia['unidadeOcorrencia'] : "";
+                    $row->observation = $ocorrencia['nomeCidade'] ? $ocorrencia['nomeCidade'] : "";
+                    $row->external_code = $ocorrencia['idOcorrencia'] ? $ocorrencia['idOcorrencia'] : "";
+
+                    $row->save();
+                }
+                // dd($row);
+                //  dd( $ocorrencia);
+            }
+            // Imprimindo a resposta
+            // echo $responseBody;
+        } catch (Exception $e) {
+            echo "Ocorreu um erro: " . $e->getMessage();
+        }
+    }
+});
+
 
 Route::get('/updateLoggi', function () {
 
-    $token = PedidosController::authLoggi();
-    dd($token);
-    $client = new \GuzzleHttp\Client();
 
-    $response = $client->request('GET', 'https://api.loggi.com/v1/companies/394829/packages/PJMXAMKC/tracking', [
-        'headers' => [
-            'accept' => 'application/json',
-            'authorization' => 'Bearer eyJraWQiOiJpOFo2dlpqQlZRT3FkRjFqMEY4TzhWcWl3eEpnXC9jRWR1SjMzd25WMW80UT0iLCJhbGciOiJSUzI1NiJ9.eyJjdXN0b206YWNjZXNzIjoi45yK8KGLjeSQmOGUhSIsInN1YiI6ImM0MTljYTRmLTUyM2YtNDY5OS05NzE3LTZkYWUyYTNjOGVjMyIsImF1ZCI6IjU2Z2ZzNGsxajY0MjN2bjUwM2FlNTA0NGJxIiwiZXZlbnRfaWQiOiI5OWQzYjg1MS00NTU1LTQ0MTMtYTdkOC01NjczM2I5M2MwMTkiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTcwNzQ4NDcxMiwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnVzLWVhc3QtMS5hbWF6b25hd3MuY29tXC91cy1lYXN0LTFfcEdKYkx6TERvIiwiY29nbml0bzp1c2VybmFtZSI6Im1pcmFudGUtc2VydmljZS1hY2NvdW50IiwiZXhwIjoxNzA3NTcxMTEyLCJpYXQiOjE3MDc0ODQ3MTJ9.We30EKdy6TnQ1XoFRE75d_-v-3JNBRLnfpHdU6JP_TQzt4oazLNh03oF33uA8stGZBm8htoo8QFsTsKZ0lJPTnt-wFBC8PES5loAXaB2RHSoAezrLrof4q8-BsL7OqftLnuUkkGum-Ll-BI4EwKMqF9mus7BuJhsagxgxakMoDWM_EuG7BFbJCJQyUu5tCeRoV-1R04p7YqtIeIoR3cqep_eJDOBbRC79qt7nlrRchU9B3l7TnzF2ujlVtn4lb4B_gMvintxX056ajyA4pkex6MQ1w0RthQtZpmhi3lIzy8jUFv8vq-mMC_GDbCxWbhOIMeb3jNoA1sR-fEQvZ6z2g',
-        ],
-    ]);
-
-    echo $response->getBody();
 
     $deliveryes = Delivery::with('carriers.documents')
         ->whereHas('carriers', function ($query) {
             $query->whereHas('documents', function ($documentQuery) {
-                $documentQuery->where('number', '17000788000139');
+                $documentQuery->where('number', '24217653000195');
             });
         })
         ->whereDoesntHave('status', function ($query) {
@@ -1205,40 +1194,43 @@ Route::get('/updateLoggi', function () {
 
 
 
-
     foreach ($deliveryes as $key => $value) {
-        $authResp = authGfl();
-        if ($authResp->getStatusCode() === 200) {
-            $responseData = json_decode($authResp->getBody(), true); // Decodifique a resposta JSON para um array associativo
-            if (isset($responseData['data']['access_key'])) {
-                $client = new Client();
-                $accessKey = $responseData['data']['access_key'];
-                $headers = [
-                    "Authorization" => "Bearer  " . $accessKey
-                ];
-
-                $response = $client->get("https://grupoastrolog.brudam.com.br/api/v1/tracking/ocorrencias/nfe?chave=" . $value->invoice_key, [
-                    'headers' => $headers
-                ]);
-
-                $body = $response->getBody()->getContents();
-                $result = json_decode($body, true);
-
-                StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
 
 
-                for ($i = 0; $i < count($result['data'][0]['dados']); $i++) {
 
 
-                    StatusHistory::create([
-                        'delivery_id' => $value->id,
-                        'external_code' => $result['data'][0]['documento'],
-                        'status' => $result['data'][0]['dados'][$i]['descricao'],
-                        'observation' => $result['data'][0]['dados'][$i]['obs'],
-                        'detail' => $result['data'][0]['dados'][$i]['obs'],
-                    ]);
+        $token = PedidosController::authLoggi();
+        $client = new \GuzzleHttp\Client();
+        try {
+            $response = $client->request('GET', 'https://api.loggi.com/v1/companies/394829/packages/' . $value->external_code . '/tracking', [
+                'headers' => [
+                    'accept' => 'application/json',
+                    'authorization' => 'Bearer ' . $token['idToken'],
+                ],
+            ]);
+
+            $responseArray = json_decode($response->getBody(), true);
+
+
+            foreach ($responseArray['packages'][0]['trackingHistory'] as $ocorrencia) {
+
+              
+                $row = StatusHistory::where('external_code', $ocorrencia['status']['code'])->exists();
+
+
+                if (!$row) {
+
+                    $row = new StatusHistory();
+                    $row->delivery_id  = $value->id;
+                    $row->status = $ocorrencia['status']['highLevelStatus'];
+                    $row->detail = $ocorrencia['status']['description'];
+                    $row->observation = '';
+                    $row->external_code = $ocorrencia['status']['code'];
+
+                    $row->save();
                 }
             }
+        } catch (Exception $e) {
         }
     }
 });
@@ -1280,4 +1272,3 @@ Route::get('/JT', function () {
 //     ]);
     
 // });
-  
