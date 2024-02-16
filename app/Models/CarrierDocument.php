@@ -9,6 +9,9 @@ class CarrierDocument extends Model
 {
     use HasFactory;
     protected $table = "carrier_documents";
+    protected $fillable = [
+        'number'
+    ];
 
     public function carrier()
     {

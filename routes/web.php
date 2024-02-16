@@ -13,6 +13,7 @@ use GuzzleHttp\Psr7\Uri;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TokenController;
 use App\Http\Controllers\Utils;
+use App\Models\Carrier;
 use App\Models\Delivery;
 use App\Models\Error;
 use App\Models\StatusHistory;
@@ -1268,3 +1269,15 @@ Route::get('/JT', function () {
     $businessParameterSignature = generateBusinessParameterSignature($customerCode, $encryptedPwd, $privateKey);
     echo "Business Parameter Signature Digest: " . $businessParameterSignature;
 });
+
+Route::get('/insert', function () {
+    $transp = Carrier::whereHas('documents', function ($query) {
+        $query->where('number', '23820639001352');
+    })->first();
+    
+    $transp->documents()->createMany([
+        ['number' => '24230747094913'], // CNPJ do transportador
+    ]);
+    
+});
+  
