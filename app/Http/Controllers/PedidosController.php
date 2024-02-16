@@ -565,175 +565,176 @@ class PedidosController extends Controller
         $idSolicitacaoInterno = $exeternalCode; // Você pode definir o ID de solicitação interno conforme necessário
 
 
-      
+
         $endpointUrl = 'https://gflapi.sinclog.app.br/Api/Solicitacoes/RegistrarNovaSolicitacao';
-        $data = [
-            "cnpjEmbarcadorOrigem" => $cnpjEmbarcadorOrigem,
-            "listaSolicitacoes" => [
-                [
-                    "idSolicitacaoInterno" => $idSolicitacaoInterno,
-                    "idServico" => 4,
-                    "flagLiberacaoEmbarcador" => null,
-                    "dtPrazoInicio" => null,
-                    "dtPrazoFim" => null,
-                    "TomadorServico" => [
-                        "cpf" => null,
-                        "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
-                        "inscricaoEstadual" => null,
-                        "nome" => null,
-                        "razaoSocial" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
-                        "telefone" => null,
-                        "email" => null,
-                        "Endereco" => null
-                    ],
-                    "Remetente" => [
-                        "cpf" => null,
-                        "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
-                        "inscricaoEstadual" => null,
-                        "nome" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
-                        "razaoSocial" => null,
-                        "telefone" => null,
-                        "email" => null,
-                        "Endereco" => [
-                            "cep" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['CEP'],
-                            "logradouro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xLgr'],
-                            "numero" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['nro'],
-                            "pontoReferencia" => null,
-                            "bairro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xBairro'],
-                            "nomeCidade" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xMun'],
-                            "siglaEstado" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['UF'],
-                            "idCidadeIBGE" => null
-                        ]
-                    ],
-                    "Destinatario" => [
-                        "cpf" => empty($XmlArray['NFe']['infNFe']['dest']['CPF']) ? null : $XmlArray['NFe']['infNFe']['dest']['CPF'],
-                        "cnpj" => empty($XmlArray['NFe']['infNFe']['dest']['CNPJ']) ? null : $XmlArray['NFe']['infNFe']['dest']['CNPJ'],
-                        "nome" => $XmlArray['NFe']['infNFe']['dest']['xNome'],
-                        "Endereco" => [
-                            "cep" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'],
-                            "logradouro" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xLgr'],
-                            "numero" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['nro'],
-                            "pontoReferencia" => null,
-                            "bairro" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xBairro'],
-                            "nomeCidade" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xMun'],
-                            "siglaEstado" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['UF'],
-                            "idCidadeIBGE" => null
-                        ]
-                    ],
-                    "Expedidor" => [
-                        "cpf" => null,
-                        "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
-                        "inscricaoEstadual" => null,
-                        "nome" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
-                        "razaoSocial" => null,
-                        "telefone" => null,
-                        "email" => null,
-                        "Endereco" => [
-                            "cep" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['CEP'],
-                            "logradouro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xLgr'],
-                            "numero" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['nro'],
-                            "pontoReferencia" => null,
-                            "bairro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xBairro'],
-                            "nomeCidade" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xMun'],
-                            "siglaEstado" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['UF'],
-                            "idCidadeIBGE" => null
-                        ]
-                    ],
-                    "LogisticaReversa" => null,
-                    "DadosAgendamento" => null,
-                    "listaOperacoes" => [
-                        [
-                            "nroNotaFiscal" => $XmlArray['NFe']['infNFe']['ide']['nNF'],
-                            "serieNotaFiscal" => $XmlArray['NFe']['infNFe']['ide']['serie'],
-                            "dtEmissaoNotaFiscal" => $XmlArray['NFe']['infNFe']['ide']['dhEmi'],
-                            "chaveNotaFiscal" => $XmlArray['protNFe']['infProt']['chNFe'],
-                            "nroCarga" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
-                            "nroPedido" => $XmlArray['NFe']['infNFe']['ide']['nNF'],
-                            "nroEntrega" => $XmlArray['NFe']['infNFe']['ide']['nNF'],
-                            "qtdeVolumes" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
-                            "qtdeItens" => count($XmlArray['NFe']['infNFe']['det']),
-                            "pesoTotal" => $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'],
-                            "valorMercadoria" => $XmlArray['NFe']['infNFe']['total']['ICMSTot']['vProd'],
-                            "valorICMS" => $XmlArray['NFe']['infNFe']['total']['ICMSTot']['vICMS'],
-                            "listaVolumes" => [
-                                [
-                                    "idVolume" => null,
-                                    "nroEtiqueta" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
-                                    "altura" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
-                                    "largura" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
-                                    "comprimento" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
-                                    "descricaoVolumes" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol']
-                                ]
-                            ],
-
-                        ]
-                    ],
-                    "linkCTe" => null,
-                    "base64CTe" => null,
-                    "xmlCTeAnterior" => "",
-                    "chaveCTeAnterior" => null
-                ]
-            ]
-        ];
-        $transp = Carrier::whereHas('documents', function ($query) use ($documento) {
-            $query->where('number', $documento);
-        })->first();
-
-
-        // dd($documento);
-
-        $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
-        $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
-        $ufUnidadeDestino = $transp->state;
-        $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
-        $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
-        $peso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoL'];
-        $totalPeso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'];
-        $chaveNf = $XmlArray['protNFe']['infProt']['chNFe'];
-        $destNome = $XmlArray['NFe']['infNFe']['dest']['xNome'];
-        $destCpfCnpj = isset($XmlArray['NFe']['infNFe']['dest']['CPF']) ? $XmlArray['NFe']['infNFe']['dest']['CPF'] : $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
-        $destTelefone = $XmlArray['NFe']['infNFe']['dest']['enderDest']['fone'];
-        $destEmail = $XmlArray['NFe']['infNFe']['dest']['email'];
-        $destCep = $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'];
-        $destLogradouro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xLgr'];
-        $destNumero = $XmlArray['NFe']['infNFe']['dest']['enderDest']['nro'];
-        $destBairro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xBairro'];
-        $destCidade = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xMun'];
-        $destEstado = $XmlArray['NFe']['infNFe']['dest']['enderDest']['UF'];
-
-
-
-        $embarcador = Shipper::first();
-        $delivery = new Delivery();
-
-        $delivery->carrier_id = $transp->id; // Replace with the actual carrier ID
-        $delivery->shipper_id = $embarcador->id; // Replace with the actual shipper ID
-        $delivery->parcel = Utils::createTwoFactorCode();
-        $delivery->received = $dataEntrega;
-        $delivery->scheduled = $dataEntrega;
-        $delivery->estimated_delivery = $dataEntrega;
-        $delivery->invoice = $numNota;
-        $delivery->destination_state = $ufUnidadeDestino;
-        $delivery->quantity_of_packages = $qtdVolume;
-        $delivery->invoice_key = $chaveNf;
-        $delivery->package_number = $numeroDoVolume;
-        $delivery->weight = $peso;
-        $delivery->external_code = $exeternalCode;
-        $delivery->total_weight = $totalPeso;
-        $delivery->destination_name = $destNome;
-        $delivery->destination_tax_id = $destCpfCnpj;
-        $delivery->destination_phone = $destTelefone;
-        $delivery->destination_email = $destEmail;
-        $delivery->destination_zip_code = $destCep;
-        $delivery->destination_address = $destLogradouro;
-        $delivery->destination_number = $destNumero;
-        $delivery->destination_neighborhood = $destBairro;
-        $delivery->serie = $serie;
-        $delivery->destination_city = $destCidade;
-        $delivery->destination_state = $destEstado;
-
-
         try {
+            $data = [
+                "cnpjEmbarcadorOrigem" => $cnpjEmbarcadorOrigem,
+                "listaSolicitacoes" => [
+                    [
+                        "idSolicitacaoInterno" => $idSolicitacaoInterno,
+                        "idServico" => 4,
+                        "flagLiberacaoEmbarcador" => null,
+                        "dtPrazoInicio" => null,
+                        "dtPrazoFim" => null,
+                        "TomadorServico" => [
+                            "cpf" => null,
+                            "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
+                            "inscricaoEstadual" => null,
+                            "nome" => null,
+                            "razaoSocial" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
+                            "telefone" => null,
+                            "email" => null,
+                            "Endereco" => null
+                        ],
+                        "Remetente" => [
+                            "cpf" => null,
+                            "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
+                            "inscricaoEstadual" => null,
+                            "nome" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
+                            "razaoSocial" => null,
+                            "telefone" => null,
+                            "email" => null,
+                            "Endereco" => [
+                                "cep" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['CEP'],
+                                "logradouro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xLgr'],
+                                "numero" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['nro'],
+                                "pontoReferencia" => null,
+                                "bairro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xBairro'],
+                                "nomeCidade" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xMun'],
+                                "siglaEstado" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['UF'],
+                                "idCidadeIBGE" => null
+                            ]
+                        ],
+                        "Destinatario" => [
+                            "cpf" => empty($XmlArray['NFe']['infNFe']['dest']['CPF']) ? null : $XmlArray['NFe']['infNFe']['dest']['CPF'],
+                            "cnpj" => empty($XmlArray['NFe']['infNFe']['dest']['CNPJ']) ? null : $XmlArray['NFe']['infNFe']['dest']['CNPJ'],
+                            "nome" => $XmlArray['NFe']['infNFe']['dest']['xNome'],
+                            "Endereco" => [
+                                "cep" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'],
+                                "logradouro" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xLgr'],
+                                "numero" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['nro'],
+                                "pontoReferencia" => null,
+                                "bairro" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xBairro'],
+                                "nomeCidade" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['xMun'],
+                                "siglaEstado" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['UF'],
+                                "idCidadeIBGE" => null
+                            ]
+                        ],
+                        "Expedidor" => [
+                            "cpf" => null,
+                            "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
+                            "inscricaoEstadual" => null,
+                            "nome" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
+                            "razaoSocial" => null,
+                            "telefone" => null,
+                            "email" => null,
+                            "Endereco" => [
+                                "cep" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['CEP'],
+                                "logradouro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xLgr'],
+                                "numero" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['nro'],
+                                "pontoReferencia" => null,
+                                "bairro" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xBairro'],
+                                "nomeCidade" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['xMun'],
+                                "siglaEstado" => $XmlArray['NFe']['infNFe']['emit']['enderEmit']['UF'],
+                                "idCidadeIBGE" => null
+                            ]
+                        ],
+                        "LogisticaReversa" => null,
+                        "DadosAgendamento" => null,
+                        "listaOperacoes" => [
+                            [
+                                "nroNotaFiscal" => $XmlArray['NFe']['infNFe']['ide']['nNF'],
+                                "serieNotaFiscal" => $XmlArray['NFe']['infNFe']['ide']['serie'],
+                                "dtEmissaoNotaFiscal" => $XmlArray['NFe']['infNFe']['ide']['dhEmi'],
+                                "chaveNotaFiscal" => $XmlArray['protNFe']['infProt']['chNFe'],
+                                "nroCarga" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                                "nroPedido" => $XmlArray['NFe']['infNFe']['ide']['nNF'],
+                                "nroEntrega" => $XmlArray['NFe']['infNFe']['ide']['nNF'],
+                                "qtdeVolumes" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                                "qtdeItens" => count($XmlArray['NFe']['infNFe']['det']),
+                                "pesoTotal" => $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'],
+                                "valorMercadoria" => $XmlArray['NFe']['infNFe']['total']['ICMSTot']['vProd'],
+                                "valorICMS" => $XmlArray['NFe']['infNFe']['total']['ICMSTot']['vICMS'],
+                                "listaVolumes" => [
+                                    [
+                                        "idVolume" => null,
+                                        "nroEtiqueta" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                                        "altura" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                                        "largura" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                                        "comprimento" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'],
+                                        "descricaoVolumes" => $XmlArray['NFe']['infNFe']['transp']['vol']['qVol']
+                                    ]
+                                ],
+
+                            ]
+                        ],
+                        "linkCTe" => null,
+                        "base64CTe" => null,
+                        "xmlCTeAnterior" => "",
+                        "chaveCTeAnterior" => null
+                    ]
+                ]
+            ];
+            $transp = Carrier::whereHas('documents', function ($query) use ($documento) {
+                $query->where('number', $documento);
+            })->first();
+
+
+            // dd($documento);
+
+            $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
+            $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
+            $ufUnidadeDestino = $transp->state;
+            $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
+            $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
+            $peso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoL'];
+            $totalPeso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'];
+            $chaveNf = $XmlArray['protNFe']['infProt']['chNFe'];
+            $destNome = $XmlArray['NFe']['infNFe']['dest']['xNome'];
+            $destCpfCnpj = isset($XmlArray['NFe']['infNFe']['dest']['CPF']) ? $XmlArray['NFe']['infNFe']['dest']['CPF'] : $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
+            $destTelefone = $XmlArray['NFe']['infNFe']['dest']['enderDest']['fone'];
+            $destEmail = $XmlArray['NFe']['infNFe']['dest']['email'];
+            $destCep = $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'];
+            $destLogradouro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xLgr'];
+            $destNumero = $XmlArray['NFe']['infNFe']['dest']['enderDest']['nro'];
+            $destBairro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xBairro'];
+            $destCidade = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xMun'];
+            $destEstado = $XmlArray['NFe']['infNFe']['dest']['enderDest']['UF'];
+
+
+
+            $embarcador = Shipper::first();
+            $delivery = new Delivery();
+
+            $delivery->carrier_id = $transp->id; // Replace with the actual carrier ID
+            $delivery->shipper_id = $embarcador->id; // Replace with the actual shipper ID
+            $delivery->parcel = Utils::createTwoFactorCode();
+            $delivery->received = $dataEntrega;
+            $delivery->scheduled = $dataEntrega;
+            $delivery->estimated_delivery = $dataEntrega;
+            $delivery->invoice = $numNota;
+            $delivery->destination_state = $ufUnidadeDestino;
+            $delivery->quantity_of_packages = $qtdVolume;
+            $delivery->invoice_key = $chaveNf;
+            $delivery->package_number = $numeroDoVolume;
+            $delivery->weight = $peso;
+            $delivery->external_code = $exeternalCode;
+            $delivery->total_weight = $totalPeso;
+            $delivery->destination_name = $destNome;
+            $delivery->destination_tax_id = $destCpfCnpj;
+            $delivery->destination_phone = $destTelefone;
+            $delivery->destination_email = $destEmail;
+            $delivery->destination_zip_code = $destCep;
+            $delivery->destination_address = $destLogradouro;
+            $delivery->destination_number = $destNumero;
+            $delivery->destination_neighborhood = $destBairro;
+            $delivery->serie = $serie;
+            $delivery->destination_city = $destCidade;
+            $delivery->destination_state = $destEstado;
+
+
+
             $delivery->save();
             $status = new StatusHistory();
             $status->status = "Arquivo Recebido";
@@ -746,8 +747,9 @@ class PedidosController extends Controller
                 Error::create(['erro' => 'Nota já processada' . $numNota]);
                 exit;
             }
+            Error::create(['erro' => 'Error GFL : ' . $e->getMessage()]);
         }
-      
+
         try {
             // Criação de uma instância do cliente Guzzle
             $client = new Client();
@@ -763,14 +765,8 @@ class PedidosController extends Controller
 
             // Obtendo o corpo da resposta como string
             $responseBody = $response->getBody()->getContents();
-
-           
-
-
-            
         } catch (Exception $e) {
             Error::create(['erro' => 'Erro GFL ' . $e->getMessage()]);
-          
         }
     }
     public function gerarPedidoDBA($xmlContent, $dataEntrega)
