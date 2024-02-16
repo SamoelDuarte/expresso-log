@@ -182,40 +182,75 @@ Route::get('/createSim', function () {
     }
 });
 
-Route::get('/getSim', function () {
-    // URL base do endpoint
-    $baseUrl = 'http://gflapi.sinclog.app.br/Api/Ocorrencias/OcorrenciaNotaFiscalDePara/';
+Route::get('/updateStatusGFL', function () {
+    $numbersToSearch = ['23820639001352', '24230747094913'];
 
-    // Criação de uma instância do cliente Guzzle
-    $client = new Client();
+    $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
 
-    // Montagem do JSON com os dados da solicitação
-    $requestData = [
-        "cnpjEmbarcador" => "23966188000122",
-        "cnpjRemetente" => "23966188000122",
-        "listaNotasFiscais" => ["258959/1"],
-    ];
 
-    // Converte o array de dados em JSON
-    $jsonData = json_encode($requestData);
+    // dd($deliveryes);
+    foreach ($deliveryes as $key => $value) {
 
-    try {
-        // Fazendo a requisição POST com o cabeçalho de autorização e corpo JSON
-        $response = $client->post($baseUrl, [
-            'headers' => [
-                'Authorization' => 'Basic ' . env('GFL_KEY_ACESS'),
-                'Content-Type' => 'application/json', // Especifique o tipo de conteúdo como JSON
-            ],
-            'body' => $jsonData, // Passa o JSON como corpo da requisição
-        ]);
 
-        // Obtendo o corpo da resposta como string
-        $responseBody = $response->getBody()->getContents();
 
-        // Imprimindo a resposta
-        echo $responseBody;
-    } catch (Exception $e) {
-        echo "Ocorreu um erro: " . $e->getMessage();
+        // URL base do endpoint
+        $baseUrl = 'http://gflapi.sinclog.app.br/Api/Ocorrencias/OcorrenciaNotaFiscalDePara/';
+
+        // Criação de uma instância do cliente Guzzle
+        $client = new Client();
+
+        // Montagem do JSON com os dados da solicitação
+        $requestData = [
+            "cnpjEmbarcador" => "23966188000122",
+            "cnpjRemetente" => "23966188000122",
+            "listaNotasFiscais" => [$value->invoice . "/" . $value->serie],
+        ];
+
+        try {
+            // Fazendo a requisição POST com o cabeçalho de autorização e corpo JSON
+            $response = $client->post($baseUrl, [
+                'headers' => [
+                    'Authorization' => 'Basic ' . env('GFL_KEY_ACESS'),
+                    'Content-Type' => 'application/json', // Especifique o tipo de conteúdo como JSON
+                ],
+                'body' => json_encode($requestData), // Passa o JSON como corpo da requisição
+            ]);
+
+            // Obtendo o corpo da resposta como string
+            $responseBody = $response->getBody()->getContents();
+
+            $responseArray = json_decode($responseBody, true);
+
+            // Reverte a ordem dos índices
+            $arrayReversed = array_reverse($responseArray['listaResultados']);
+
+            //  dd($arrayReversed);
+
+            foreach ($arrayReversed as $ocorrencia) {
+
+                
+
+                $row = StatusHistory::where('external_code', $ocorrencia['idOcorrencia'])->exists();
+
+
+                if (!$row) {
+                    $row = new StatusHistory();
+                    $row->delivery_id  = $value->id;
+                    $row->status = $ocorrencia['descricaoOcorrencia'];
+                    $row->detail = $ocorrencia['unidadeOcorrencia'] ? $ocorrencia['unidadeOcorrencia'] : "";
+                    $row->observation = $ocorrencia['nomeCidade'] ? $ocorrencia['nomeCidade'] : "";
+                    $row->external_code = $ocorrencia['idOcorrencia'] ? $ocorrencia['idOcorrencia'] : "";
+
+                    $row->save();
+                }
+                // dd($row);
+                //  dd( $ocorrencia);
+            }
+            // Imprimindo a resposta
+            echo $responseBody;
+        } catch (Exception $e) {
+            echo "Ocorreu um erro: " . $e->getMessage();
+        }
     }
 });
 
@@ -621,10 +656,10 @@ Route::get('/daytonaCotação2', function () {
 
 Route::get('/getStatusJT', function () {
 
-    
-     //Definindo parâmetros
-     $privateKey = env('PRIVATE_KEY_JT');
-     $apiAccount = env('API_ACCOUNT_JT');
+
+    //Definindo parâmetros
+    $privateKey = env('PRIVATE_KEY_JT');
+    $apiAccount = env('API_ACCOUNT_JT');
 
     // Montando o JSON do envio
     $pedido = [
@@ -818,9 +853,9 @@ Route::get('/getFreteJT', function () {
 
 Route::get('/getOrdesJT', function () {
 
-     //Definindo parâmetros
-     $privateKey = env('PRIVATE_KEY_JT');
-     $apiAccount = env('API_ACCOUNT_JT');
+    //Definindo parâmetros
+    $privateKey = env('PRIVATE_KEY_JT');
+    $apiAccount = env('API_ACCOUNT_JT');
 
     // Parametro de negócio
     $pedido = [
@@ -888,24 +923,7 @@ Route::get('/updateStatusDBA', function () {
 
     $numbersToSearch = ['08982220000170', '50160966000164'];
 
-    $deliveryes = Delivery::with('carriers.documents')
-        ->whereHas('carriers', function ($query) use ($numbersToSearch) {
-            $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
-                $documentQuery->whereIn('number', $numbersToSearch);
-            });
-        })
-        ->whereDoesntHave('status', function ($query) {
-            $query->where('status', 'finalizado')
-                ->orWhere('status', 'entregue')
-                ->orWhere('status', 'devolvido');;
-        })
-        ->where(function ($query) {
-            $query->whereNull('updated_at')
-                ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'));
-        })
-        ->orderBy('id')
-        ->limit(15)
-        ->get();
+    $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
 
 
 
@@ -1227,25 +1245,26 @@ Route::get('/updateLoggi', function () {
 
 Route::get('/JT', function () {
 
-    function generateBusinessParameterSignature($customerCode, $pwd, $privateKey) {
+    function generateBusinessParameterSignature($customerCode, $pwd, $privateKey)
+    {
         // Concatenate customerCode, pwd, and privateKey
         $concatenatedString = $customerCode . $pwd . $privateKey;
-        
+
         // Generate MD5 hash of the concatenated string
         $md5Hash = md5($concatenatedString, true);
-        
+
         // Encode the MD5 hash using Base64
         $base64Encoded = base64_encode($md5Hash);
-        
+
         return $base64Encoded;
     }
-    
+
     // Example usage:
     $customerCode = "J0086026981";
     $plainTextPwd = "G3H0b644";
     $encryptedPwd = strtoupper(md5($plainTextPwd . "jadada236t2")); // Assuming pwd is in uppercase MD5 format
     $privateKey = "bccf1dc5e47a4cb7a69d644d8c597c3a";
-    
+
     $businessParameterSignature = generateBusinessParameterSignature($customerCode, $encryptedPwd, $privateKey);
     echo "Business Parameter Signature Digest: " . $businessParameterSignature;
 });

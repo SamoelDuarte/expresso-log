@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Delivery;
 use App\Models\StatusHistory;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -74,5 +75,30 @@ class DeliveryController extends Controller
         } else {
             echo json_encode(array("Mensagem error" => "enviar numero_nota"));
         }
+    }
+
+    public static function getDeliverys($numbersToSearch){
+        $deliveryes = Delivery::with('carriers.documents')
+        ->whereHas('carriers', function ($query) use ($numbersToSearch) {
+            $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
+                $documentQuery->whereIn('number', $numbersToSearch);
+            });
+        })
+        ->whereDoesntHave('status', function ($query) {
+            $query->where('status', 'finalizado')
+                ->orWhere('status', 'entregue')
+                ->orWhere('status', 'Entrega Realizada')
+                ->orWhere('status', 'devolvido');
+        })
+        ->where(function ($query) {
+            $query->whereNull('updated_at')
+                ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'));
+        })
+        ->orderBy('id')
+        ->limit(15)
+        ->get();
+
+
+        return $deliveryes;
     }
 }
