@@ -33,38 +33,38 @@ class PedidosController extends Controller
         switch ($documento) {
                 // Transportadora DBA
             case "50160966000164":
-                $this->gerarPedidoDBA($xmlContent,$dataEntrega);
+                $this->gerarPedidoDBA($xmlContent, $dataEntrega);
                 break;
 
             case "42584754001077":
-                $this->gerarPedidoJT($xmlContent,$dataEntrega);
+                $this->gerarPedidoJT($xmlContent, $dataEntrega);
                 break;
 
             case "23820639001352":
             case "24230747094913":
-                $this->gerarPedidoGFL($xmlContent,$dataEntrega);
+                $this->gerarPedidoGFL($xmlContent, $dataEntrega);
                 break;
 
             case "24217653000195":
-                $this->gerarPedidoLoggi($xmlContent,$dataEntrega);
+                $this->gerarPedidoLoggi($xmlContent, $dataEntrega);
                 break;
 
             case "37744796000105":
             case "08982220000170":
-                $this->gerarPedidoMesh($xmlContent,$dataEntrega);
+                $this->gerarPedidoMesh($xmlContent, $dataEntrega);
                 break;
 
             case "17000788000139":
             case "20588287000120":
 
-                $this->gerarPedidoAstralog($xmlContent,$dataEntrega);
+                $this->gerarPedidoAstralog($xmlContent, $dataEntrega);
                 break;
 
             default:
                 Error::create(['erro' => 'Transportadora não Integrada CNPJ:' . $documento]);
         }
     }
-    public function gerarPedidoLoggi($xmlContent,$dataEntrega)
+    public function gerarPedidoLoggi($xmlContent, $dataEntrega)
     {
         $token = $this->authLoggi();
         $xmlObject = simplexml_load_string($xmlContent);
@@ -106,7 +106,7 @@ class PedidosController extends Controller
                 'name' => (string) $dadosDestinatario->xNome,
                 'federalTaxId' => (string) $dadosDestinatario->CPF ?: (string) $dadosDestinatario->CNPJ,
             ],
-           
+
             'pickupType' => 'PICKUP_TYPE_SPOT',
             'packages' => [
                 [
@@ -259,7 +259,7 @@ class PedidosController extends Controller
             echo "Erro: " . $e->getMessage();
         }
     }
-    public function gerarPedidoAstralog($xmlContent,$dataEntrega)
+    public function gerarPedidoAstralog($xmlContent, $dataEntrega)
     {
 
 
@@ -546,7 +546,7 @@ class PedidosController extends Controller
             echo "A solicitação não foi bem-sucedida.\n";
         }
     }
-    public function gerarPedidoGFL($xmlContent,$dataEntrega)
+    public function gerarPedidoGFL($xmlContent, $dataEntrega)
     {
         // URL do endpoint
 
@@ -722,9 +722,22 @@ class PedidosController extends Controller
             // Obtendo o corpo da resposta como string
             $responseBody = $response->getBody()->getContents();
 
-            dd(json_decode($responseBody, true));
-            // Imprimindo a resposta
-            echo $responseBody;
+            // // Obtendo o código de status da resposta
+            // $status = $response->getStatusCode();
+            // dd( $status );
+            // // Se for um erro 400, trate-o de acordo
+            // if ($status === 400) {
+            //     $responseBody = $response->getBody()->getContents();
+            //     // Aqui você pode manipular a resposta de erro conforme necessário
+            //     dd('aki');
+            //     echo "Erro 400: " . $responseBody;
+            // } else {
+            //     // Caso contrário, apenas imprima o corpo da resposta normalmente
+            //     $responseBody = $response->getBody()->getContents();
+            //     dd('aki2');
+            //     echo $responseBody;
+            // }
+
 
             $transp = Carrier::whereHas('documents', function ($query) use ($documento) {
                 $query->where('number', $documento);
@@ -799,10 +812,10 @@ class PedidosController extends Controller
                 }
             }
         } catch (Exception $e) {
-            echo "Ocorreu um erro: " . $e->getMessage();
+            Error::create(['erro' => 'Erro GFL ' . $e->getMessage()]);
         }
     }
-    public function gerarPedidoDBA($xmlContent,$dataEntrega)
+    public function gerarPedidoDBA($xmlContent, $dataEntrega)
     {
         $xmlObject = simplexml_load_string($xmlContent); // Transformar o XML em um objeto SimpleXMLElement
         $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
@@ -912,7 +925,7 @@ class PedidosController extends Controller
             }
         }
     }
-    public function gerarPedidoMesh($xmlContent,$dataEntrega)
+    public function gerarPedidoMesh($xmlContent, $dataEntrega)
     {
         $xmlObject = simplexml_load_string($xmlContent); // Transformar o XML em um objeto SimpleXMLElement
         $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
@@ -1117,7 +1130,7 @@ class PedidosController extends Controller
         echo $responseData;
     }
 
-    public function gerarPedidoJT($xmlContent,$dataEntrega)
+    public function gerarPedidoJT($xmlContent, $dataEntrega)
     {
         $client = new Client();
         $dateTime = new DateTime();
@@ -1272,7 +1285,7 @@ class PedidosController extends Controller
                     CURLOPT_CUSTOMREQUEST => 'POST',
                     CURLOPT_POSTFIELDS => 'bizContent=' . $req_pedido,
                     CURLOPT_HTTPHEADER => array(
-                        'timestamp: '.time(),
+                        'timestamp: ' . time(),
                         'apiAccount:' . $apiAccount,
                         'digest:' . $headerDigest,
                         'Content-Type: application/x-www-form-urlencoded'
