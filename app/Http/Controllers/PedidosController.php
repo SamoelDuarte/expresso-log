@@ -248,6 +248,8 @@ class PedidosController extends Controller
                 }
             }
         } catch (\GuzzleHttp\Exception\ClientException $e) {
+
+            Error::create(['erro' => 'Error LOGGI' . $e->getMessage()]);
             // Capturar a exceção do Guzzle para obter o corpo da resposta da API da Loggi
             $response = $e->getResponse();
             if ($response) {
