@@ -1262,6 +1262,10 @@ Route::get('/JT', function () {
     echo "Business Parameter Signature Digest: " . $businessParameterSignature;
 });
 
+Route::get('/alerta', function () {
+    $statusArray = StatusHistory::where('send', 1)->get();
+    echo count($statusArray);
+});
 Route::get('/alerta_entregue', function () {
     // Buscar os registros de StatusHistory com send igual a 1
     $statusArray = StatusHistory::where('send', 1)->get();
