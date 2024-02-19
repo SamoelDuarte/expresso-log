@@ -22,4 +22,26 @@ class StatusHistory extends Model
     {
         return $this->belongsTo(Delivery::class, 'delivery_id', 'id');
     }
+
+    protected static function boot()
+{
+    parent::boot();
+
+    static::creating(function ($statusHistory) {
+        // Verificar se já existe um registro com o mesmo status e delivery_id
+        $existingRecord = static::where('status', $statusHistory->status)
+                                ->where('delivery_id', $statusHistory->delivery_id)
+                                ->exists();
+
+        // Se já existir um registro, não criar um novo
+        if ($existingRecord) {
+            return false; // Retorna false para cancelar a criação do registro
+        }
+
+        // Verificar se o status é 'entregue' e definir a coluna 'send' como 1
+        if (strtolower($statusHistory->status) === 'entregue') {
+            $statusHistory->send = 1;
+        }
+    });
+}
 }

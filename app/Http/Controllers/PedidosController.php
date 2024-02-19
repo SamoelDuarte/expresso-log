@@ -107,7 +107,7 @@ class PedidosController extends Controller
                 'federalTaxId' => (string) $dadosDestinatario->CPF ?: (string) $dadosDestinatario->CNPJ,
             ],
 
-            'pickupType' => 'PICKUP_TYPE_SPOT',
+            'pickupType' => 'PICKUP_TYPE_MILK_RUN',
             'packages' => [
                 [
                     'freightType' => 'FREIGHT_TYPE_ECONOMIC',
