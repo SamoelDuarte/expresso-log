@@ -15,6 +15,7 @@ class AddExternalCodeToDeliveries extends Migration
         });
     }
 
+    
     /**
      * Reverse the migrations.
      */
