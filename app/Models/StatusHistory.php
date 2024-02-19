@@ -22,15 +22,4 @@ class StatusHistory extends Model
     {
         return $this->belongsTo(Delivery::class, 'delivery_id', 'id');
     }
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($statusHistory) {
-            if (strtolower($statusHistory->status) === 'entregue') {
-               
-            }
-        });
-    }
 }
