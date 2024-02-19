@@ -1268,7 +1268,7 @@ Route::get('/alerta', function () {
 });
 Route::get('/alerta_entregue', function () {
     // Buscar os registros de StatusHistory com send igual a 1
-    $statusArray = StatusHistory::where('send', 1)->get();
+    $statusArray = StatusHistory::where('send', 1)->limit(15)->get();
 
   
     foreach ($statusArray as $status) {
