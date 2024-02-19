@@ -1266,7 +1266,9 @@ Route::get('/alerta_entregue', function () {
     // Buscar os registros de StatusHistory com send igual a 1
     $statusArray = StatusHistory::where('send', 1)->get();
 
+  
     foreach ($statusArray as $status) {
+     
         // Criar uma instância do cliente Guzzle
         $client = new Client();
         $headers = [
@@ -1276,7 +1278,7 @@ Route::get('/alerta_entregue', function () {
             'multipart' => [
                 [
                     'name' => 'numero',
-                    'contents' => '258959'
+                    'contents' => $status->deliveries->invoice
                 ]
             ]
         ];

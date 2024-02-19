@@ -39,7 +39,8 @@ class StatusHistory extends Model
         }
 
         // Verificar se o status é 'entregue' e definir a coluna 'send' como 1
-        if (strtolower($statusHistory->status) === 'entregue') {
+        if (strtolower($statusHistory->status) === 'entregue' 
+        || strtolower($statusHistory->status) === 'finalizado') {
             $statusHistory->send = 1;
         }
     });
