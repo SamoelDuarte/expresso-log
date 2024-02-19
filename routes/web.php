@@ -1282,7 +1282,7 @@ Route::get('/alerta_entregue', function () {
         ];
 
         // Criar a requisição POST para a URL desejada
-        $request = new Request('POST', 'https://app.backofficeexpress.shop/Cron/atualiza_status_pedido',$headers);
+        $request = new Request('POST', 'https://lojamirante.com.br/Cron/atualiza_status_pedido',$headers);
 
         // Enviar a requisição de forma assíncrona e esperar pela resposta
         $res = $client->sendAsync($request, $options)->wait();
