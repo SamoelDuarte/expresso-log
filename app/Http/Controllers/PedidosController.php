@@ -117,7 +117,7 @@ class PedidosController extends Controller
                     'freightType' => 'FREIGHT_TYPE_ECONOMIC',
                     'documentType' => [
                         'invoice' => [
-                            'icms' => 'ICMS_NOT_TAXED',
+                            'icms' => 'ICMS_TAXED',
                             'key' => (string) $xmlObject->protNFe->infProt->chNFe,
                             'series' => '4',
                             'number' => (string) $xmlObject->NFe->infNFe->ide->nNF,

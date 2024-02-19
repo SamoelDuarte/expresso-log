@@ -1214,7 +1214,7 @@ Route::get('/updateStatusLoggi', function () {
 
             foreach ($responseArray['packages'][0]['trackingHistory'] as $ocorrencia) {
 
-              
+
                 $row = StatusHistory::where('external_code', $ocorrencia['status']['code'])->exists();
 
 
@@ -1263,10 +1263,27 @@ Route::get('/JT', function () {
 });
 
 Route::get('/alterar_pedido', function () {
-    $statusArray = StatusHistory::with('deliveries')->where('send',1)->get();
-
+    $statusArray = StatusHistory::with('deliveries')->where('send', 1)->get();
+    // dd($statusArray);
     foreach ($statusArray as $key => $status) {
-        dd($status->deliveries->invoice);
+
+       
+
+        $client = new Client();
+        $options = [
+            'multipart' => [
+                [
+                    'name' => 'numero',
+                    'contents' => '258959'
+                ]
+            ]
+        ];
+        $request = new Request('POST', 'https://app.backofficeexpress.shop/Cron/atualiza_status_pedido');
+        $res = $client->sendAsync($request, $options)->wait();
+        echo $res->getBody();
+        $status->send = 0;
+        $status->save();
+
+        dd($status);
     }
-    
 });
