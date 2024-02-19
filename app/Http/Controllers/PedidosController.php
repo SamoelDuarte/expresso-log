@@ -79,19 +79,23 @@ class PedidosController extends Controller
         $dadosRemetente = $xmlObject->NFe->infNFe->emit;
 
 
-        //  dd();
+        //   dd($xmlObject->NFe->infNFe->dest);
         // Construir o corpo da requisição para a API da Loggi
         $requestData = [
             'shipFrom' => [
                 'address' => [
                     'correiosAddress' => [
                         'logradouro' => (string) $enderecoRemetente->xLgr,
+                        'numero' => (string) $enderecoRemetente->nro,
                         'cep' => (string) $enderecoRemetente->CEP,
                         'cidade' => (string) $enderecoRemetente->xMun,
+                        'bairro' => (string) $enderecoRemetente->xBairro,
+                        'complemento' => (string) $enderecoRemetente->xBairro,
                         'uf' => (string) $enderecoRemetente->UF,
                     ]
                 ],
                 'name' => (string) $dadosRemetente->xNome,
+                'phoneNumber' => (string) $enderecoRemetente->fone,
                 'federalTaxId' => (string) $dadosRemetente->CNPJ,
             ],
             'shipTo' => [
