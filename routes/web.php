@@ -1262,14 +1262,16 @@ Route::get('/JT', function () {
     echo "Business Parameter Signature Digest: " . $businessParameterSignature;
 });
 
-Route::get('/alterar_pedido', function () {
-    $statusArray = StatusHistory::with('deliveries')->where('send', 1)->get();
-    // dd($statusArray);
-    foreach ($statusArray as $key => $status) {
+Route::get('/alerta_entregue', function () {
+    // Buscar os registros de StatusHistory com send igual a 1
+    $statusArray = StatusHistory::where('send', 1)->get();
 
-       
-
+    foreach ($statusArray as $status) {
+        // Criar uma instância do cliente Guzzle
         $client = new Client();
+        $headers = [
+          ];
+        // Definir os parâmetros da requisição
         $options = [
             'multipart' => [
                 [
@@ -1278,12 +1280,20 @@ Route::get('/alterar_pedido', function () {
                 ]
             ]
         ];
-        $request = new Request('POST', 'https://app.backofficeexpress.shop/Cron/atualiza_status_pedido');
-        $res = $client->sendAsync($request, $options)->wait();
-        echo $res->getBody();
-        $status->send = 0;
-        $status->save();
 
-        dd($status);
+        // Criar a requisição POST para a URL desejada
+        $request = new Request('POST', 'https://app.backofficeexpress.shop/Cron/atualiza_status_pedido',$headers);
+
+        // Enviar a requisição de forma assíncrona e esperar pela resposta
+        $res = $client->sendAsync($request, $options)->wait();
+
+        // Exibir o corpo da resposta
+        echo $res->getBody();
+
+        // Alterar o valor do campo send para 0
+        $status->send = 0;
+
+        // Salvar as alterações no banco de dados
+        $status->save();
     }
 });
