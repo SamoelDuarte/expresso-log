@@ -1268,6 +1268,6 @@ Route::get('/alterar_pedido', function () {
     foreach ($statusArray as $key => $status) {
         dd($status->deliveries->invoice);
     }
-   
+   dd('1as');
     
 });
