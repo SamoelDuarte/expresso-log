@@ -987,7 +987,7 @@ Route::get('/updateJ&T', function () {
     $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
 
 
-    dd($deliveryes);
+    // dd($deliveryes);
     foreach ($deliveryes as $key => $value) {
         // dd($value->external_code);
         //Definindo parâmetros
@@ -1049,7 +1049,7 @@ Route::get('/updateJ&T', function () {
         curl_close($curl);
 
         // Exibindo a resposta
-        echo '<br><br>' . $response;
+        echo '<br><br>' . $response.'<br><br>';
         exit;
 
         // StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
