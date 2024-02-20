@@ -987,7 +987,7 @@ Route::get('/updateJ&T', function () {
     $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
 
 
- 
+    dd($deliveryes);
     foreach ($deliveryes as $key => $value) {
         // dd($value->external_code);
         //Definindo parâmetros
@@ -1052,20 +1052,20 @@ Route::get('/updateJ&T', function () {
         echo '<br><br>' . $response;
         exit;
 
-        StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
+        // StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
 
 
-        for ($i = 0; $i < count($result['data'][0]['dados']); $i++) {
+        // for ($i = 0; $i < count($result['data'][0]['dados']); $i++) {
 
 
-            StatusHistory::create([
-                'delivery_id' => $value->id,
-                'external_code' => $result['data'][0]['documento'],
-                'status' => $result['data'][0]['dados'][$i]['descricao'],
-                'observation' => $result['data'][0]['dados'][$i]['obs'],
-                'detail' => $result['data'][0]['dados'][$i]['obs'],
-            ]);
-        }
+        //     StatusHistory::create([
+        //         'delivery_id' => $value->id,
+        //         'external_code' => $result['data'][0]['documento'],
+        //         'status' => $result['data'][0]['dados'][$i]['descricao'],
+        //         'observation' => $result['data'][0]['dados'][$i]['obs'],
+        //         'detail' => $result['data'][0]['dados'][$i]['obs'],
+        //     ]);
+        // }
     }
 });
 
