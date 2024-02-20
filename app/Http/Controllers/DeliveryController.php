@@ -18,6 +18,7 @@ class DeliveryController extends Controller
 
     public function getEntregas()
     {
+        
         $entregas = Delivery::with('carriers')
             ->with(['status' => function ($query) {
                 $query->orderBy('created_at', 'desc');

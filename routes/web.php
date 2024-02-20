@@ -1000,8 +1000,7 @@ Route::get('/updateJ&T', function () {
     })
     ->groupBy('external_code')
     ->pluck('id');
-
-    dd($uniqueDeliveries);
+    
 
 // Depois, usamos os IDs únicos para obter as entregas, garantindo que cada external_code seja único
 $deliveries = Delivery::with('carriers.documents')
