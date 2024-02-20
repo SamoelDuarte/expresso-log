@@ -88,6 +88,7 @@ class DeliveryController extends Controller
             $query->where('status', 'finalizado')
                 ->orWhere('status', 'entregue')
                 ->orWhere('status', 'Entrega Realizada')
+                ->orWhere('status', 'Entrega Realizada (Mobile)')
                 ->orWhere('status', 'devolvido');
         })
         ->where(function ($query) {
