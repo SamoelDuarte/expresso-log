@@ -583,71 +583,6 @@ Route::get('/daytonaCotação2', function () {
     }
 });
 
-Route::get('/getStatusJT', function () {
-
-
-    //Definindo parâmetros
-    $privateKey = env('PRIVATE_KEY_JT');
-    $apiAccount = env('API_ACCOUNT_JT');
-
-    // Montando o JSON do envio
-    $pedido = [
-        "billCodes" => '888030034335191',
-
-    ];
-
-    $pedido = json_encode($pedido);
-
-    // Codificando o pedido para envio
-    $req_pedido = rawurlencode($pedido);
-
-    // Montando o digest do header
-    $headerDigest = base64_encode(md5($pedido . $privateKey, true));
-
-    // Criando um carimbo de data/hora (timestamp)
-    $timestamp = round(microtime(true) * 1000);
-
-    // URL da API
-    // $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
-    $url = 'https://openapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
-
-    // Iniciando uma sessão cURL
-    $curl = curl_init();
-
-    // Configurando as opções da requisição cURL
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_POSTFIELDS => 'bizContent=' . $req_pedido,
-        CURLOPT_HTTPHEADER => array(
-            'timestamp:' . $timestamp,
-            'apiAccount:' . $apiAccount,
-            'digest:' . $headerDigest,
-            'Content-Type: application/x-www-form-urlencoded'
-        ),
-    ));
-
-    // Enviando a requisição e obtendo a resposta
-    $response = curl_exec($curl);
-
-    // Verificando se ocorreu algum erro na requisição
-    if (curl_errno($curl)) {
-        echo 'Erro cURL: ' . curl_error($curl);
-    }
-
-    // Fechando a requisição cURL
-    curl_close($curl);
-
-    // Exibindo a resposta
-    echo '<br><br>' . $response;
-});
-
 Route::get('/getFreteJT', function () {
 
 
@@ -1047,56 +982,89 @@ Route::get('/updateAstrlog', function () {
 });
 
 Route::get('/updateJ&T', function () {
+    $numbersToSearch = ['42584754001077'];
 
-    $deliveryes = Delivery::with('carriers.documents')
-        ->whereHas('carriers', function ($query) {
-            $query->whereHas('documents', function ($documentQuery) {
-                $documentQuery->where('number', '17000788000139');
-            });
-        })
-        ->whereDoesntHave('status', function ($query) {
-            $query->where('status', 'finalizado');
-        })
-        ->orderBy('id')
-        ->get();
+    $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
 
 
-
+ 
     foreach ($deliveryes as $key => $value) {
-        $authResp = authGfl();
-        if ($authResp->getStatusCode() === 200) {
-            $responseData = json_decode($authResp->getBody(), true); // Decodifique a resposta JSON para um array associativo
-            if (isset($responseData['data']['access_key'])) {
-                $client = new Client();
-                $accessKey = $responseData['data']['access_key'];
-                $headers = [
-                    "Authorization" => "Bearer  " . $accessKey
-                ];
+        // dd($value->external_code);
+        //Definindo parâmetros
+        $privateKey = env('PRIVATE_KEY_JT');
+        $apiAccount = env('API_ACCOUNT_JT');
 
-                $response = $client->get("https://grupoastrolog.brudam.com.br/api/v1/tracking/ocorrencias/nfe?chave=" . $value->invoice_key, [
-                    'headers' => $headers
-                ]);
+        // Montando o JSON do envio
+        $pedido = [
+            "billCodes" => $value->external_code,
 
-                $body = $response->getBody()->getContents();
-                $result = json_decode($body, true);
+        ];
 
-                // dd($result);
+        $pedido = json_encode($pedido);
 
-                StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
+        // Codificando o pedido para envio
+        $req_pedido = rawurlencode($pedido);
+
+        // Montando o digest do header
+        $headerDigest = base64_encode(md5($pedido . $privateKey, true));
+
+        // Criando um carimbo de data/hora (timestamp)
+        $timestamp = round(microtime(true) * 1000);
+
+        // URL da API
+        // $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
+        $url = 'https://openapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
+
+        // Iniciando uma sessão cURL
+        $curl = curl_init();
+
+        // Configurando as opções da requisição cURL
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => 'bizContent=' . $req_pedido,
+            CURLOPT_HTTPHEADER => array(
+                'timestamp:' . $timestamp,
+                'apiAccount:' . $apiAccount,
+                'digest:' . $headerDigest,
+                'Content-Type: application/x-www-form-urlencoded'
+            ),
+        ));
+
+        // Enviando a requisição e obtendo a resposta
+        $response = curl_exec($curl);
+
+        // Verificando se ocorreu algum erro na requisição
+        if (curl_errno($curl)) {
+            echo 'Erro cURL: ' . curl_error($curl);
+        }
+
+        // Fechando a requisição cURL
+        curl_close($curl);
+
+        // Exibindo a resposta
+        echo '<br><br>' . $response;
+        exit;
+
+        StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
 
 
-                for ($i = 0; $i < count($result['data'][0]['dados']); $i++) {
+        for ($i = 0; $i < count($result['data'][0]['dados']); $i++) {
 
 
-                    StatusHistory::create([
-                        'delivery_id' => $value->id,
-                        'external_code' => $result['data'][0]['documento'],
-                        'status' => $result['data'][0]['dados'][$i]['descricao'],
-                        'observation' => $result['data'][0]['dados'][$i]['obs'],
-                        'detail' => $result['data'][0]['dados'][$i]['obs'],
-                    ]);
-                }
-            }
+            StatusHistory::create([
+                'delivery_id' => $value->id,
+                'external_code' => $result['data'][0]['documento'],
+                'status' => $result['data'][0]['dados'][$i]['descricao'],
+                'observation' => $result['data'][0]['dados'][$i]['obs'],
+                'detail' => $result['data'][0]['dados'][$i]['obs'],
+            ]);
         }
     }
 });
@@ -1270,13 +1238,12 @@ Route::get('/alerta_entregue', function () {
     // Buscar os registros de StatusHistory com send igual a 1
     $statusArray = StatusHistory::where('send', 1)->limit(15)->get();
 
-  
+
     foreach ($statusArray as $status) {
-     
+
         // Criar uma instância do cliente Guzzle
         $client = new Client();
-        $headers = [
-          ];
+        $headers = [];
         // Definir os parâmetros da requisição
         $options = [
             'multipart' => [
@@ -1288,7 +1255,7 @@ Route::get('/alerta_entregue', function () {
         ];
 
         // Criar a requisição POST para a URL desejada
-        $request = new Request('POST', 'https://lojamirante.com.br/Cron/atualiza_status_pedido',$headers);
+        $request = new Request('POST', 'https://lojamirante.com.br/Cron/atualiza_status_pedido', $headers);
 
         // Enviar a requisição de forma assíncrona e esperar pela resposta
         $res = $client->sendAsync($request, $options)->wait();
