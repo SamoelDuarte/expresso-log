@@ -981,7 +981,7 @@ Route::get('/updateAstrlog', function () {
     }
 });
 
-Route::get('/updateJ&T', function () {
+Route::get('/updateStatusJ&T', function () {
      $numbersToSearch = ['42584754001077'];
 
      $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
