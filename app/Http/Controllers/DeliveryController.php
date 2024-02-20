@@ -6,6 +6,7 @@ use App\Models\Delivery;
 use App\Models\StatusHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class DeliveryController extends Controller
@@ -78,28 +79,30 @@ class DeliveryController extends Controller
     }
 
     public static function getDeliverys($numbersToSearch){
-        $deliveryes = Delivery::with('carriers.documents')
-        ->whereHas('carriers', function ($query) use ($numbersToSearch) {
-            $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
-                $documentQuery->whereIn('number', $numbersToSearch);
-            });
-        })
-        ->whereDoesntHave('status', function ($query) {
-            $query->where('status', 'finalizado')
-                ->orWhere('status', 'entregue')
-                ->orWhere('status', 'Entrega Realizada')
-                ->orWhere('status', 'Entrega Realizada (Mobile)')
-                ->orWhere('status', 'devolvido');
-        })
-        ->where(function ($query) {
-            $query->whereNull('updated_at')
-                ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'));
-        })
-        ->orderBy('id')
-        ->limit(15)
-        ->get();
-
-
-        return $deliveryes;
+        // Primeiro, obtemos os IDs únicos dos deliveries que correspondem aos critérios, excluindo status específicos
+        $uniqueDeliveries = Delivery::select('external_code', DB::raw('MIN(id) as id'))
+            ->whereHas('carriers', function ($query) use ($numbersToSearch) {
+                $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
+                    $documentQuery->whereIn('number', $numbersToSearch);
+                });
+            })
+            ->whereDoesntHave('status', function ($query) {
+                $query->whereIn('status', ['finalizado', 'entregue', 'Entrega Realizada', 'Entrega Realizada (Mobile)', 'devolvido']);
+            })
+            ->where(function ($query) {
+                $query->whereNull('updated_at')
+                    ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'));
+            })
+            ->groupBy('external_code')
+            ->pluck('id');
+    
+        // Depois, usamos os IDs únicos para obter as entregas, garantindo que cada external_code seja único
+        $deliveries = Delivery::with('carriers.documents')
+            ->whereIn('id', $uniqueDeliveries)
+            ->orderBy('id')
+            ->limit(15)
+            ->get();
+    
+        return $deliveries;
     }
 }
