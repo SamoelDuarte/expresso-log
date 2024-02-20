@@ -982,36 +982,13 @@ Route::get('/updateAstrlog', function () {
 });
 
 Route::get('/updateJ&T', function () {
-    $numbersToSearch = ['42584754001077'];
+    // $numbersToSearch = ['42584754001077'];
 
-    // Primeiro, obtemos os IDs únicos dos deliveries que correspondem aos critérios, excluindo status específicos
-    $uniqueDeliveries = Delivery::select('external_code', DB::raw('MIN(id) as id'))
-    ->whereHas('carriers', function ($query) use ($numbersToSearch) {
-        $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
-            $documentQuery->whereIn('number', $numbersToSearch);
-        });
-    })
-    ->whereDoesntHave('status', function ($query) {
-        $query->whereIn('status', ['finalizado', 'entregue', 'Entrega Realizada', 'Entrega Realizada (Mobile)', 'devolvido']);
-    })
-    ->where(function ($query) {
-        $query->whereNull('updated_at')
-            ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'));
-    })
-    ->groupBy('external_code')
-    ->pluck('id');
-    
-
-// Depois, usamos os IDs únicos para obter as entregas, garantindo que cada external_code seja único
-$deliveries = Delivery::with('carriers.documents')
-    ->whereIn('id', $uniqueDeliveries)
-    ->orderBy('id')
-    ->limit(70)
-    ->get();
+    // $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
 
 
-    // dd($deliveryes);
-    foreach ($deliveries as $key => $value) {
+    // // dd($deliveryes);
+    // foreach ($deliveryes as $key => $value) {
         // dd($value->external_code);
         //Definindo parâmetros
         $privateKey = env('PRIVATE_KEY_JT');
@@ -1019,7 +996,7 @@ $deliveries = Delivery::with('carriers.documents')
 
         // Montando o JSON do envio
         $pedido = [
-            "billCodes" => $value->external_code,
+            "billCodes" => '888030037774653',
 
         ];
 
@@ -1088,7 +1065,7 @@ $deliveries = Delivery::with('carriers.documents')
         //         'detail' => $result['data'][0]['dados'][$i]['obs'],
         //     ]);
         // }
-    }
+    // }
 });
 
 Route::get('/updateStatusGFL', function () {
@@ -1262,7 +1239,6 @@ Route::get('/alerta_entregue', function () {
 
 
     foreach ($statusArray as $status) {
-
         // Criar uma instância do cliente Guzzle
         $client = new Client();
         $headers = [];
@@ -1271,7 +1247,12 @@ Route::get('/alerta_entregue', function () {
             'multipart' => [
                 [
                     'name' => 'numero',
-                    'contents' => $status->deliveries->invoice
+                    'contents' => $status->deliveries->invoice,
+                   
+                ],
+                [
+                  'name' => 'status',
+                  'contents' => $status->status,
                 ]
             ]
         ];
@@ -1291,4 +1272,69 @@ Route::get('/alerta_entregue', function () {
         // Salvar as alterações no banco de dados
         $status->save();
     }
+});
+
+
+Route::get('/getEtiqueta', function () {
+
+      //Definindo parâmetros
+      $privateKey = env('PRIVATE_KEY_JT');
+      $apiAccount = env('API_ACCOUNT_JT');
+
+      // Montando o JSON do envio
+      $pedido = [
+          "billCodes" => $value->external_code,
+
+      ];
+
+      $pedido = json_encode($pedido);
+
+      // Codificando o pedido para envio
+      $req_pedido = rawurlencode($pedido);
+
+      // Montando o digest do header
+      $headerDigest = base64_encode(md5($pedido . $privateKey, true));
+
+      // Criando um carimbo de data/hora (timestamp)
+      $timestamp = round(microtime(true) * 1000);
+
+      // URL da API
+      $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
+    //   $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/order/printOrder';
+
+      // Iniciando uma sessão cURL
+      $curl = curl_init();
+
+      // Configurando as opções da requisição cURL
+      curl_setopt_array($curl, array(
+          CURLOPT_URL => $url,
+          CURLOPT_RETURNTRANSFER => true,
+          CURLOPT_ENCODING => '',
+          CURLOPT_MAXREDIRS => 10,
+          CURLOPT_TIMEOUT => 0,
+          CURLOPT_FOLLOWLOCATION => true,
+          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+          CURLOPT_CUSTOMREQUEST => 'POST',
+          CURLOPT_POSTFIELDS => 'bizContent=' . $req_pedido,
+          CURLOPT_HTTPHEADER => array(
+              'timestamp:' . $timestamp,
+              'apiAccount:' . $apiAccount,
+              'digest:' . $headerDigest,
+              'Content-Type: application/x-www-form-urlencoded'
+          ),
+      ));
+
+      // Enviando a requisição e obtendo a resposta
+      $response = curl_exec($curl);
+
+      // Verificando se ocorreu algum erro na requisição
+      if (curl_errno($curl)) {
+          echo 'Erro cURL: ' . curl_error($curl);
+      }
+
+      // Fechando a requisição cURL
+      curl_close($curl);
+
+      // Exibindo a resposta
+      echo '<br><br>' . $response.'<br><br>';
 });
