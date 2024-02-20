@@ -984,11 +984,33 @@ Route::get('/updateAstrlog', function () {
 Route::get('/updateJ&T', function () {
     $numbersToSearch = ['42584754001077'];
 
-    $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
+    // Primeiro, obtemos os IDs únicos dos deliveries que correspondem aos critérios, excluindo status específicos
+    $uniqueDeliveries = Delivery::select('external_code', DB::raw('MIN(id) as id'))
+    ->whereHas('carriers', function ($query) use ($numbersToSearch) {
+        $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
+            $documentQuery->whereIn('number', $numbersToSearch);
+        });
+    })
+    ->whereDoesntHave('status', function ($query) {
+        $query->whereIn('status', ['finalizado', 'entregue', 'Entrega Realizada', 'Entrega Realizada (Mobile)', 'devolvido']);
+    })
+    ->where(function ($query) {
+        $query->whereNull('updated_at')
+            ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'));
+    })
+    ->groupBy('external_code')
+    ->pluck('id');
+
+// Depois, usamos os IDs únicos para obter as entregas, garantindo que cada external_code seja único
+$deliveries = Delivery::with('carriers.documents')
+    ->whereIn('id', $uniqueDeliveries)
+    ->orderBy('id')
+    ->limit(70)
+    ->get();
 
 
     // dd($deliveryes);
-    foreach ($deliveryes as $key => $value) {
+    foreach ($deliveries as $key => $value) {
         // dd($value->external_code);
         //Definindo parâmetros
         $privateKey = env('PRIVATE_KEY_JT');
