@@ -1050,7 +1050,6 @@ Route::get('/updateJ&T', function () {
 
         // Exibindo a resposta
         echo '<br><br>' . $response.'<br><br>';
-        exit;
 
         // StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
 
