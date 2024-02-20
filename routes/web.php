@@ -982,14 +982,14 @@ Route::get('/updateAstrlog', function () {
 });
 
 Route::get('/updateJ&T', function () {
-    // $numbersToSearch = ['42584754001077'];
+     $numbersToSearch = ['42584754001077'];
 
-    // $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
+     $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
 
 
     // // dd($deliveryes);
-    // foreach ($deliveryes as $key => $value) {
-        // dd($value->external_code);
+    foreach ($deliveryes as $key => $value) {
+        //  dd($value->external_code);
         //Definindo parâmetros
         $privateKey = env('PRIVATE_KEY_JT');
         $apiAccount = env('API_ACCOUNT_JT');
@@ -1048,24 +1048,20 @@ Route::get('/updateJ&T', function () {
         // Fechando a requisição cURL
         curl_close($curl);
 
+        $resonseArray = json_decode($response,true);
         // Exibindo a resposta
-        echo '<br><br>' . $response.'<br><br>';
 
-        // StatusHistory::where('external_code', $result['data'][0]['documento'])->delete();
-
-
-        // for ($i = 0; $i < count($result['data'][0]['dados']); $i++) {
-
-
-        //     StatusHistory::create([
-        //         'delivery_id' => $value->id,
-        //         'external_code' => $result['data'][0]['documento'],
-        //         'status' => $result['data'][0]['dados'][$i]['descricao'],
-        //         'observation' => $result['data'][0]['dados'][$i]['obs'],
-        //         'detail' => $result['data'][0]['dados'][$i]['obs'],
-        //     ]);
-        // }
-    // }
+        foreach ($resonseArray['data'][0]['details'] as  $detail) {
+            
+            StatusHistory::create([
+                'delivery_id' => $value->id,
+                'external_code' => $detail['scanCode'],
+                'status' => $detail['scanType'],
+                'observation' => $detail['scanNetworkCity'],
+                'detail' => $detail['scanNetworkProvince'],
+            ]);
+        }
+    }
 });
 
 Route::get('/updateStatusGFL', function () {
