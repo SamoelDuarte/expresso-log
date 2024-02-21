@@ -18,6 +18,7 @@ use App\Models\Delivery;
 use App\Models\Error;
 use App\Models\StatusHistory;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /*
@@ -982,9 +983,9 @@ Route::get('/updateAstrlog', function () {
 });
 
 Route::get('/updateStatusJET', function () {
-     $numbersToSearch = ['42584754001077'];
+    $numbersToSearch = ['42584754001077'];
 
-     $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
+    $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
 
 
     // // dd($deliveryes);
@@ -1048,11 +1049,11 @@ Route::get('/updateStatusJET', function () {
         // Fechando a requisição cURL
         curl_close($curl);
 
-        $resonseArray = json_decode($response,true);
+        $resonseArray = json_decode($response, true);
         // Exibindo a resposta
 
         foreach ($resonseArray['data'][0]['details'] as  $detail) {
-            
+
             StatusHistory::create([
                 'delivery_id' => $value->id,
                 'external_code' => $detail['scanCode'],
@@ -1225,15 +1226,40 @@ Route::get('/JT', function () {
     echo "Business Parameter Signature Digest: " . $businessParameterSignature;
 });
 
-Route::get('/alerta', function () {
-    $statusArray = StatusHistory::where('send', 1)->get();
-    echo count($statusArray);
+Route::get('/countAlerta', function () {
+// Buscar os registros de StatusHistory com send igual a 1
+$statusArray = StatusHistory::where('send', 1)->limit(15)->get();
+
+echo " <h2>Quantidade de alerta  ( " . count($statusArray)." ) </h2>.";
+});
+
+Route::get('/updateAlerta', function () {
+ 
+// Data de ontem
+$ontem = Carbon::yesterday();
+
+// Consulta na tabela StatusHistory
+$statusArray = StatusHistory::select('id', 'delivery_id', 'status', 'send', \DB::raw('MAX(updated_at) as max_created_at'))
+    ->whereDate('updated_at', $ontem)
+    ->whereIn('status', ['entregue', 'finalizado', 'entrega realizada (mobile)', 'entrega realizada', 'Saiu para Entrega'])
+    ->groupBy('id', 'delivery_id', 'status', 'send')
+    ->orderByRaw("FIELD(status, 'entregue', 'finalizado', 'entrega realizada (mobile)', 'entrega realizada', 'Saiu para Entrega')")
+    ->get();
+
+foreach ($statusArray as $status) {
+    // Define o valor de 'send' como 1
+    $status->send = 1;
+    // Salva a alteração no banco de dados
+    $status->save();
+}
+
+
 });
 Route::get('/alerta_entregue', function () {
     // Buscar os registros de StatusHistory com send igual a 1
     $statusArray = StatusHistory::where('send', 1)->limit(15)->get();
 
-// dd($statusArray);
+    // dd($statusArray);
     foreach ($statusArray as $status) {
         // Criar uma instância do cliente Guzzle
         $client = new Client();
@@ -1244,11 +1270,11 @@ Route::get('/alerta_entregue', function () {
                 [
                     'name' => 'numero',
                     'contents' => $status->deliveries->invoice,
-                   
+
                 ],
                 [
-                  'name' => 'status',
-                  'contents' => $status->status,
+                    'name' => 'status',
+                    'contents' => $status->status,
                 ]
             ]
         ];
@@ -1273,64 +1299,64 @@ Route::get('/alerta_entregue', function () {
 
 Route::get('/getEtiqueta', function () {
 
-      //Definindo parâmetros
-      $privateKey = env('PRIVATE_KEY_JT');
-      $apiAccount = env('API_ACCOUNT_JT');
+    //Definindo parâmetros
+    $privateKey = env('PRIVATE_KEY_JT');
+    $apiAccount = env('API_ACCOUNT_JT');
 
-      // Montando o JSON do envio
-      $pedido = [
-          "billCodes" => $value->external_code,
+    // Montando o JSON do envio
+    $pedido = [
+        "billCodes" => $value->external_code,
 
-      ];
+    ];
 
-      $pedido = json_encode($pedido);
+    $pedido = json_encode($pedido);
 
-      // Codificando o pedido para envio
-      $req_pedido = rawurlencode($pedido);
+    // Codificando o pedido para envio
+    $req_pedido = rawurlencode($pedido);
 
-      // Montando o digest do header
-      $headerDigest = base64_encode(md5($pedido . $privateKey, true));
+    // Montando o digest do header
+    $headerDigest = base64_encode(md5($pedido . $privateKey, true));
 
-      // Criando um carimbo de data/hora (timestamp)
-      $timestamp = round(microtime(true) * 1000);
+    // Criando um carimbo de data/hora (timestamp)
+    $timestamp = round(microtime(true) * 1000);
 
-      // URL da API
-      $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
+    // URL da API
+    $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
     //   $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/order/printOrder';
 
-      // Iniciando uma sessão cURL
-      $curl = curl_init();
+    // Iniciando uma sessão cURL
+    $curl = curl_init();
 
-      // Configurando as opções da requisição cURL
-      curl_setopt_array($curl, array(
-          CURLOPT_URL => $url,
-          CURLOPT_RETURNTRANSFER => true,
-          CURLOPT_ENCODING => '',
-          CURLOPT_MAXREDIRS => 10,
-          CURLOPT_TIMEOUT => 0,
-          CURLOPT_FOLLOWLOCATION => true,
-          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-          CURLOPT_CUSTOMREQUEST => 'POST',
-          CURLOPT_POSTFIELDS => 'bizContent=' . $req_pedido,
-          CURLOPT_HTTPHEADER => array(
-              'timestamp:' . $timestamp,
-              'apiAccount:' . $apiAccount,
-              'digest:' . $headerDigest,
-              'Content-Type: application/x-www-form-urlencoded'
-          ),
-      ));
+    // Configurando as opções da requisição cURL
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS => 'bizContent=' . $req_pedido,
+        CURLOPT_HTTPHEADER => array(
+            'timestamp:' . $timestamp,
+            'apiAccount:' . $apiAccount,
+            'digest:' . $headerDigest,
+            'Content-Type: application/x-www-form-urlencoded'
+        ),
+    ));
 
-      // Enviando a requisição e obtendo a resposta
-      $response = curl_exec($curl);
+    // Enviando a requisição e obtendo a resposta
+    $response = curl_exec($curl);
 
-      // Verificando se ocorreu algum erro na requisição
-      if (curl_errno($curl)) {
-          echo 'Erro cURL: ' . curl_error($curl);
-      }
+    // Verificando se ocorreu algum erro na requisição
+    if (curl_errno($curl)) {
+        echo 'Erro cURL: ' . curl_error($curl);
+    }
 
-      // Fechando a requisição cURL
-      curl_close($curl);
+    // Fechando a requisição cURL
+    curl_close($curl);
 
-      // Exibindo a resposta
-      echo '<br><br>' . $response.'<br><br>';
+    // Exibindo a resposta
+    echo '<br><br>' . $response . '<br><br>';
 });
