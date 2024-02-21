@@ -42,11 +42,13 @@ class StatusHistory extends Model
         if (strtolower($statusHistory->status) === 'entregue' 
         || strtolower($statusHistory->status) === 'finalizado'
         || strtolower($statusHistory->status) === 'entrega realizada (mobile)'
-        || strtolower($statusHistory->status) === 'entrega realizada'
-        || strtolower($statusHistory->status) === 'solicitação em rota'
-        || strtolower($statusHistory->status) === ' saiu para entregar') {
-            $statusHistory->send = 1;
+        || strtolower($statusHistory->status) === 'entrega realizada') {
+            $statusHistory->status = "Entregue";
+        }elseif( strtolower($statusHistory->status) === 'solicitação em rota'
+        || strtolower($statusHistory->status) === 'saiu para entregar'){
+            $statusHistory->status = "Saiu para Entrega";
         }
+        $statusHistory->send = 1;
     });
 }
 }
