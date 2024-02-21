@@ -45,7 +45,8 @@ class StatusHistory extends Model
         || strtolower($statusHistory->status) === 'entrega realizada') {
             $statusHistory->status = "Entregue";
         }elseif( strtolower($statusHistory->status) === 'solicitação em rota'
-        || strtolower($statusHistory->status) === 'saiu para entregar'){
+        || strtolower($statusHistory->status) === 'saiu para entregar'
+        || strtolower($statusHistory->status) === 'Em Rota'){
             $statusHistory->status = "Saiu para Entrega";
         }
         $statusHistory->send = 1;
