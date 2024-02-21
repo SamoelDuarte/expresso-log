@@ -1233,7 +1233,7 @@ Route::get('/alerta_entregue', function () {
     // Buscar os registros de StatusHistory com send igual a 1
     $statusArray = StatusHistory::where('send', 1)->limit(15)->get();
 
-
+dd($statusArray);
     foreach ($statusArray as $status) {
         // Criar uma instância do cliente Guzzle
         $client = new Client();
