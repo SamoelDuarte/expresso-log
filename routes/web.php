@@ -1139,6 +1139,7 @@ Route::get('/updateStatusGFL', function () {
         } catch (Exception $e) {
             echo "Ocorreu um erro: " . $e->getMessage();
         }
+        $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
     }
 });
 
@@ -1201,6 +1202,7 @@ Route::get('/updateStatusLoggi', function () {
             }
         } catch (Exception $e) {
         }
+        $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
     }
 });
 
