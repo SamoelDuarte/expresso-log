@@ -1218,7 +1218,9 @@ Route::get('/JT', function () {
 
     // Example usage:
     $customerCode = "J0086026981";
-    $plainTextPwd = "G3H0b644";
+    // $plainTextPwd = "G3H0b644";senha antiga
+    $plainTextPwd = "G3H0b643";
+    
     $encryptedPwd = strtoupper(md5($plainTextPwd . "jadada236t2")); // Assuming pwd is in uppercase MD5 format
     $privateKey = "bccf1dc5e47a4cb7a69d644d8c597c3a";
 

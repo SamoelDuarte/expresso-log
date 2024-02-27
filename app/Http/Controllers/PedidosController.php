@@ -1106,7 +1106,7 @@ class PedidosController extends Controller
 
         $entrega = Delivery::where('invoice_key', $chaveNf)->first();
 
-        if (!$entrega) {
+        if ($entrega) {
 
             //Definindo parâmetros
             $privateKey = env('PRIVATE_KEY_JT');
@@ -1129,7 +1129,7 @@ class PedidosController extends Controller
             //Montando o JSON do envio
             $pedido = [
                 "customerCode" => 'J0086026981',
-                "digest" => 'Zy+vQdOi9CKk8snUA517nA==',
+                "digest" => '1RSteqUoNxyCYPg2yHwAng==',
                 "txlogisticId" => (string)$xmlObj->NFe->infNFe->ide->nNF,
                 "expressType" => "EZ", // Você pode definir este valor conforme necessário
                 "orderType" => "1", // Você pode definir este valor conforme necessário
@@ -1230,6 +1230,7 @@ class PedidosController extends Controller
 
             //Montando o digest do header
             $headerDigest = base64_encode(md5($pedido . $privateKey, true));
+          
             try {
 
                 //Instanciando e enviando a requisição
@@ -1259,11 +1260,9 @@ class PedidosController extends Controller
                 //Fechando a requisição
                 curl_close($curl);
 
-                //  dd($responseArray);
                 $billcode = $responseArray['data']['orderList'][0]['billCode'];
                 //Exibindo a resposta
                 echo '<br><br>' . $response;
-
 
 
                 echo json_encode(array('mensagem' => 'sucesso'));
@@ -1272,7 +1271,7 @@ class PedidosController extends Controller
                     Error::create(['erro' => 'Erro servidor interno J&T' . $e->getMessage()]);
                 }
             }
-
+            
 
 
             $transp = Carrier::whereHas('documents', function ($query) use ($documento) {
