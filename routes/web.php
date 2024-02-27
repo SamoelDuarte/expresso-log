@@ -1145,23 +1145,9 @@ Route::get('/updateStatusGFL', function () {
 
 
 Route::get('/updateStatusLoggi', function () {
+    $numbersToSearch = ['24217653000195'];
 
-
-
-    $deliveryes = Delivery::with('carriers.documents')
-        ->whereHas('carriers', function ($query) {
-            $query->whereHas('documents', function ($documentQuery) {
-                $documentQuery->where('number', '24217653000195');
-            });
-        })
-        ->whereDoesntHave('status', function ($query) {
-            $query->where('status', 'finalizado');
-        })
-        ->orderBy('id')
-        ->get();
-
-
-
+    $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
 
 
     foreach ($deliveryes as $key => $value) {
@@ -1182,7 +1168,7 @@ Route::get('/updateStatusLoggi', function () {
             $responseArray = json_decode($response->getBody(), true);
 
 
-            echo $responseArray['packages'][0];
+            echo $responseArray;
             foreach ($responseArray['packages'][0]['trackingHistory'] as $ocorrencia) {
 
 
