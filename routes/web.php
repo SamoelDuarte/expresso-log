@@ -1066,6 +1066,7 @@ Route::get('/updateStatusJET', function () {
                 'detail' => $detail['scanNetworkProvince'],
             ]);
         }
+        $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
     }
 });
 
