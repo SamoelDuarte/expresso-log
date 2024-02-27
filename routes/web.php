@@ -1182,6 +1182,7 @@ Route::get('/updateStatusLoggi', function () {
             $responseArray = json_decode($response->getBody(), true);
 
 
+            echo $responseArray['packages'][0];
             foreach ($responseArray['packages'][0]['trackingHistory'] as $ocorrencia) {
 
 
