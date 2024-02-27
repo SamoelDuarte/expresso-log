@@ -42,6 +42,7 @@ class StatusHistory extends Model
         if (strtolower($statusHistory->status) === 'entregue' 
         || strtolower($statusHistory->status) === 'finalizado'
         || strtolower($statusHistory->status) === 'entrega realizada (mobile)'
+        || strtolower($statusHistory->status) === 'assinatura de encomenda'
         || strtolower($statusHistory->status) === 'entrega realizada') {
             $statusHistory->status = "Entregue";
         }elseif( strtolower($statusHistory->status) === 'solicitação em rota'
