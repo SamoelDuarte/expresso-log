@@ -997,7 +997,7 @@ Route::get('/updateStatusJET', function () {
 
         // Montando o JSON do envio
         $pedido = [
-            "billCodes" => '888030037774653',
+            "billCodes" => $value->external_code,
 
         ];
 
