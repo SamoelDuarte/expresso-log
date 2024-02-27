@@ -1054,7 +1054,7 @@ Route::get('/updateStatusJET', function () {
         $resonseArray = json_decode($response, true);
         // Exibindo a resposta
 
-        echo   "Numero Nota : ".$value->invoice." ,  Resposta : ".$resonseArray['data'][0]['billCode'] ; 
+        echo   "Numero Nota : ".$value->invoice." ,  Resposta : ".$resonseArray['data'][0]['billCode']." <br>" ; 
 
         foreach ($resonseArray['data'][0]['details'] as  $detail) {
 
