@@ -995,6 +995,7 @@ Route::get('/updateStatusJET', function () {
         $privateKey = env('PRIVATE_KEY_JT');
         $apiAccount = env('API_ACCOUNT_JT');
 
+      
         // Montando o JSON do envio
         $pedido = [
             "billCodes" => $value->external_code,
@@ -1046,11 +1047,14 @@ Route::get('/updateStatusJET', function () {
             echo 'Erro cURL: ' . curl_error($curl);
         }
 
+   
         // Fechando a requisição cURL
         curl_close($curl);
 
         $resonseArray = json_decode($response, true);
         // Exibindo a resposta
+
+        echo   "Numero Nota : ".$value->invoice." ,  Resposta : ".$resonseArray['data'][0]['billCode'] ; 
 
         foreach ($resonseArray['data'][0]['details'] as  $detail) {
 
