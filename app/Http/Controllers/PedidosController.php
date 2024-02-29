@@ -835,7 +835,7 @@ class PedidosController extends Controller
             $totalPeso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'];
             $chaveNf = $XmlArray['protNFe']['infProt']['chNFe'];
             $destNome = $XmlArray['NFe']['infNFe']['dest']['xNome'];
-            $destCpfCnpj = $XmlArray['NFe']['infNFe']['dest']['CPF'];
+            $destCpfCnpj = $XmlArray['NFe']['infNFe']['dest']['CPF'] ?: $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
             $destTelefone = $XmlArray['NFe']['infNFe']['dest']['enderDest']['fone'];
             $destEmail = $XmlArray['NFe']['infNFe']['dest']['email'];
             $destCep = $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'];
@@ -917,7 +917,7 @@ class PedidosController extends Controller
         $totalPeso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'];
         $chaveNf = $XmlArray['protNFe']['infProt']['chNFe'];
         $destNome = $XmlArray['NFe']['infNFe']['dest']['xNome'];
-        $destCpfCnpj = $XmlArray['NFe']['infNFe']['dest']['CPF'];
+        $destCpfCnpj = $XmlArray['NFe']['infNFe']['dest']['CPF'] ?: $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
         $destTelefone = $XmlArray['NFe']['infNFe']['dest']['enderDest']['fone'];
         $destEmail = $XmlArray['NFe']['infNFe']['dest']['email'];
         $destCep = $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'];
@@ -1165,7 +1165,7 @@ class PedidosController extends Controller
                     "name" => (string)$xmlObj->NFe->infNFe->dest->xNome,
                     "postCode" => (string)$xmlObj->NFe->infNFe->dest->enderDest->CEP,
                     "mailBox" => "no-email@mail.com.br", // Preencha conforme necessário
-                    "taxNumber" => (string)$xmlObj->NFe->infNFe->dest->CPF,
+                    "taxNumber" => (string)$xmlObj->NFe->infNFe->dest->CPF ?: (string)$xmlObj->NFe->infNFe->dest->CNPJ,
                     "mobile" => (string)$xmlObj->NFe->infNFe->dest->enderDest->fone,
                     "phone" => (string)$xmlObj->NFe->infNFe->dest->enderDest->fone,
                     "prov" => (string)$xmlObj->NFe->infNFe->dest->enderDest->UF,
