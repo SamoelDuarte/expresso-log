@@ -21,6 +21,9 @@ class PedidosController extends Controller
 {
     public function gerarPedido(Request $request)
     {
+        try {
+            //code...
+        
 
         $dataEntrega = $request->dataprevista;
 
@@ -63,6 +66,10 @@ class PedidosController extends Controller
             default:
                 Error::create(['erro' => 'Transportadora não Integrada CNPJ:' . $documento]);
         }
+
+    } catch (Exception $e) {
+        Error::create(['erro' => 'Error Geral' . $e->getMessage()]);
+    }
     }
     public function gerarPedidoLoggi($xmlContent, $dataEntrega)
     {
@@ -262,7 +269,7 @@ class PedidosController extends Controller
             }
         } catch (\Exception $e) {
             // Exibir qualquer outra exceção que possa ocorrer
-            echo "Erro: " . $e->getMessage();
+            echo "Erro: na Loggi" . $e->getMessage();
         }
     }
     public function gerarPedidoAstralog($xmlContent, $dataEntrega)
@@ -878,6 +885,7 @@ class PedidosController extends Controller
                 echo json_encode(array('mensagem' => 'sucesso'));
             } catch (Exception $e) {
                 // Verifique se a mensagem de erro contém "SQLSTATE[23000]" (case-sensitive)
+                echo "Erro: na DBA " . $e->getMessage();
                 if (strpos($e->getMessage(), "SQLSTATE[23000]") !== false) {
                     Error::create(['erro' => 'Nota já processada' . $numNota]);
                     exit;
@@ -1052,6 +1060,7 @@ class PedidosController extends Controller
             $status->save();
             echo json_encode(array('mensagem' => 'sucesso'));
         } catch (Exception $e) {
+            echo "Erro: na MESH" . $e->getMessage();
             // Verifique se a mensagem de erro contém "SQLSTATE[23000]" (case-sensitive)
             if (strpos($e->getMessage(), "SQLSTATE[23000]") !== false) {
                 Error::create(['erro' => 'Nota já processada' . $numNota]);
@@ -1267,6 +1276,7 @@ class PedidosController extends Controller
 
                 echo json_encode(array('mensagem' => 'sucesso'));
             } catch (RequestException $e) {
+                echo "Erro: na J&T" . $e->getMessage();
                 if ($e->getResponse()->getReasonPhrase() == "Internal Server Error") {
                     Error::create(['erro' => 'Erro servidor interno J&T' . $e->getMessage()]);
                 }
@@ -1341,6 +1351,7 @@ class PedidosController extends Controller
 
                 echo json_encode(array("mensagem" => "sucesso"));
             } catch (Exception $e) {
+                echo "Erro: na TJ" . $e->getMessage();
                 // Verifique se a mensagem de erro contém "SQLSTATE[23000]" (case-sensitive)
                 if (strpos($e->getMessage(), "SQLSTATE[23000]") !== false) {
                     Error::create(['erro' => 'Nota já processada' . $numNota]);
