@@ -827,6 +827,13 @@ class PedidosController extends Controller
 
 
 
+            $doc = "";
+
+            if(isset($XmlArray['NFe']['infNFe']['dest']['CPF'])){
+                $doc =  $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
+            }else{
+                $doc =  $XmlArray['NFe']['infNFe']['dest']['CPF'];
+            }
 
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
             $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
@@ -837,7 +844,7 @@ class PedidosController extends Controller
             $totalPeso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoB'];
             $chaveNf = $XmlArray['protNFe']['infProt']['chNFe'];
             $destNome = $XmlArray['NFe']['infNFe']['dest']['xNome'];
-            $destCpfCnpj = $XmlArray['NFe']['infNFe']['dest']['CPF'] ?: $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
+            $destCpfCnpj = $doc;
             $destTelefone = $XmlArray['NFe']['infNFe']['dest']['enderDest']['fone'];
             $destEmail = $XmlArray['NFe']['infNFe']['dest']['email'];
             $destCep = $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'];
