@@ -829,8 +829,10 @@ class PedidosController extends Controller
 
             $doc = "";
 
-            if(isset($XmlArray['NFe']['infNFe']['dest']['CPF'])){
+            if(isset($XmlArray['NFe']['infNFe']['dest']['CPF']) && !isset($XmlArray['NFe']['infNFe']['dest']['CNPJ'])){
                 $doc =  $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
+            }else if(isset($XmlArray['NFe']['infNFe']['dest']['CNPJ']) && !isset($XmlArray['NFe']['infNFe']['dest']['CPF'])){
+                $doc =  $XmlArray['NFe']['infNFe']['dest']['CPF'];
             }
 
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
