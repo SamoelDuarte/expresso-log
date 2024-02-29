@@ -1358,9 +1358,7 @@ class PedidosController extends Controller
                     exit;
                 }
             }
-        } else {
-            dd('nao já processada');
-        }
+        } 
     }
 
     public function authGfl()
