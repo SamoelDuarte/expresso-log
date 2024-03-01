@@ -32,7 +32,7 @@ class PedidosController extends Controller
             $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
             $XmlArray = json_decode($jsonString, true);
             $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
-
+           
             switch ($documento) {
                     // Transportadora DBA
                 case "50160966000164":
@@ -191,7 +191,7 @@ class PedidosController extends Controller
 
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
             $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
-            $ufUnidadeDestino = $transp->estado;
+            $ufUnidadeDestino = $transp->state;
             $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
             $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
             $peso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoL'];
@@ -489,7 +489,7 @@ class PedidosController extends Controller
 
                 $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
                 $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
-                $ufUnidadeDestino = $transp->estado;
+                $ufUnidadeDestino = $transp->state;
                 $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
                 $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
                 $peso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoL'];
@@ -785,6 +785,7 @@ class PedidosController extends Controller
     }
     public function gerarPedidoDBA($xmlContent, $dataEntrega)
     {
+       
         $xmlObject = simplexml_load_string($xmlContent); // Transformar o XML em um objeto SimpleXMLElement
         $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
 
@@ -809,7 +810,7 @@ class PedidosController extends Controller
             ],
             'body' => $xmlContent,
         ]);
-
+     
 
         // Converter o corpo em uma string
         $responseData = $response->getBody()->getContents();
@@ -824,24 +825,24 @@ class PedidosController extends Controller
                 $query->where('number', $documento);
             })->first();
 
-
+          
             try {
                 $doc = "";
-
-                if (isset($XmlArray['NFe']['infNFe']['dest']['CPF']) && !isset($XmlArray['NFe']['infNFe']['dest']['CNPJ'])) {
-                    $doc =  $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
-                } else if (isset($XmlArray['NFe']['infNFe']['dest']['CNPJ']) && !isset($XmlArray['NFe']['infNFe']['dest']['CPF'])) {
+             
+                if (isset($XmlArray['NFe']['infNFe']['dest']['CPF'])) {
                     $doc =  $XmlArray['NFe']['infNFe']['dest']['CPF'];
+                }else{
+                    $doc =  $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
                 }
+          
             } catch (Exception $e) {
+               
                 Error::create(['erro' => 'Numero da nota'.$XmlArray['NFe']['infNFe']['ide']['nNF'].'Dados :' . print_r($XmlArray['NFe']['infNFe']['dest'])]);
                 exit;
             }
-
-
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
             $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
-            $ufUnidadeDestino = $transp->estado;
+            $ufUnidadeDestino = $transp->state;
             $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
             $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
             $peso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoL'];
@@ -857,7 +858,7 @@ class PedidosController extends Controller
             $destBairro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xBairro'];
             $destCidade = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xMun'];
             $destEstado = $XmlArray['NFe']['infNFe']['dest']['enderDest']['UF'];
-
+       
 
 
             $embarcador = Shipper::first();
@@ -923,7 +924,7 @@ class PedidosController extends Controller
         $dateTime = new DateTime();
         $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
         $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
-        $ufUnidadeDestino = $transp->estado;
+        $ufUnidadeDestino = $transp->state;
         $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
         $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
         $peso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoL'];
@@ -1306,7 +1307,7 @@ class PedidosController extends Controller
 
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
             $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
-            $ufUnidadeDestino = $transp->estado;
+            $ufUnidadeDestino = $transp->state;
             $qtdVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['qVol'];
             $numeroDoVolume = $XmlArray['NFe']['infNFe']['transp']['vol']['nVol'];
             $peso = $XmlArray['NFe']['infNFe']['transp']['vol']['pesoL'];
