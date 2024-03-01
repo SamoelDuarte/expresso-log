@@ -32,7 +32,7 @@ class DeliveryController extends Controller
 
         return DataTables::of($entregas)->make(true);
     }
-    
+
 
     public function show($id)
     {
@@ -102,7 +102,7 @@ class DeliveryController extends Controller
         $deliveries = Delivery::with('carriers.documents')
             ->whereIn('id', $uniqueDeliveries)
             ->orderBy('id')
-            ->limit(1)
+            ->limit(5)
             ->get();
     
         return $deliveries;
