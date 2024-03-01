@@ -95,6 +95,11 @@ class DeliveryController extends Controller
                 usort($data["Ocorrencias"], function ($a, $b) use ($statusOrder) {
                     $aOrder = isset($statusOrder[$a['status']]) ? $statusOrder[$a['status']] : PHP_INT_MAX;
                     $bOrder = isset($statusOrder[$b['status']]) ? $statusOrder[$b['status']] : PHP_INT_MAX;
+                    
+                    // Inverte a ordem de 'Entregue' e 'Saiu para Entregar'
+                    if ($a['status'] === 'Entregue') $aOrder *= -1;
+                    if ($b['status'] === 'Saiu para Entregar') $bOrder *= -1;
+                    
                     return $aOrder - $bOrder;
                 });
 
