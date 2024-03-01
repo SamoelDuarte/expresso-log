@@ -1374,7 +1374,7 @@ Route::get('/getPorNota', function () {
 
     // Montando o JSON do envio
     $pedido = [
-        "billCodes" => '888030037088509',
+        "billCodes" => '888030039543530',
 
     ];
 
@@ -1432,8 +1432,8 @@ Route::get('/getPorNota', function () {
 
     // echo   "Numero Nota : ".$value->invoice." ,  Resposta : ".$resonseArray['data'][0]['billCode']." <br>" ; 
 
-
-    dd($resonseArray['data'][0]['details']);
+    $invertedArray = array_flip($resonseArray['data'][0]['details']);
+    dd($invertedArray);
     // foreach ($resonseArray['data'][0]['details'] as  $detail) {
 
     //     StatusHistory::create([
