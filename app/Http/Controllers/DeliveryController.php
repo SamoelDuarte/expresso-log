@@ -54,44 +54,46 @@ class DeliveryController extends Controller
             if ($historicosStatus->isEmpty()) {
                 echo json_encode(array("Mensagem error" => "Nota nao encrontrada no sistema"));
             } else {
-                //   dd($historicosStatus[0]->deliveries);
-                $data["Pedidos"] = array(
-                    "NrCnpj" => "23966188000122",
-                    "NrNota" => $historicosStatus[0]->deliveries->invoice,
-                    "serie" => $historicosStatus[0]->deliveries->serie,
-                    "id" => $historicosStatus[0]->deliveries->id
-                );
-
-
-                $statusOrder = array(
-                    'Entregue' => 1,
-                    'Saiu para Entregar' => 2,
-                    // Adicione outros status conforme necessário
-                );
                 
-                $data["Ocorrencias"] = array(); // Inicialize o array
-                
-                foreach ($historicosStatus as $historicoStatus) {
-                    $data["Ocorrencias"][] = array(
-                        'data' => $historicoStatus->created_at,
-                        'status' =>  $historicoStatus->status,
-                        'observation' => $historicoStatus->observation,
-                        'detail' => $historicoStatus->detail,
+            
+                    //   dd($historicosStatus[0]->deliveries);
+                    $data["Pedidos"] = array(
+                        "NrCnpj" => "23966188000122",
+                        "NrNota" => $historicosStatus[0]->deliveries->invoice,
+                        "serie" => $historicosStatus[0]->deliveries->serie,
+                        "id" => $historicosStatus[0]->deliveries->id
                     );
-                }
-                
-                // Função de comparação para ordenar os status
-                function compareStatus($a, $b) {
-                    global $statusOrder;
-                    $aOrder = isset($statusOrder[$a['status']]) ? $statusOrder[$a['status']] : PHP_INT_MAX;
-                    $bOrder = isset($statusOrder[$b['status']]) ? $statusOrder[$b['status']] : PHP_INT_MAX;
-                    return $aOrder - $bOrder;
-                }
-                
-                // Ordena o array de acordo com o status
-                usort($data["Ocorrencias"], 'compareStatus');
 
-                echo json_encode($data);
+
+                    $statusOrder = array(
+                        'Entregue' => 1,
+                        'Saiu para Entregar' => 2,
+                        // Adicione outros status conforme necessário
+                    );
+                    
+                    $data["Ocorrencias"] = array(); // Inicialize o array
+                    
+                    foreach ($historicosStatus as $historicoStatus) {
+                        $data["Ocorrencias"][] = array(
+                            'data' => $historicoStatus->created_at,
+                            'status' =>  $historicoStatus->status,
+                            'observation' => $historicoStatus->observation,
+                            'detail' => $historicoStatus->detail,
+                        );
+                    }
+                    
+                    // Função de comparação para ordenar os status
+                    function compareStatus($a, $b) {
+                        global $statusOrder;
+                        $aOrder = isset($statusOrder[$a['status']]) ? $statusOrder[$a['status']] : PHP_INT_MAX;
+                        $bOrder = isset($statusOrder[$b['status']]) ? $statusOrder[$b['status']] : PHP_INT_MAX;
+                        return $aOrder - $bOrder;
+                    }
+                    
+                    // Ordena o array de acordo com o status
+                    usort($data["Ocorrencias"], 'compareStatus');
+
+                    echo json_encode($data);
             }
         } else {
             echo json_encode(array("Mensagem error" => "enviar numero_nota"));
