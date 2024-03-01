@@ -761,7 +761,7 @@ class PedidosController extends Controller
                 Error::create(['erro' => 'Nota já processada' . $numNota]);
                 exit;
             }
-            Error::create(['erro' => 'Error GFL : ' . $e->getMessage()]);
+            Error::create(['erro' => 'Error GFL : '."Numero da nota :". $numNota. $e->getMessage()]);
         }
 
         try {
