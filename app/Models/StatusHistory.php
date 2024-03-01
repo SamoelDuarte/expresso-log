@@ -50,6 +50,8 @@ class StatusHistory extends Model
         || strtolower($statusHistory->status) === 'bipe de saída para entrega'
         || strtolower($statusHistory->status) === 'Em Rota'){
             $statusHistory->status = "Saiu para Entrega";
+        }else{
+            $statusHistory->status =  $statusHistory->status;
         }
         $statusHistory->send = 1;
     });
