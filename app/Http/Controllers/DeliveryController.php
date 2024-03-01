@@ -18,7 +18,7 @@ class DeliveryController extends Controller
 
     public function getEntregas()
     {
-
+        
         $entregas = Delivery::with('carriers')
             ->with(['status' => function ($query) {
                 $query->orderBy('created_at', 'desc');
@@ -62,16 +62,8 @@ class DeliveryController extends Controller
                     "id" => $historicosStatus[0]->deliveries->id
                 );
 
-
-                $statusOrder = array(
-                    'Entregue' => 1,
-                    'Saiu para Entregar' => 2,
-                    // Adicione outros status conforme necessário
-                );
-                
-                $data["Ocorrencias"] = array(); // Inicialize o array
-                
                 foreach ($historicosStatus as $historicoStatus) {
+
                     $data["Ocorrencias"][] = array(
                         'data' => $historicoStatus->created_at,
                         'status' =>  $historicoStatus->status,
@@ -79,17 +71,6 @@ class DeliveryController extends Controller
                         'detail' => $historicoStatus->detail,
                     );
                 }
-                
-                // Função de comparação para ordenar os status
-                function compareStatus($a, $b) {
-                    global $statusOrder;
-                    $aOrder = isset($statusOrder[$a['status']]) ? $statusOrder[$a['status']] : PHP_INT_MAX;
-                    $bOrder = isset($statusOrder[$b['status']]) ? $statusOrder[$b['status']] : PHP_INT_MAX;
-                    return $aOrder - $bOrder;
-                }
-                
-                // Ordena o array de acordo com o status
-                usort($data["Ocorrencias"], 'compareStatus');
 
 
                 echo json_encode($data);
@@ -99,8 +80,7 @@ class DeliveryController extends Controller
         }
     }
 
-    public static function getDeliverys($numbersToSearch)
-    {
+    public static function getDeliverys($numbersToSearch){
         // Primeiro, obtemos os IDs únicos dos deliveries que correspondem aos critérios, excluindo status específicos
         $uniqueDeliveries = Delivery::select('external_code', DB::raw('MIN(id) as id'))
             ->whereHas('carriers', function ($query) use ($numbersToSearch) {
@@ -117,14 +97,15 @@ class DeliveryController extends Controller
             })
             ->groupBy('external_code')
             ->pluck('id');
-
+    
         // Depois, usamos os IDs únicos para obter as entregas, garantindo que cada external_code seja único
         $deliveries = Delivery::with('carriers.documents')
             ->whereIn('id', $uniqueDeliveries)
             ->orderBy('id')
             ->limit(20)
             ->get();
-
+    
         return $deliveries;
+
     }
 }
