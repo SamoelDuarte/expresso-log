@@ -106,5 +106,6 @@ class DeliveryController extends Controller
             ->get();
     
         return $deliveries;
+        
     }
 }
