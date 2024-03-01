@@ -96,9 +96,11 @@ class DeliveryController extends Controller
                     $aOrder = isset($statusOrder[$a['status']]) ? $statusOrder[$a['status']] : PHP_INT_MAX;
                     $bOrder = isset($statusOrder[$b['status']]) ? $statusOrder[$b['status']] : PHP_INT_MAX;
                     
-                    // Inverte a ordem de 'Entregue' e 'Saiu para Entregar'
-                    if ($a['status'] === 'Entregue') $aOrder *= -1;
-                    if ($b['status'] === 'Saiu para Entregar') $bOrder *= -1;
+                    // Define a ordem para 'Entregue' e 'Saiu para Entregar'
+                    if ($a['status'] === 'Entregue') $aOrder = PHP_INT_MAX - 1;
+                    if ($b['status'] === 'Entregue') $bOrder = PHP_INT_MAX - 1;
+                    if ($a['status'] === 'Saiu para Entregar') $aOrder = PHP_INT_MAX - 2;
+                    if ($b['status'] === 'Saiu para Entregar') $bOrder = PHP_INT_MAX - 2;
                     
                     return $aOrder - $bOrder;
                 });
