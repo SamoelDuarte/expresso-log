@@ -23,55 +23,54 @@ class PedidosController extends Controller
     {
         try {
             //code...
-        
 
-        $dataEntrega = $request->dataprevista;
 
-        $xmlContent = $request->getContent();
-        $xmlObject = simplexml_load_string($xmlContent); // Transformar o XML em um objeto SimpleXMLElement
-        $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
-        $XmlArray = json_decode($jsonString, true);
-        $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
+            $dataEntrega = $request->dataprevista;
 
-        switch ($documento) {
-                // Transportadora DBA
-            case "50160966000164":
-                $this->gerarPedidoDBA($xmlContent, $dataEntrega);
-                break;
+            $xmlContent = $request->getContent();
+            $xmlObject = simplexml_load_string($xmlContent); // Transformar o XML em um objeto SimpleXMLElement
+            $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
+            $XmlArray = json_decode($jsonString, true);
+            $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
 
-            case "42584754001077":
-                $this->gerarPedidoJT($xmlContent, $dataEntrega);
-                break;
+            switch ($documento) {
+                    // Transportadora DBA
+                case "50160966000164":
+                    $this->gerarPedidoDBA($xmlContent, $dataEntrega);
+                    break;
 
-            case "23820639001352":
-            case "24230747094913":
-                $this->gerarPedidoGFL($xmlContent, $dataEntrega);
-                break;
+                case "42584754001077":
+                    $this->gerarPedidoJT($xmlContent, $dataEntrega);
+                    break;
 
-            case "24217653000195":
-                $this->gerarPedidoLoggi($xmlContent, $dataEntrega);
-                break;
+                case "23820639001352":
+                case "24230747094913":
+                    $this->gerarPedidoGFL($xmlContent, $dataEntrega);
+                    break;
 
-            case "37744796000105":
-            case "08982220000170":
-                $this->gerarPedidoMesh($xmlContent, $dataEntrega);
-                break;
+                case "24217653000195":
+                    $this->gerarPedidoLoggi($xmlContent, $dataEntrega);
+                    break;
 
-            case "17000788000139":
-            case "20588287000120":
+                case "37744796000105":
+                case "08982220000170":
+                    $this->gerarPedidoMesh($xmlContent, $dataEntrega);
+                    break;
 
-                $this->gerarPedidoAstralog($xmlContent, $dataEntrega);
-                break;
+                case "17000788000139":
+                case "20588287000120":
 
-            default:
-                Error::create(['erro' => 'Transportadora não Integrada CNPJ:' . $documento]);
+                    $this->gerarPedidoAstralog($xmlContent, $dataEntrega);
+                    break;
+
+                default:
+                    Error::create(['erro' => 'Transportadora não Integrada CNPJ:' . $documento]);
+            }
+        } catch (Exception $e) {
+            // Tratamento da exceção aqui
+            $mensagem = 'Error Geral: ' . $e->getMessage() . ' em ' . $e->getFile() . ' na linha ' . $e->getLine();
+            Error::create(['erro' => $mensagem]);
         }
-
-    } catch (Exception $e) {
-        // Tratamento da exceção aqui
-        $mensagem = 'Error Geral: ' . $e->getMessage() . ' em ' . $e->getFile() . ' na linha ' . $e->getLine();
-        Error::create(['erro' => $mensagem]);
-    }
     }
     public function gerarPedidoLoggi($xmlContent, $dataEntrega)
     {
@@ -826,14 +825,19 @@ class PedidosController extends Controller
             })->first();
 
 
+            try {
+                $doc = "";
 
-            $doc = "";
+                if (isset($XmlArray['NFe']['infNFe']['dest']['CPF']) && !isset($XmlArray['NFe']['infNFe']['dest']['CNPJ'])) {
+                    $doc =  $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
+                } else if (isset($XmlArray['NFe']['infNFe']['dest']['CNPJ']) && !isset($XmlArray['NFe']['infNFe']['dest']['CPF'])) {
+                    $doc =  $XmlArray['NFe']['infNFe']['dest']['CPF'];
+                }
+            } catch (Exception $e) {
+                Error::create(['erro' => 'Numero da nota'.$XmlArray['NFe']['infNFe']['ide']['nNF'].'Dados :' . print_r($XmlArray['NFe']['infNFe']['dest'])]);
+                exit;
+            }
 
-            // if(isset($XmlArray['NFe']['infNFe']['dest']['CPF']) && !isset($XmlArray['NFe']['infNFe']['dest']['CNPJ'])){
-            //     $doc =  $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
-            // }else if(isset($XmlArray['NFe']['infNFe']['dest']['CNPJ']) && !isset($XmlArray['NFe']['infNFe']['dest']['CPF'])){
-            //     $doc =  $XmlArray['NFe']['infNFe']['dest']['CPF'];
-            // }
 
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
             $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
@@ -1248,7 +1252,7 @@ class PedidosController extends Controller
 
             //Montando o digest do header
             $headerDigest = base64_encode(md5($pedido . $privateKey, true));
-          
+
             try {
 
                 //Instanciando e enviando a requisição
@@ -1290,7 +1294,7 @@ class PedidosController extends Controller
                     Error::create(['erro' => 'Erro servidor interno J&T' . $e->getMessage()]);
                 }
             }
-            
+
 
 
             $transp = Carrier::whereHas('documents', function ($query) use ($documento) {
@@ -1367,7 +1371,7 @@ class PedidosController extends Controller
                     exit;
                 }
             }
-        } 
+        }
     }
 
     public function authGfl()
