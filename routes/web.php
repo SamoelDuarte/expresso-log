@@ -1056,6 +1056,7 @@ Route::get('/updateStatusJET', function () {
 
         foreach ($resonseArray['data'][0]['details'] as  $detail) {
 
+            dd($detail);
              // Verifique se o código já existe na tabela status_history.
              $existeRegistro = StatusHistory::where('external_code', $detail['desc'])->exists();
 
