@@ -61,9 +61,8 @@ class DeliveryController extends Controller
                     "serie" => $historicosStatus[0]->deliveries->serie,
                     "id" => $historicosStatus[0]->deliveries->id
                 );
-
+            
                 foreach ($historicosStatus as $historicoStatus) {
-
                     $data["Ocorrencias"][] = array(
                         'data' => $historicoStatus->created_at,
                         'status' =>  $historicoStatus->status,
@@ -71,8 +70,16 @@ class DeliveryController extends Controller
                         'detail' => $historicoStatus->detail,
                     );
                 }
-
-
+            
+                // Ordena os status
+                usort($data["Ocorrencias"], function ($a, $b) {
+                    if ($a['status'] === 'Entregue') return 1; // Garante que 'Entregue' seja o último
+                    if ($b['status'] === 'Entregue') return -1;
+                    if ($a['status'] === 'Saiu para Entrega') return 1; // Garante que 'Saiu para Entrega' seja o penúltimo
+                    if ($b['status'] === 'Saiu para Entrega') return -1;
+                    return 0; // Para os outros casos, mantenha a ordem original
+                });
+            
                 echo json_encode($data);
             }
         } else {
