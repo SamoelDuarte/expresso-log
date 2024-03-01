@@ -1057,10 +1057,6 @@ Route::get('/updateStatusJET', function () {
         foreach ($resonseArray['data'][0]['details'] as  $detail) {
 
             // dd($detail);
-
-
-
-
              // Verifique se o código já existe na tabela status_history.
              $existeRegistro = StatusHistory::where('external_code', $detail['scanTime'])->exists();
 
@@ -1363,6 +1359,9 @@ Route::get('/getEtiqueta', function () {
     echo '<br><br>' . $response . '<br><br>';
 });
 
+Route::get('/atualiza', function () {
+    
+});
 
 Route::get('/getPorNota', function () {
 
@@ -1375,7 +1374,7 @@ Route::get('/getPorNota', function () {
 
     // Montando o JSON do envio
     $pedido = [
-        "billCodes" => '888030040464196',
+        "billCodes" => '888030037088509',
 
     ];
 

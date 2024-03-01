@@ -45,16 +45,14 @@ class StatusHistory extends Model
         || strtolower($statusHistory->status) === 'assinatura de encomenda'
         || strtolower($statusHistory->status) === 'entrega realizada') {
             $statusHistory->status = "Entregue";
+            $statusHistory->send = 1;
         }elseif( strtolower($statusHistory->status) === 'solicitação em rota'
         || strtolower($statusHistory->status) === 'saiu para entregar'
         || strtolower($statusHistory->status) === 'bipe de saída para entrega'
         || strtolower($statusHistory->status) === 'Em Rota'){
             $statusHistory->status = "Saiu para Entrega";
-        }else{
-            $statusHistory->status =  $statusHistory->status;
+            $statusHistory->send = 1;
         }
-        $statusHistory->send = 1;
-        
     });
 }
 }
