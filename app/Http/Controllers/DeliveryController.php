@@ -32,6 +32,7 @@ class DeliveryController extends Controller
 
         return DataTables::of($entregas)->make(true);
     }
+    
 
     public function show($id)
     {

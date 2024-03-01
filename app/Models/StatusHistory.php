@@ -54,6 +54,7 @@ class StatusHistory extends Model
             $statusHistory->status =  $statusHistory->status;
         }
         $statusHistory->send = 1;
+        
     });
 }
 }
