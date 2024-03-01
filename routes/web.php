@@ -1056,18 +1056,18 @@ Route::get('/updateStatusJET', function () {
 
         foreach ($resonseArray['data'][0]['details'] as  $detail) {
 
-            dd($detail);
+            // dd($detail);
 
 
 
-            
+
              // Verifique se o código já existe na tabela status_history.
-             $existeRegistro = StatusHistory::where('external_code', $detail['desc'])->exists();
+             $existeRegistro = StatusHistory::where('external_code', $detail['scanTime'])->exists();
 
              if (!$existeRegistro) {
                 StatusHistory::create([
                     'delivery_id' => $value->id,
-                    'external_code' => $detail['desc'],
+                    'external_code' => $detail['scanTime'],
                     'status' => $detail['scanType'],
                     'observation' => $detail['scanNetworkCity'],
                     'detail' => $detail['scanNetworkProvince'],
