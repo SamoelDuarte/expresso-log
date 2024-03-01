@@ -46,11 +46,13 @@ Route::middleware('auth.token')->group(function () {
         Route::post('/', 'consultaCep');
     });
 
+    Route::prefix('/getStatus')->controller(DeliveryController::class)->group(function () {
+        Route::post('/', 'getStatus');
+    });
+
  
 });
-Route::prefix('/getStatus')->controller(DeliveryController::class)->group(function () {
-    Route::get('/', 'getStatus');
-});
+
 Route::prefix('/admin')->controller(AdminController::class)->group(function () {
     Route::get('/login', 'login')->name('admin.login');
     Route::get('/sair', 'sair')->name('admin.sair');
