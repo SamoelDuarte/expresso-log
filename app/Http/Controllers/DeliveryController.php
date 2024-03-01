@@ -102,7 +102,7 @@ class DeliveryController extends Controller
         $deliveries = Delivery::with('carriers.documents')
             ->whereIn('id', $uniqueDeliveries)
             ->orderBy('id')
-            ->limit(100)
+            ->limit(20)
             ->get();
     
         return $deliveries;
