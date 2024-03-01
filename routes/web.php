@@ -1370,7 +1370,7 @@ Route::get('/getPorNota', function () {
 
     // Montando o JSON do envio
     $pedido = [
-        "billCodes" => '888030039580340',
+        "billCodes" => '888030040464196',
 
     ];
 
