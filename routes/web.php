@@ -819,8 +819,6 @@ Route::get('/updateStatusDBA', function () {
 
             if ($occurrences !== null) {
                 foreach ($occurrences as $key => $occurrence) {
-
-                    Log::info("Iteração do loop externo: " . $key);
                     $codigo = $occurrence['codigo'];
 
                     // Verifique se o código já existe na tabela status_history.
@@ -995,7 +993,7 @@ Route::get('/updateStatusJET', function () {
         $privateKey = env('PRIVATE_KEY_JT');
         $apiAccount = env('API_ACCOUNT_JT');
 
-      
+
         // Montando o JSON do envio
         $pedido = [
             "billCodes" => $value->external_code,
@@ -1047,24 +1045,31 @@ Route::get('/updateStatusJET', function () {
             echo 'Erro cURL: ' . curl_error($curl);
         }
 
-   
+
         // Fechando a requisição cURL
         curl_close($curl);
 
         $resonseArray = json_decode($response, true);
         // Exibindo a resposta
 
-        echo   "Numero Nota : ".$value->invoice." ,  Resposta : ".$resonseArray['data'][0]['billCode']." <br>" ; 
+        echo   "Numero Nota : " . $value->invoice . " ,  Resposta : " . $resonseArray['data'][0]['billCode'] . " <br>";
 
         foreach ($resonseArray['data'][0]['details'] as  $detail) {
 
-            StatusHistory::create([
-                'delivery_id' => $value->id,
-                'external_code' => $detail['scanCode'],
-                'status' => $detail['scanType'],
-                'observation' => $detail['scanNetworkCity'],
-                'detail' => $detail['scanNetworkProvince'],
-            ]);
+             // Verifique se o código já existe na tabela status_history.
+             $existeRegistro = StatusHistory::where('external_code', $detail['desc'])->exists();
+
+             if (!$existeRegistro) {
+                StatusHistory::create([
+                    'delivery_id' => $value->id,
+                    'external_code' => $detail['desc'],
+                    'status' => $detail['scanType'],
+                    'observation' => $detail['scanNetworkCity'],
+                    'detail' => $detail['scanNetworkProvince'],
+                ]);
+             }
+
+           
         }
         $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
     }
@@ -1212,7 +1217,7 @@ Route::get('/JT', function () {
     $customerCode = "J0086026981";
     // $plainTextPwd = "G3H0b644";senha antiga
     $plainTextPwd = "G3H0b643";
-    
+
     $encryptedPwd = strtoupper(md5($plainTextPwd . "jadada236t2")); // Assuming pwd is in uppercase MD5 format
     $privateKey = "bccf1dc5e47a4cb7a69d644d8c597c3a";
 
@@ -1221,33 +1226,31 @@ Route::get('/JT', function () {
 });
 
 Route::get('/countAlerta', function () {
-// Buscar os registros de StatusHistory com send igual a 1
-$statusArray = StatusHistory::where('send', 1)->limit(15)->get();
+    // Buscar os registros de StatusHistory com send igual a 1
+    $statusArray = StatusHistory::where('send', 1)->limit(15)->get();
 
-echo " <h2>Quantidade de alerta  ( " . count($statusArray)." ) </h2>.";
+    echo " <h2>Quantidade de alerta  ( " . count($statusArray) . " ) </h2>.";
 });
 
 Route::get('/updateAlerta', function () {
- 
-// Data de ontem
-$ontem = Carbon::yesterday();
 
-// Consulta na tabela StatusHistory
-$statusArray = StatusHistory::select('id', 'delivery_id', 'status', 'send', \DB::raw('MAX(updated_at) as max_created_at'))
-    ->whereDate('updated_at', $ontem)
-    ->whereIn('status', ['entregue', 'finalizado', 'entrega realizada (mobile)', 'entrega realizada', 'Saiu para Entrega'])
-    ->groupBy('id', 'delivery_id', 'status', 'send')
-    ->orderByRaw("FIELD(status, 'entregue', 'finalizado', 'entrega realizada (mobile)', 'entrega realizada', 'Saiu para Entrega')")
-    ->get();
+    // Data de ontem
+    $ontem = Carbon::yesterday();
 
-foreach ($statusArray as $status) {
-    // Define o valor de 'send' como 1
-    $status->send = 1;
-    // Salva a alteração no banco de dados
-    $status->save();
-}
+    // Consulta na tabela StatusHistory
+    $statusArray = StatusHistory::select('id', 'delivery_id', 'status', 'send', \DB::raw('MAX(updated_at) as max_created_at'))
+        ->whereDate('updated_at', $ontem)
+        ->whereIn('status', ['entregue', 'finalizado', 'entrega realizada (mobile)', 'entrega realizada', 'Saiu para Entrega'])
+        ->groupBy('id', 'delivery_id', 'status', 'send')
+        ->orderByRaw("FIELD(status, 'entregue', 'finalizado', 'entrega realizada (mobile)', 'entrega realizada', 'Saiu para Entrega')")
+        ->get();
 
-
+    foreach ($statusArray as $status) {
+        // Define o valor de 'send' como 1
+        $status->send = 1;
+        // Salva a alteração no banco de dados
+        $status->save();
+    }
 });
 Route::get('/alerta_entregue', function () {
     // Buscar os registros de StatusHistory com send igual a 1
@@ -1353,4 +1356,89 @@ Route::get('/getEtiqueta', function () {
 
     // Exibindo a resposta
     echo '<br><br>' . $response . '<br><br>';
+});
+
+
+Route::get('/getPorNota', function () {
+
+
+
+    //Definindo parâmetros
+    $privateKey = env('PRIVATE_KEY_JT');
+    $apiAccount = env('API_ACCOUNT_JT');
+
+
+    // Montando o JSON do envio
+    $pedido = [
+        "billCodes" => '888030039580340',
+
+    ];
+
+    $pedido = json_encode($pedido);
+
+    // Codificando o pedido para envio
+    $req_pedido = rawurlencode($pedido);
+
+    // Montando o digest do header
+    $headerDigest = base64_encode(md5($pedido . $privateKey, true));
+
+    // Criando um carimbo de data/hora (timestamp)
+    $timestamp = round(microtime(true) * 1000);
+
+    // URL da API
+    // $url = 'https://demoopenapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
+    $url = 'https://openapi.jtjms-br.com/webopenplatformapi/api/logistics/trace';
+
+    // Iniciando uma sessão cURL
+    $curl = curl_init();
+
+    // Configurando as opções da requisição cURL
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS => 'bizContent=' . $req_pedido,
+        CURLOPT_HTTPHEADER => array(
+            'timestamp:' . $timestamp,
+            'apiAccount:' . $apiAccount,
+            'digest:' . $headerDigest,
+            'Content-Type: application/x-www-form-urlencoded'
+        ),
+    ));
+
+    // Enviando a requisição e obtendo a resposta
+    $response = curl_exec($curl);
+
+    // Verificando se ocorreu algum erro na requisição
+    if (curl_errno($curl)) {
+        echo 'Erro cURL: ' . curl_error($curl);
+    }
+
+
+    // Fechando a requisição cURL
+    curl_close($curl);
+
+    $resonseArray = json_decode($response, true);
+    // Exibindo a resposta
+
+    // echo   "Numero Nota : ".$value->invoice." ,  Resposta : ".$resonseArray['data'][0]['billCode']." <br>" ; 
+
+
+    dd($resonseArray['data'][0]['details']);
+    // foreach ($resonseArray['data'][0]['details'] as  $detail) {
+
+    //     StatusHistory::create([
+    //         'delivery_id' => $value->id,
+    //         'external_code' => $detail['scanCode'],
+    //         'status' => $detail['scanType'],
+    //         'observation' => $detail['scanNetworkCity'],
+    //         'detail' => $detail['scanNetworkProvince'],
+    //     ]);
+    // }
+    // $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
 });

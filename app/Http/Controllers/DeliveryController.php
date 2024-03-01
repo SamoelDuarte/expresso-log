@@ -88,7 +88,7 @@ class DeliveryController extends Controller
                 });
             })
             ->whereDoesntHave('status', function ($query) {
-                $query->whereIn('status', ['finalizado', 'entregue', 'Entrega Realizada', 'Entrega Realizada (Mobile)', 'devolvido']);
+                $query->whereIn('status', ['finalizado', 'Entregue', 'Entrega Realizada', 'Entrega Realizada (Mobile)', 'devolvido']);
             })
             ->where(function ($query) {
                 $query->whereNull('updated_at')
