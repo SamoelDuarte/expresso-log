@@ -72,7 +72,7 @@
                 <div class="col-md-4">
                     <div class="card card-home">
                         <div class="card-body">
-                            <h6 class="card-subtitle mb-2 text-muted linha-bottom">Entregas Em Aberto - </h6>
+                            <h6 class="card-subtitle mb-2 text-muted linha-bottom">Entregas Em Aberto - {{ $in_progress }} </h6>
                             <div class="row">
                                 <div class="col-md-6 text-right">
                                     <p class="card-text">texto</p>

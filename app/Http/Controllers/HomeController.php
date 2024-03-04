@@ -23,9 +23,13 @@ class HomeController extends Controller
                 ->whereDate('created_at', $today);
         })->count();
 
+        $in_progress = Delivery::whereDoesntHave('status', function ($query) {
+            $query->where('status', 'Entregue');
+        })->count();
 
-        
-        return view('admin.home.index',compact('countToday'));
+
+
+        return view('admin.home.index',compact('countToday','in_progress'));
     }
 
     public function filter(Request $request)
