@@ -14,9 +14,6 @@ class UpdateEstimatedDeliveryForDeliveries extends Migration
      */
     public function up()
     {
-        Schema::table('deliveries', function (Blueprint $table) {
-            $table->date('estimated_delivery')->nullable();
-        });
 
         DB::table('deliveries')
             ->whereNull('estimated_delivery')
@@ -38,8 +35,6 @@ class UpdateEstimatedDeliveryForDeliveries extends Migration
      */
     public function down()
     {
-        Schema::table('deliveries', function (Blueprint $table) {
-            $table->dropColumn('estimated_delivery');
-        });
+      
     }
 }
