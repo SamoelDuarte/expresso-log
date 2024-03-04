@@ -238,6 +238,7 @@ class PedidosController extends Controller
             $delivery->destination_city = $destCidade;
             $delivery->serie = $serie;
             $delivery->destination_state = $destEstado;
+            $delivery->estimated_delivery = $dataEntrega;
 
 
             try {
@@ -535,6 +536,7 @@ class PedidosController extends Controller
                 $delivery->destination_city = $destCidade;
                 $delivery->serie = $serie;
                 $delivery->destination_state = $destEstado;
+                $delivery->estimated_delivery = $dataEntrega;
 
 
                 try {
@@ -746,6 +748,7 @@ class PedidosController extends Controller
             $delivery->serie = $serie;
             $delivery->destination_city = $destCidade;
             $delivery->destination_state = $destEstado;
+            $delivery->estimated_delivery = $dataEntrega;
 
 
 
@@ -888,6 +891,7 @@ class PedidosController extends Controller
             $delivery->serie = $serie;
             $delivery->destination_city = $destCidade;
             $delivery->destination_state = $destEstado;
+            $delivery->estimated_delivery = $dataEntrega;
 
 
             try {
@@ -1064,6 +1068,7 @@ class PedidosController extends Controller
         $delivery->destination_city = $destCidade;
         $delivery->serie = $serie;
         $delivery->destination_state = $destEstado;
+        $delivery->estimated_delivery = $dataEntrega;
 
 
         try {
@@ -1354,6 +1359,7 @@ class PedidosController extends Controller
             $delivery->destination_city = $destCidade;
             $delivery->serie = $serie;
             $delivery->destination_state = $destEstado;
+            $delivery->estimated_delivery = $dataEntrega;
 
 
             try {
