@@ -27,9 +27,14 @@ class HomeController extends Controller
             $query->where('status', 'Entregue');
         })->count();
 
+        $overdue  = Delivery::where('estimated_delivery', '<=', $today)
+        ->whereDoesntHave('status', function ($query) {
+            $query->where('status', 'Entregue');
+        })
+        ->count();
 
 
-        return view('admin.home.index',compact('countToday','in_progress'));
+        return view('admin.home.index',compact('countToday','in_progress','overdue'));
     }
 
     public function filter(Request $request)

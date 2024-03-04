@@ -31,6 +31,20 @@
             height: 100%;
             /* Ajusta a altura da linha */
         }
+
+        .on-time {
+    background-color: #28a745; /* Verde */
+    color: #fff; /* Texto branco */
+    border-radius: 10px; /* Borda arredondada */
+    padding: 5px 10px; /* Espaçamento interno */
+}
+
+.overdue {
+    background-color: #dc3545; /* Vermelho */
+    color: #fff; /* Texto branco */
+    border-radius: 10px; /* Borda arredondada */
+    padding: 5px 10px; /* Espaçamento interno */
+}
     </style>
 @endsection
 
@@ -65,20 +79,29 @@
                     <div class="card card-home">
                         <div class="card-body">
                             <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Recebidas Hoje</h6>
-                            <p class="card-text">{{ $countToday }}</p>
+                            <p class="card-text"><b>{{ $countToday }}</b></p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="card card-home">
                         <div class="card-body">
-                            <h6 class="card-subtitle mb-2 text-muted linha-bottom">Entregas Em Aberto - {{ $in_progress }} </h6>
+                            <h6 class="card-subtitle mb-2 text-muted linha-bottom">Entregas Em Aberto - {{ $in_progress }}
+                            </h6>
                             <div class="row">
-                                <div class="col-md-6 text-right">
-                                    <p class="card-text">texto</p>
+                                <div class="col-md-6">
+                                    @php
+                                        $onTimePercentage = (($in_progress - $overdue) / $in_progress) * 100;
+                                    @endphp
+                                    <h4><b>{{ $in_progress - $overdue }}</b></h4>
+                                    <small>No Prazo <h4 class="on-time"><b>{{ number_format($onTimePercentage, 2) }}%</b></h4></small>
                                 </div>
-                                <div class="col-md-6 text-left">
-                                    <p class="card-text">texto</p>
+                                <div class="col-md-6">
+                                    @php
+                                    $overduePercentage = $overdue / $in_progress * 100;
+                                @endphp
+                                    <h4><b>{{ $overdue }}</b></h4>
+                                    <small>Atrazado  <h4 class="overdue"><b>{{ number_format($overduePercentage, 2) }}%</b></h4></small>
                                 </div>
                             </div>
                         </div>
