@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Delivery;
 use App\Models\Error as ModelsError;
 use App\Models\StatusHistory;
 use Carbon\Carbon;
@@ -13,7 +14,15 @@ class HomeController extends Controller
 {
     public function index()
     {
-        return view('admin.home.index');
+        // Obtém a data de hoje
+        $today = Carbon::today();
+
+        // Conta as entregas que possuem um histórico de status com a data de hoje e status "Arquivo Recebido"
+        $countToday = Delivery::whereHas('status', function ($query) use ($today) {
+            $query->where('status', 'Arquivo Recebido')
+                ->whereDate('created_at', $today);
+        })->count();
+        return view('admin.home.index',compact('countToday'));
     }
 
     public function filter(Request $request)

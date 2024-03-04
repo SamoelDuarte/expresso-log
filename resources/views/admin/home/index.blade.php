@@ -4,34 +4,33 @@
 @section('css')
     <link href="{{ asset('/assets/admin/libs/daterangepicker-master/daterangepicker.css') }}" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        .card {
+            border: none;
+            margin: auto;
+            /* Centralizar horizontalmente */
+            text-align: center;
+            background-color: #0aeaae45;
+            /* Centralizar o texto */
+        }
+
+        .linha-bottom {
+            border-bottom: 1px dotted #ccc;
+            /* Linha pontilhada abaixo do título */
+            margin-bottom: 10px;
+            /* Espaçamento abaixo do título */
+        }
+
+        .card-text {
+            font-size: 24px;
+            /* Ajuste de tamanho de fonte */
+        }
+    </style>
 @endsection
 
 @section('content')
-    <div class="container">
-        {{-- <h1>Painel de Erros</h1>
+  
 
-    <!-- Filtro de Data -->
-    <div class="form-group">
-        <label for="filterDate">Filtrar por Data:</label>
-        <select id="filterDate" class="form-control">
-            <option value="today">Hoje</option>
-            <option value="7days">Últimos 7 Dias</option>
-            <option value="30days">Últimos 30 Dias</option>
-        </select>
-    </div>
-
-    <!-- Lista de Erros -->
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th>Erro</th>
-            </tr>
-        </thead>
-        <tbody id="errorList">
-            <!-- Erros serão adicionados aqui -->
-        </tbody>
-    </table> --}}
 
         <div class="navtab-bg nav-pills d-flex">
             <ul class="nav nav-justified w-50">
@@ -53,8 +52,21 @@
             </ul>
 
         </div>
+
+
         <div class="tab-content text-muted mt-2">
             <div class="tab-pane show active" id="movement-tab">
+
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Recebidas Hoje</h6>
+                                <p class="card-text">{{ $countToday }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     {{-- <div class="col-md-6 p-0">
                         <div class="col-md-12 mb-4">
@@ -68,31 +80,6 @@
                         </div>
                     </div> --}}
 
-
-
-                    <div class="col-sm-12 col-xl-12 mb-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="text-uppercase font-size-12 font-weight-bold">Ultimas Entregas</span>
-                            </div>
-                            <div class="card-body p-0">
-                                <table class="table table-border">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Transp</th>
-                                            <th scope="col">N° Encomenda</th>
-                                            <th scope="col">N° NF</th>
-                                            <th scope="col">UF Destinatario</th>
-                                            <th scope="col">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbody-more-location">
-
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="tab-pane" id="erro-tab">
@@ -132,7 +119,7 @@
         </div>
 
 
-    </div>
+   
 @endsection
 @section('scripts')
     <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
@@ -141,393 +128,393 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
     <script>
-        var paymentMethodChart = null;
-        const Page = {
-            init: () => {
-                Page.setListeners();
-            },
+        // var paymentMethodChart = null;
+        // const Page = {
+        //     init: () => {
+        //         Page.setListeners();
+        //     },
 
-            setListeners: () => {
-                // date picker
+        //     setListeners: () => {
+        //         // date picker
 
-                moment.locale('pt-br');
+        //         moment.locale('pt-br');
 
-                var start = moment();
-                var end = moment();
+        //         var start = moment();
+        //         var end = moment();
 
-                function cb(start, end) {
-                    $("#filter-days span").html(
-                        start.format("DD/MM/YYYY") +
-                        " - " +
-                        end.format("DD/MM/YYYY")
+        //         function cb(start, end) {
+        //             $("#filter-days span").html(
+        //                 start.format("DD/MM/YYYY") +
+        //                 " - " +
+        //                 end.format("DD/MM/YYYY")
 
-                    );
+        //             );
 
-                    orderDash(start.format("YYYY-MM-DD"), end.format("YYYY-MM-DD"));
-                }
+        //             orderDash(start.format("YYYY-MM-DD"), end.format("YYYY-MM-DD"));
+        //         }
 
-                $("#filter-days").daterangepicker({
-                    startDate: start,
-                    endDate: end,
-                    ranges: {
-                        "Hoje": [moment(), moment()],
-                        "Ontem": [
-                            moment().subtract(1, "days"),
-                            moment().subtract(1, "days"),
-                        ],
-                        "Últimos 7 dias": [moment().subtract(6, "days"), moment()],
-                        "Últimos 30 dias": [moment().subtract(29, "days"), moment()],
-                        "Esse mês": [
-                            moment().startOf("month"),
-                            moment().endOf("month"),
-                        ],
-                        "Mês passado": [
-                            moment().subtract(1, "month").startOf("month"),
-                            moment().subtract(1, "month").endOf("month"),
-                        ],
-                    },
-                    locale: {
-                        format: "DD/MM/YYYY",
-                        separator: " - ",
-                        applyLabel: "Aplicar",
-                        cancelLabel: "Cancelar",
-                        fromLabel: "De",
-                        toLabel: "Até",
-                        customRangeLabel: "Personalizado",
-                        months: [
-                            "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-                            "Jul", "Ago", "Set", "Out", "Nov", "Dez"
-                        ],
-                        monthsShort: [
-                            "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-                            "Jul", "Ago", "Set", "Out", "Nov", "Dez"
-                        ],
-                        daysOfWeek: [
-                            "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb",
-                        ],
-                        monthNames: [
-                            "Janeiro",
-                            "Fevereiro",
-                            "Março",
-                            "Abril",
-                            "Maio",
-                            "Junho",
-                            "Julho",
-                            "Agosto",
-                            "Setembro",
-                            "Outubro",
-                            "Novembro",
-                            "Dezembro",
-                        ],
-                        firstDay: 0,
-                    },
-                }, cb);
+        //         $("#filter-days").daterangepicker({
+        //             startDate: start,
+        //             endDate: end,
+        //             ranges: {
+        //                 "Hoje": [moment(), moment()],
+        //                 "Ontem": [
+        //                     moment().subtract(1, "days"),
+        //                     moment().subtract(1, "days"),
+        //                 ],
+        //                 "Últimos 7 dias": [moment().subtract(6, "days"), moment()],
+        //                 "Últimos 30 dias": [moment().subtract(29, "days"), moment()],
+        //                 "Esse mês": [
+        //                     moment().startOf("month"),
+        //                     moment().endOf("month"),
+        //                 ],
+        //                 "Mês passado": [
+        //                     moment().subtract(1, "month").startOf("month"),
+        //                     moment().subtract(1, "month").endOf("month"),
+        //                 ],
+        //             },
+        //             locale: {
+        //                 format: "DD/MM/YYYY",
+        //                 separator: " - ",
+        //                 applyLabel: "Aplicar",
+        //                 cancelLabel: "Cancelar",
+        //                 fromLabel: "De",
+        //                 toLabel: "Até",
+        //                 customRangeLabel: "Personalizado",
+        //                 months: [
+        //                     "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+        //                     "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+        //                 ],
+        //                 monthsShort: [
+        //                     "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+        //                     "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+        //                 ],
+        //                 daysOfWeek: [
+        //                     "Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb",
+        //                 ],
+        //                 monthNames: [
+        //                     "Janeiro",
+        //                     "Fevereiro",
+        //                     "Março",
+        //                     "Abril",
+        //                     "Maio",
+        //                     "Junho",
+        //                     "Julho",
+        //                     "Agosto",
+        //                     "Setembro",
+        //                     "Outubro",
+        //                     "Novembro",
+        //                     "Dezembro",
+        //                 ],
+        //                 firstDay: 0,
+        //             },
+        //         }, cb);
 
-                cb(start, end);
+        //         cb(start, end);
 
-                function orderDash(start, end) {
+        //         function orderDash(start, end) {
 
-                    // getconfigDaysDashborad(start, end);
-                    tableError(start, end)
-                }
+        //             // getconfigDaysDashborad(start, end);
+        //             tableError(start, end)
+        //         }
 
-                function getconfigDaysDashborad(start, end) {
-                    let dateStart = start.format("YYYY-MM-DD");
-                    let dateEnd = end.format("YYYY-MM-DD");
+        //         function getconfigDaysDashborad(start, end) {
+        //             let dateStart = start.format("YYYY-MM-DD");
+        //             let dateEnd = end.format("YYYY-MM-DD");
 
-                    $.ajax({
-                        type: "GET",
-                        dataType: "JSON",
-                        data: {
-                            dateStart,
-                            dateEnd
-                        },
-                        url: "/dashboard/get-days-dashborad",
-                        beforeSend: () => {
-                            Utils.isLoading();
-                        },
-                        success: (data) => {
-                            $("#count-location").html(data['count-location'])
-                            $("#count-location2").html(data['count-location'])
-                            $("#amounts-opened").html(data['amounts-opened'])
-                            $("#amounts-settings").html(data['amounts-settings'])
-                            $("#amounts-cancel").html(data['amounts-cancel'])
-                            $("#amounts-awaiting-withdrawal").html(data['amounts-awaiting-withdrawal'])
-                            $("#amounts-received").html(data['amounts-received'])
-                            $("#amounts-late").html(data['amounts-late'])
-                            if (paymentMethodChart) {
-                                paymentMethodChart.destroy();
-                            }
-                            configChart(data['amounts-pix'], data['amounts-credit'], data[
-                                'amounts-debit'])
-                            // upChart(data['amounts-pix'], data['amounts-credit'], data['amounts-debit']);
-                        },
-                        error: (xhr) => {},
-                        complete: () => {},
-                    });
-                    initTable(dateStart, dateEnd);
-                    initTableLastLocation();
-                }
+        //             $.ajax({
+        //                 type: "GET",
+        //                 dataType: "JSON",
+        //                 data: {
+        //                     dateStart,
+        //                     dateEnd
+        //                 },
+        //                 url: "/dashboard/get-days-dashborad",
+        //                 beforeSend: () => {
+        //                     Utils.isLoading();
+        //                 },
+        //                 success: (data) => {
+        //                     $("#count-location").html(data['count-location'])
+        //                     $("#count-location2").html(data['count-location'])
+        //                     $("#amounts-opened").html(data['amounts-opened'])
+        //                     $("#amounts-settings").html(data['amounts-settings'])
+        //                     $("#amounts-cancel").html(data['amounts-cancel'])
+        //                     $("#amounts-awaiting-withdrawal").html(data['amounts-awaiting-withdrawal'])
+        //                     $("#amounts-received").html(data['amounts-received'])
+        //                     $("#amounts-late").html(data['amounts-late'])
+        //                     if (paymentMethodChart) {
+        //                         paymentMethodChart.destroy();
+        //                     }
+        //                     configChart(data['amounts-pix'], data['amounts-credit'], data[
+        //                         'amounts-debit'])
+        //                     // upChart(data['amounts-pix'], data['amounts-credit'], data['amounts-debit']);
+        //                 },
+        //                 error: (xhr) => {},
+        //                 complete: () => {},
+        //             });
+        //             initTable(dateStart, dateEnd);
+        //             initTableLastLocation();
+        //         }
 
-                function tableError(start, end) {
-                    let dateStart = start;
-                    let dateEnd = end;
-                    $.ajax({
-                        type: "GET",
-                        dataType: "JSON",
-                        data: {
-                            dateStart,
-                            dateEnd
-                        },
-                        url: "/home/errors/filter",
-                        beforeSend: () => {
-                            Utils.isLoading();
-                        },
-                        success: (data) => {
+        //         function tableError(start, end) {
+        //             let dateStart = start;
+        //             let dateEnd = end;
+        //             $.ajax({
+        //                 type: "GET",
+        //                 dataType: "JSON",
+        //                 data: {
+        //                     dateStart,
+        //                     dateEnd
+        //                 },
+        //                 url: "/home/errors/filter",
+        //                 beforeSend: () => {
+        //                     Utils.isLoading();
+        //                 },
+        //                 success: (data) => {
 
-                            var btnError = document.getElementById("count-error");
-                            btnError.textContent = data['errors'].length;
-                            const errorList = document.getElementById('errorList');
-                            errorList.innerHTML = ''; // Limpa a lista atual
-                            data.errors.forEach(error => {
-                                const row = document.createElement('tr');
-                                row.innerHTML = `
-                                    <td>${error.formatted_date}</td>
-                                    <td>${error.erro}</td>
-                                `;
-                                errorList.appendChild(row);
-                            });
+        //                     var btnError = document.getElementById("count-error");
+        //                     btnError.textContent = data['errors'].length;
+        //                     const errorList = document.getElementById('errorList');
+        //                     errorList.innerHTML = ''; // Limpa a lista atual
+        //                     data.errors.forEach(error => {
+        //                         const row = document.createElement('tr');
+        //                         row.innerHTML = `
+        //                             <td>${error.formatted_date}</td>
+        //                             <td>${error.erro}</td>
+        //                         `;
+        //                         errorList.appendChild(row);
+        //                     });
 
-                        },
-                        error: (xhr) => {},
-                        complete: () => {
-                            Utils.isLoading(false);
-                        },
-                    });
+        //                 },
+        //                 error: (xhr) => {},
+        //                 complete: () => {
+        //                     Utils.isLoading(false);
+        //                 },
+        //             });
 
-                }
+        //         }
 
-                function initTable(start, end) {
-                    $.ajax({
-                        type: "GET",
-                        dataType: "JSON",
-                        data: {
-                            start,
-                            end
-                        },
-                        url: "/dashboard/get-more-locations",
-                        beforeSend: () => {
-                            Utils.isLoading();
-                        },
-                        success: (data) => {
-                            $("#tbody-more-location").empty();
-                            data.products.data.map((products) => {
-                                var valor = parseFloat(products.total_amount).toLocaleString(
-                                    'pt-br', {
-                                        minimumFractionDigits: 2
-                                    });
-                                $("#tbody-more-location").append(`
-                        <tr>
-                           <td>${products.variant.product.name+'-'+products.variant.size+'-'+products.variant.color}</td>
-                           <td>${products.sold_qty}</td>
-                           <td >${'R$ '+valor}</td>
-                        </tr>
+        //         function initTable(start, end) {
+        //             $.ajax({
+        //                 type: "GET",
+        //                 dataType: "JSON",
+        //                 data: {
+        //                     start,
+        //                     end
+        //                 },
+        //                 url: "/dashboard/get-more-locations",
+        //                 beforeSend: () => {
+        //                     Utils.isLoading();
+        //                 },
+        //                 success: (data) => {
+        //                     $("#tbody-more-location").empty();
+        //                     data.products.data.map((products) => {
+        //                         var valor = parseFloat(products.total_amount).toLocaleString(
+        //                             'pt-br', {
+        //                                 minimumFractionDigits: 2
+        //                             });
+        //                         $("#tbody-more-location").append(`
+        //                 <tr>
+        //                    <td>${products.variant.product.name+'-'+products.variant.size+'-'+products.variant.color}</td>
+        //                    <td>${products.sold_qty}</td>
+        //                    <td >${'R$ '+valor}</td>
+        //                 </tr>
                         
-                        `);
+        //                 `);
 
-                            });
-                            Utils.setupPagination({
-                                data: data.products,
-                                get: "Page.getCombos",
-                            });
-                        },
-                        error: (xhr) => {
+        //                     });
+        //                     Utils.setupPagination({
+        //                         data: data.products,
+        //                         get: "Page.getCombos",
+        //                     });
+        //                 },
+        //                 error: (xhr) => {
 
-                        },
-                        complete: () => {
-                            Utils.isLoading(false);
-                        },
-                    });
-                }
+        //                 },
+        //                 complete: () => {
+        //                     Utils.isLoading(false);
+        //                 },
+        //             });
+        //         }
 
-                function upChart(data) {
-                    chart.updateSeries(
-                        [{
-                            data: data.data
-                        }]
-                    )
-                }
+        //         function upChart(data) {
+        //             chart.updateSeries(
+        //                 [{
+        //                     data: data.data
+        //                 }]
+        //             )
+        //         }
 
-                function configChart(pix, credit, debit) {
-                    var options = {
-                        series: [pix, credit, debit],
-                        chart: {
-                            height: 390,
-                            type: 'radialBar',
-                        },
-                        plotOptions: {
-                            radialBar: {
-                                offsetY: 0,
-                                startAngle: 0,
-                                endAngle: 270,
-                                hollow: {
-                                    margin: 5,
-                                    size: '30%',
-                                    background: 'transparent',
-                                    image: undefined,
-                                },
-                                dataLabels: {
-                                    name: {
-                                        show: false,
-                                    },
-                                    value: {
-                                        show: false,
-                                    }
-                                }
-                            }
-                        },
-                        colors: ['#0084ff', '#39539E', '#0077B5'],
-                        labels: ['Pix', 'Cartão De Crédito', 'Cartão De Débito'],
-                        legend: {
-                            show: true,
-                            floating: true,
-                            fontSize: '16px',
-                            position: 'left',
-                            offsetX: 50,
-                            offsetY: 15,
-                            labels: {
-                                useSeriesColors: true,
-                            },
-                            markers: {
-                                size: 0
-                            },
-                            formatter: function(seriesName, opts) {
-                                return seriesName + ":  " + opts.w.globals.series[opts.seriesIndex]
-                            },
-                            itemMargin: {
-                                vertical: 3
-                            }
-                        },
-                        responsive: [{
-                            breakpoint: 480,
-                            options: {
-                                legend: {
-                                    show: false
-                                }
-                            }
-                        }]
-                    };
+        //         function configChart(pix, credit, debit) {
+        //             var options = {
+        //                 series: [pix, credit, debit],
+        //                 chart: {
+        //                     height: 390,
+        //                     type: 'radialBar',
+        //                 },
+        //                 plotOptions: {
+        //                     radialBar: {
+        //                         offsetY: 0,
+        //                         startAngle: 0,
+        //                         endAngle: 270,
+        //                         hollow: {
+        //                             margin: 5,
+        //                             size: '30%',
+        //                             background: 'transparent',
+        //                             image: undefined,
+        //                         },
+        //                         dataLabels: {
+        //                             name: {
+        //                                 show: false,
+        //                             },
+        //                             value: {
+        //                                 show: false,
+        //                             }
+        //                         }
+        //                     }
+        //                 },
+        //                 colors: ['#0084ff', '#39539E', '#0077B5'],
+        //                 labels: ['Pix', 'Cartão De Crédito', 'Cartão De Débito'],
+        //                 legend: {
+        //                     show: true,
+        //                     floating: true,
+        //                     fontSize: '16px',
+        //                     position: 'left',
+        //                     offsetX: 50,
+        //                     offsetY: 15,
+        //                     labels: {
+        //                         useSeriesColors: true,
+        //                     },
+        //                     markers: {
+        //                         size: 0
+        //                     },
+        //                     formatter: function(seriesName, opts) {
+        //                         return seriesName + ":  " + opts.w.globals.series[opts.seriesIndex]
+        //                     },
+        //                     itemMargin: {
+        //                         vertical: 3
+        //                     }
+        //                 },
+        //                 responsive: [{
+        //                     breakpoint: 480,
+        //                     options: {
+        //                         legend: {
+        //                             show: false
+        //                         }
+        //                     }
+        //                 }]
+        //             };
 
-                    paymentMethodChart = new ApexCharts(document.querySelector("#chart"), options);
-                    paymentMethodChart.render();
-                }
-            },
-        };
-        Page.init();
+        //             paymentMethodChart = new ApexCharts(document.querySelector("#chart"), options);
+        //             paymentMethodChart.render();
+        //         }
+        //     },
+        // };
+        // Page.init();
 
 
-        var options = {
-          series: [{
-        
-          data: []
-        }],
-          annotations: {
-          points: [{
-            x: 'Bananas',
-            seriesIndex: 0,
-            label: {
-              borderColor: '#775DD0',
-              offsetY: 0,
-              style: {
-                color: '#fff',
-                background: '#775DD0',
-              },
-              text: 'Bananas are good',
-            }
-          }]
-        },
-        chart: {
-          height: 350,
-          type: 'bar',
-        },
-        plotOptions: {
-          bar: {
-            borderRadius: 10,
-            columnWidth: '50%',
-            horizontal:true
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          width: 2
-        },
-        
-        grid: {
-          row: {
-            colors: ['#fff', '#f2f2f2']
-          }
-        },
-        xaxis: {
-          labels: {
-            rotate: -45
-          },
-          categories: [ ],
-          tickPlacement: 'on'
-        },
-        yaxis: {
-          title: {
-            text: 'Status Entrega',
-          },
-        },
-        fill: {
-          type: 'gradient',
-          gradient: {
-            shade: 'light',
-            type: "horizontal",
-            shadeIntensity: 0.25,
-            gradientToColors: undefined,
-            inverseColors: true,
-            opacityFrom: 0.85,
-            opacityTo: 0.85,
-            stops: [50, 0, 100]
-          },
-        }
-        };
+        // var options = {
+        //     series: [{
 
-        $.ajax({
-            type: "GET",
-            dataType: "JSON",
-            url: "/home/status/filter",
-            beforeSend: () => {
-                Utils.isLoading();
-            },
-            success: (data) => {
-                var dadosDoBanco = data;
+        //         data: []
+        //     }],
+        //     annotations: {
+        //         points: [{
+        //             x: 'Bananas',
+        //             seriesIndex: 0,
+        //             label: {
+        //                 borderColor: '#775DD0',
+        //                 offsetY: 0,
+        //                 style: {
+        //                     color: '#fff',
+        //                     background: '#775DD0',
+        //                 },
+        //                 text: 'Bananas are good',
+        //             }
+        //         }]
+        //     },
+        //     chart: {
+        //         height: 350,
+        //         type: 'bar',
+        //     },
+        //     plotOptions: {
+        //         bar: {
+        //             borderRadius: 10,
+        //             columnWidth: '50%',
+        //             horizontal: true
+        //         }
+        //     },
+        //     dataLabels: {
+        //         enabled: false
+        //     },
+        //     stroke: {
+        //         width: 2
+        //     },
 
-                // Extrair os dados do banco em um formato adequado para o gráfico
-                var categorias = [];
-                var series = [];
+        //     grid: {
+        //         row: {
+        //             colors: ['#fff', '#f2f2f2']
+        //         }
+        //     },
+        //     xaxis: {
+        //         labels: {
+        //             rotate: -45
+        //         },
+        //         categories: [],
+        //         tickPlacement: 'on'
+        //     },
+        //     yaxis: {
+        //         title: {
+        //             text: 'Status Entrega',
+        //         },
+        //     },
+        //     fill: {
+        //         type: 'gradient',
+        //         gradient: {
+        //             shade: 'light',
+        //             type: "horizontal",
+        //             shadeIntensity: 0.25,
+        //             gradientToColors: undefined,
+        //             inverseColors: true,
+        //             opacityFrom: 0.85,
+        //             opacityTo: 0.85,
+        //             stops: [50, 0, 100]
+        //         },
+        //     }
+        // };
 
-                dadosDoBanco.forEach(function(item) {
-                    categorias.push(item.status);
-                    series.push(item.amount);
-                });
+        // $.ajax({
+        //     type: "GET",
+        //     dataType: "JSON",
+        //     url: "/home/status/filter",
+        //     beforeSend: () => {
+        //         Utils.isLoading();
+        //     },
+        //     success: (data) => {
+        //         var dadosDoBanco = data;
 
-                // Atualizar os dados no objeto 'options'
-                options.series[0].data = series;
-                options.xaxis.categories = categorias;
+        //         // Extrair os dados do banco em um formato adequado para o gráfico
+        //         var categorias = [];
+        //         var series = [];
 
-                // Renderizar o gráfico
-                var chart = new ApexCharts(document.querySelector("#chart"), options);
-                chart.render();
+        //         dadosDoBanco.forEach(function(item) {
+        //             categorias.push(item.status);
+        //             series.push(item.amount);
+        //         });
 
-            },
-            error: (xhr) => {},
-            complete: () => {
-                Utils.isLoading(false);
-            },
-        });
+        //         // Atualizar os dados no objeto 'options'
+        //         options.series[0].data = series;
+        //         options.xaxis.categories = categorias;
+
+        //         // Renderizar o gráfico
+        //         var chart = new ApexCharts(document.querySelector("#chart"), options);
+        //         chart.render();
+
+        //     },
+        //     error: (xhr) => {},
+        //     complete: () => {
+        //         Utils.isLoading(false);
+        //     },
+        // });
     </script>
 @endsection
