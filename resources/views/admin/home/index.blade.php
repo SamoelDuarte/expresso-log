@@ -25,50 +25,68 @@
             font-size: 24px;
             /* Ajuste de tamanho de fonte */
         }
+
+        .linha-vertical {
+            border-left: 1px solid #ccc;
+            height: 100%;
+            /* Ajusta a altura da linha */
+        }
     </style>
 @endsection
 
 @section('content')
-  
+    <div class="navtab-bg nav-pills d-flex">
+        <ul class="nav nav-justified w-50">
+            <li class="nav-item">
+                <a href="#movement-tab" data-toggle="tab" aria-expanded="false"
+                    class="nav-link active h-100 d-flex justify-content-center align-items-center">
+                    <span class="d-block d-sm-none"><i class="uil-home-alt"></i></span>
+                    <span class="d-none d-sm-block">Status Entregas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#erro-tab" data-toggle="tab" aria-expanded="true"
+                    class="nav-link h-100 d-flex justify-content-center align-items-center">
+                    <span class="d-block d-sm-none"><i class="uil-user"></i></span>
+                    <span class="d-none d-sm-block">Erros</span>
+                    <button class="btn btn-erro" id="count-error"></button>
+                </a>
+            </li>
+        </ul>
+
+    </div>
 
 
-        <div class="navtab-bg nav-pills d-flex">
-            <ul class="nav nav-justified w-50">
-                <li class="nav-item">
-                    <a href="#movement-tab" data-toggle="tab" aria-expanded="false"
-                        class="nav-link active h-100 d-flex justify-content-center align-items-center">
-                        <span class="d-block d-sm-none"><i class="uil-home-alt"></i></span>
-                        <span class="d-none d-sm-block">Status Entregas</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="#erro-tab" data-toggle="tab" aria-expanded="true"
-                        class="nav-link h-100 d-flex justify-content-center align-items-center">
-                        <span class="d-block d-sm-none"><i class="uil-user"></i></span>
-                        <span class="d-none d-sm-block">Erros</span>
-                        <button class="btn btn-erro" id="count-error"></button>
-                    </a>
-                </li>
-            </ul>
+    <div class="tab-content text-muted mt-2">
+        <div class="tab-pane show active" id="movement-tab">
 
-        </div>
-
-
-        <div class="tab-content text-muted mt-2">
-            <div class="tab-pane show active" id="movement-tab">
-
-                <div class="row">
-                    <div class="col-md-2">
-                        <div class="card card-home">
-                            <div class="card-body">
-                                <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Recebidas Hoje</h6>
-                                <p class="card-text">{{ $countToday }}</p>
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="card card-home">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Recebidas Hoje</h6>
+                            <p class="card-text">{{ $countToday }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card card-home">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted linha-bottom">Entregas Em Aberto - </h6>
+                            <div class="row">
+                                <div class="col-md-6 text-right">
+                                    <p class="card-text">texto</p>
+                                </div>
+                                <div class="col-md-6 text-left">
+                                    <p class="card-text">texto</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    {{-- <div class="col-md-6 p-0">
+            </div>
+            <div class="row">
+                {{-- <div class="col-md-6 p-0">
                         <div class="col-md-12 mb-4">
                             <div class="card">
                                 <div class="card-body">
@@ -80,46 +98,43 @@
                         </div>
                     </div> --}}
 
-                </div>
             </div>
-            <div class="tab-pane" id="erro-tab">
+        </div>
+        <div class="tab-pane" id="erro-tab">
 
-                <div class="row">
-                    <div class="col-sm-12">
-                        <form class="form-inline float-sm-right mt-3 mt-sm-0">
-                            <div class="form-group mb-sm-0">
-                                <h4 for="filter-days">Filtro de dias: &nbsp;&nbsp;</h4>
-                                <div id="filter-days" class="form-control">
-                                    <i class="fa fa-calendar"></i>&nbsp;
-                                    <span></span> <i class="fa fa-caret-down"></i>
-                                </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <form class="form-inline float-sm-right mt-3 mt-sm-0">
+                        <div class="form-group mb-sm-0">
+                            <h4 for="filter-days">Filtro de dias: &nbsp;&nbsp;</h4>
+                            <div id="filter-days" class="form-control">
+                                <i class="fa fa-calendar"></i>&nbsp;
+                                <span></span> <i class="fa fa-caret-down"></i>
                             </div>
-                        </form>
-                    </div>
-                    <div class="col-sm-12 col-xl-12 mb-4">
-                        <div class="card">
+                        </div>
+                    </form>
+                </div>
+                <div class="col-sm-12 col-xl-12 mb-4">
+                    <div class="card">
 
-                            <div class="card-body p-0">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Data</th>
-                                            <th>Erro</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="errorList">
-                                        <!-- Erros serão adicionados aqui -->
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="card-body p-0">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Erro</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="errorList">
+                                    <!-- Erros serão adicionados aqui -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-
-   
+    </div>
 @endsection
 @section('scripts')
     <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>

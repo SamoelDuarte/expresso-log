@@ -22,6 +22,9 @@ class HomeController extends Controller
             $query->where('status', 'Arquivo Recebido')
                 ->whereDate('created_at', $today);
         })->count();
+
+
+        
         return view('admin.home.index',compact('countToday'));
     }
 

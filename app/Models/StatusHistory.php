@@ -43,6 +43,7 @@ class StatusHistory extends Model
         || strtolower($statusHistory->status) === 'finalizado'
         || strtolower($statusHistory->status) === 'entrega realizada (mobile)'
         || strtolower($statusHistory->status) === 'assinatura de encomenda'
+        || strtolower($statusHistory->status) === 'consolidado'
         || strtolower($statusHistory->status) === 'entrega realizada') {
             $statusHistory->status = "Entregue";
             $statusHistory->send = 1;
