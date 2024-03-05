@@ -32,6 +32,7 @@ class PedidosController extends Controller
             $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
             $XmlArray = json_decode($jsonString, true);
             $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
+            $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
            
             switch ($documento) {
                     // Transportadora DBA
@@ -64,7 +65,7 @@ class PedidosController extends Controller
                     break;
 
                 default:
-                    Error::create(['erro' => 'Transportadora não Integrada CNPJ:' . $documento]);
+                    Error::create(['erro' => 'Transportadora não Integrada CNPJ:' . $documento ." , Nota : ".$numNota]);
             }
         } catch (Exception $e) {
             // Tratamento da exceção aqui
