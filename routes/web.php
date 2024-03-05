@@ -70,7 +70,7 @@ Route::middleware('auth.admin')->group(function () {
     Route::prefix('/home')->controller(HomeController::class)->group(function () {
         Route::get('/', 'index')->name('admin.dashboard');
         Route::get('/errors/filter', 'filter');
-        Route::get('/status/filter', 'filterStatus');
+        Route::get('/status', 'statusDash');
     });
 
     Route::prefix('/transportadora')->controller(CarrierController::class)->group(function () {
@@ -1455,4 +1455,20 @@ Route::get('/statusAll', function () {
     $statusList = StatusHistory::distinct()->pluck('status');
 
     dd($statusList);
+});
+
+Route::get('/dash',function(){
+    $statusCounts = DB::table('deliveries')
+    ->leftJoin('status_history', function ($join) {
+        $join->on('deliveries.id', '=', 'status_history.delivery_id')
+            ->whereRaw('status_history.id = (select max(id) from status_history where status_history.delivery_id = deliveries.id)');
+    })
+    ->whereNotIn('status_history.status', ['entregue', 'devolvido']) // Exclui deliveries com status de "entregue" e "devolvido"
+    ->orWhereNull('status_history.status') // Também inclui deliveries sem status_history
+    ->whereDate('status_history.created_at', '>', '2024-02-25') // Considera apenas as entregas após a data específica de criação do status_history
+    ->select('status_history.status', DB::raw('count(*) as count'))
+    ->groupBy('status_history.status')
+    ->get();
+
+    dd($statusCounts);
 });

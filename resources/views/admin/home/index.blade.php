@@ -125,8 +125,11 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-md-12">
+                    <canvas id="statusChart"></canvas>
+                </div>
 
-                
+
             </div>
             <div class="row">
                 {{-- <div class="col-md-6 p-0">
@@ -144,7 +147,6 @@
             </div>
         </div>
         <div class="tab-pane" id="erro-tab">
-
             <div class="row">
                 <div class="col-sm-12">
                     <form class="form-inline float-sm-right mt-3 mt-sm-0">
@@ -271,48 +273,10 @@
                 cb(start, end);
 
                 function orderDash(start, end) {
-
-                    // getconfigDaysDashborad(start, end);
                     tableError(start, end)
                 }
 
-                // function getconfigDaysDashborad(start, end) {
-                //     let dateStart = start.format("YYYY-MM-DD");
-                //     let dateEnd = end.format("YYYY-MM-DD");
-
-                //     $.ajax({
-                //         type: "GET",
-                //         dataType: "JSON",
-                //         data: {
-                //             dateStart,
-                //             dateEnd
-                //         },
-                //         url: "/dashboard/get-days-dashborad",
-                //         beforeSend: () => {
-                //             Utils.isLoading();
-                //         },
-                //         success: (data) => {
-                //             $("#count-location").html(data['count-location'])
-                //             $("#count-location2").html(data['count-location'])
-                //             $("#amounts-opened").html(data['amounts-opened'])
-                //             $("#amounts-settings").html(data['amounts-settings'])
-                //             $("#amounts-cancel").html(data['amounts-cancel'])
-                //             $("#amounts-awaiting-withdrawal").html(data['amounts-awaiting-withdrawal'])
-                //             $("#amounts-received").html(data['amounts-received'])
-                //             $("#amounts-late").html(data['amounts-late'])
-                //             if (paymentMethodChart) {
-                //                 paymentMethodChart.destroy();
-                //             }
-                //             configChart(data['amounts-pix'], data['amounts-credit'], data[
-                //                 'amounts-debit'])
-                //             // upChart(data['amounts-pix'], data['amounts-credit'], data['amounts-debit']);
-                //         },
-                //         error: (xhr) => {},
-                //         complete: () => {},
-                //     });
-                //     initTable(dateStart, dateEnd);
-                //     initTableLastLocation();
-                // }
+              
 
                 function tableError(start, end) {
                     let dateStart = start;
@@ -352,227 +316,63 @@
 
                 }
 
-                function initTable(start, end) {
-                    $.ajax({
-                        type: "GET",
-                        dataType: "JSON",
-                        data: {
-                            start,
-                            end
-                        },
-                        url: "/dashboard/get-more-locations",
-                        beforeSend: () => {
-                            Utils.isLoading();
-                        },
-                        success: (data) => {
-                            $("#tbody-more-location").empty();
-                            data.products.data.map((products) => {
-                                var valor = parseFloat(products.total_amount).toLocaleString(
-                                    'pt-br', {
-                                        minimumFractionDigits: 2
-                                    });
-                                $("#tbody-more-location").append(`
-                        <tr>
-                           <td>${products.variant.product.name+'-'+products.variant.size+'-'+products.variant.color}</td>
-                           <td>${products.sold_qty}</td>
-                           <td >${'R$ '+valor}</td>
-                        </tr>
-                        
-                        `);
-
-                            });
-                            Utils.setupPagination({
-                                data: data.products,
-                                get: "Page.getCombos",
-                            });
-                        },
-                        error: (xhr) => {
-
-                        },
-                        complete: () => {
-                            Utils.isLoading(false);
-                        },
-                    });
-                }
-
-                // function upChart(data) {
-                //     chart.updateSeries(
-                //         [{
-                //             data: data.data
-                //         }]
-                //     )
-                // }
-
-                // function configChart(pix, credit, debit) {
-                //     var options = {
-                //         series: [pix, credit, debit],
-                //         chart: {
-                //             height: 390,
-                //             type: 'radialBar',
-                //         },
-                //         plotOptions: {
-                //             radialBar: {
-                //                 offsetY: 0,
-                //                 startAngle: 0,
-                //                 endAngle: 270,
-                //                 hollow: {
-                //                     margin: 5,
-                //                     size: '30%',
-                //                     background: 'transparent',
-                //                     image: undefined,
-                //                 },
-                //                 dataLabels: {
-                //                     name: {
-                //                         show: false,
-                //                     },
-                //                     value: {
-                //                         show: false,
-                //                     }
-                //                 }
-                //             }
-                //         },
-                //         colors: ['#0084ff', '#39539E', '#0077B5'],
-                //         labels: ['Pix', 'Cartão De Crédito', 'Cartão De Débito'],
-                //         legend: {
-                //             show: true,
-                //             floating: true,
-                //             fontSize: '16px',
-                //             position: 'left',
-                //             offsetX: 50,
-                //             offsetY: 15,
-                //             labels: {
-                //                 useSeriesColors: true,
-                //             },
-                //             markers: {
-                //                 size: 0
-                //             },
-                //             formatter: function(seriesName, opts) {
-                //                 return seriesName + ":  " + opts.w.globals.series[opts.seriesIndex]
-                //             },
-                //             itemMargin: {
-                //                 vertical: 3
-                //             }
-                //         },
-                //         responsive: [{
-                //             breakpoint: 480,
-                //             options: {
-                //                 legend: {
-                //                     show: false
-                //                 }
-                //             }
-                //         }]
-                //     };
-
-                //     paymentMethodChart = new ApexCharts(document.querySelector("#chart"), options);
-                //     paymentMethodChart.render();
-                // }
             },
         };
         Page.init();
 
+        // Função para carregar os dados e criar o gráfico
+function fetchDataAndCreateChart() {
+    // Faça uma solicitação AJAX para obter os dados
+    $.ajax({
+        url: '/home/status', // Substitua 'url_para_obter_dados' pela sua URL de backend
+        method: 'GET',
+        success: function(data) {
+            // Ordenar os dados pelo valor de 'count' (quantidade) em ordem decrescente
+            data.sort(function(a, b) {
+                return b.count - a.count;
+            });
 
-        // var options = {
-        //     series: [{
+            // Extrair os labels (status) e os valores (quantidades) dos dados ordenados
+            var labels = data.map(function(item, index) {
+                return `${item.status} (${item.count})`; // Adiciona o número após o status
+            });
 
-        //         data: []
-        //     }],
-        //     annotations: {
-        //         points: [{
-        //             x: 'Bananas',
-        //             seriesIndex: 0,
-        //             label: {
-        //                 borderColor: '#775DD0',
-        //                 offsetY: 0,
-        //                 style: {
-        //                     color: '#fff',
-        //                     background: '#775DD0',
-        //                 },
-        //                 text: 'Bananas are good',
-        //             }
-        //         }]
-        //     },
-        //     chart: {
-        //         height: 350,
-        //         type: 'bar',
-        //     },
-        //     plotOptions: {
-        //         bar: {
-        //             borderRadius: 10,
-        //             columnWidth: '50%',
-        //             horizontal: true
-        //         }
-        //     },
-        //     dataLabels: {
-        //         enabled: false
-        //     },
-        //     stroke: {
-        //         width: 2
-        //     },
+            var values = data.map(function(item) {
+                return item.count;
+            });
 
-        //     grid: {
-        //         row: {
-        //             colors: ['#fff', '#f2f2f2']
-        //         }
-        //     },
-        //     xaxis: {
-        //         labels: {
-        //             rotate: -45
-        //         },
-        //         categories: [],
-        //         tickPlacement: 'on'
-        //     },
-        //     yaxis: {
-        //         title: {
-        //             text: 'Status Entrega',
-        //         },
-        //     },
-        //     fill: {
-        //         type: 'gradient',
-        //         gradient: {
-        //             shade: 'light',
-        //             type: "horizontal",
-        //             shadeIntensity: 0.25,
-        //             gradientToColors: undefined,
-        //             inverseColors: true,
-        //             opacityFrom: 0.85,
-        //             opacityTo: 0.85,
-        //             stops: [50, 0, 100]
-        //         },
-        //     }
-        // };
+            // Configuração do gráfico
+            var ctx = document.getElementById('statusChart').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'horizontalBar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantidade',
+                        data: values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error(error); // Lidar com erros de solicitação AJAX
+        }
+    });
+}
 
-        $.ajax({
-            type: "GET",
-            dataType: "JSON",
-            url: "/home/status/filter",
-            beforeSend: () => {
-                Utils.isLoading();
-            },
-            success: (data) => {
-                var dadosDoBanco = data;
-
-                // Extrair os dados do banco em um formato adequado para o gráfico
-                var categorias = [];
-                var series = [];
-
-                dadosDoBanco.forEach(function(item) {
-                    categorias.push(item.status);
-                    series.push(item.amount);
-                });
-
-                // Atualizar os dados no objeto 'options'
-                options.series[0].data = series;
-                options.xaxis.categories = categorias;
-
-                // Renderizar o gráfico
-                var chart = new ApexCharts(document.querySelector("#chart"), options);
-                chart.render();
-
-            },
-            error: (xhr) => {},
-            complete: () => {
-                Utils.isLoading(false);
-            },
-        });
+// Chame a função para carregar os dados e criar o gráfico
+fetchDataAndCreateChart();
     </script>
 @endsection

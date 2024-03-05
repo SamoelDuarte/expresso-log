@@ -28,17 +28,17 @@ class HomeController extends Controller
         })->count();
 
         $overdue  = Delivery::where('estimated_delivery', '<=', $today)
-        ->whereDoesntHave('status', function ($query) {
-            $query->where('status', 'Entregue');
-        })
-        ->count();
+            ->whereDoesntHave('status', function ($query) {
+                $query->where('status', 'Entregue');
+            })
+            ->count();
 
         $returned = Delivery::whereHas('status', function ($query) {
             $query->where('status', 'devolvido');
         })->count();
 
 
-        return view('admin.home.index',compact('countToday','in_progress','overdue','returned'));
+        return view('admin.home.index', compact('countToday', 'in_progress', 'overdue', 'returned'));
     }
 
     public function filter(Request $request)
@@ -65,28 +65,21 @@ class HomeController extends Controller
         return response()->json(['errors' => $errors]);
     }
 
-    public function filterStatus(Request $request)
+    public function statusDash(Request $request)
     {
-        // Obtenha as datas de início e fim do request
-        $dateStart = $request->input('dateStart');
-        $dateEnd = $request->input('dateEnd');
-
-
-        $dateStart = Carbon::parse($dateStart)->startOfDay();
-        $dateEnd = Carbon::parse($dateEnd)->endOfDay();
-        // Filtre os erros com base nas datas fornecidas
-        $errors = ModelsError::whereBetween('created_at', [$dateStart, $dateEnd])
-            ->orderBy('created_at', 'desc')
-            ->get();
-        $dadosAgrupados = DB::table('status_history as sh1')
-            ->select('sh1.delivery_id', 'sh1.status', 'sh1.created_at', DB::raw('COUNT(*) as amount'))
-            ->join(DB::raw('(SELECT MAX(id) as max_id, delivery_id FROM status_history GROUP BY delivery_id) as sh2'), function ($join) {
-                $join->on('sh1.id', '=', 'sh2.max_id');
+        $statusCounts = DB::table('deliveries')
+            ->leftJoin('status_history', function ($join) {
+                $join->on('deliveries.id', '=', 'status_history.delivery_id')
+                    ->whereRaw('status_history.id = (select max(id) from status_history where status_history.delivery_id = deliveries.id)');
             })
-            ->groupBy('sh1.delivery_id', 'sh1.status', 'sh1.created_at')
-            ->orderBy('sh1.delivery_id')
+            ->whereNotIn('status_history.status', ['entregue', 'devolvido']) // Exclui deliveries com status de "entregue" e "devolvido"
+            ->orWhereNull('status_history.status') // Também inclui deliveries sem status_history
+            ->whereDate('status_history.created_at', '>', '2024-02-25') // Considera apenas as entregas após a data específica de criação do status_history
+            ->select('status_history.status', DB::raw('count(*) as count'))
+            ->groupBy('status_history.status')
             ->get();
 
-        return response()->json($dadosAgrupados);
+
+        return response()->json($statusCounts);
     }
 }

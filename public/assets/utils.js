@@ -180,12 +180,14 @@ const Utils = {
 
 Utils.init();
 
-$(document).ready(function() {
+
+if ($('#cnpj').length) {
     $('#cnpj').inputmask("99.999.999/9999-99", {
         placeholder: " ",
-        clearMaskOnLostFocus: false,
+        clearMaskOnLostFocus: false
     });
-});
+}
+
 
 let SPMaskBehaviorPhone = function (val) {
     return val.replace(/\D/g, '').length === 11 ? '(00) 0 0000-0000' : '(00) 0000-00009';
