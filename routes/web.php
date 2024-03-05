@@ -1452,62 +1452,7 @@ Route::get('/getPorNota', function () {
 
 Route::get('/statusAll', function () {
 
-    // $statusList = StatusHistory::distinct()->pluck('status');
+    $statusList = StatusHistory::distinct()->pluck('status');
 
-    // dd($statusList);
-    $value = Delivery::with('carriers.documents')
-    ->where('invoice', '279907')
-    ->orderBy('id')
-    ->limit(20)
-    ->first();
-    //  dd($value);
-        // Chave da API
-        $apiKey = env('DBA_API_KEY');
-
-
-
-        // Chave da NF-e
-        $chaveNfe = $value->invoice_key;
-
-        // dd($value);
-        echo $chaveNfe . "------- horaValue" . $value->updated_at . "------- horaAtual" . Carbon::now()->format('Y-m-d H:i:s') . "<br>";
-        $client = new Client();
-
-        $uri = new Uri("https://englobasistemas.com.br/arquivos/api/PegarOcorrencias/RastreamentoChaveNfe");
-        $uri = Uri::withQueryValue($uri, 'apikey', $apiKey);
-        $uri = Uri::withQueryValue($uri, 'chaveNfe', $chaveNfe);
-
-        try {
-            $response = $client->request('POST', $uri);
-
-            $responseArray = json_decode($response->getBody()->getContents(), true);
-
-            $occurrences = isset($responseArray[1]) ? $responseArray[1] : null;
-            dd($occurrences);
-            if ($occurrences !== null) {
-                foreach ($occurrences as $key => $occurrence) {
-                    $codigo = $occurrence['codigo'];
-
-                    // Verifique se o código já existe na tabela status_history.
-                    $existeRegistro = StatusHistory::where('external_code', $codigo)->exists();
-
-                    if (!$existeRegistro) {
-                        // O código não existe, então você pode inserir so registro.
-                        StatusHistory::create([
-                            'delivery_id' => $value->id,
-                            'external_code' => $codigo,
-                            'status' => $occurrence['ocorrencia'],
-                            'observation' => $occurrence['obs'],
-                        ]);
-                    }
-                }
-               
-                $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
-            } else {
-                $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
-            }
-        } catch (Exception $e) {
-            Log::error("Error: " . $e->getMessage());
-            echo "Error: " . $e->getMessage() . "\n";
-        }
+    dd($statusList);
 });

@@ -33,8 +33,12 @@ class HomeController extends Controller
         })
         ->count();
 
+        $returned = Delivery::whereHas('status', function ($query) {
+            $query->where('status', 'devolvido');
+        })->count();
 
-        return view('admin.home.index',compact('countToday','in_progress','overdue'));
+
+        return view('admin.home.index',compact('countToday','in_progress','overdue','returned'));
     }
 
     public function filter(Request $request)

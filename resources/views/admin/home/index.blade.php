@@ -95,7 +95,7 @@
                     <div class="card card-home">
                         <div class="card-body">
                             <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Devolução</h6>
-                            <p class="card-text"><b></b></p>
+                            <p class="card-text"><b>{{ $returned }}</b></p>
                         </div>
                     </div>
                 </div>
