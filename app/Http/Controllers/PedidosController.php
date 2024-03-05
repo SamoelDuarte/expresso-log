@@ -239,7 +239,8 @@ class PedidosController extends Controller
             $delivery->destination_city = $destCidade;
             $delivery->serie = $serie;
             $delivery->destination_state = $destEstado;
-            $delivery->estimated_delivery = $dataEntrega;
+            $delivery->created_at = now(); // Atribui a data/hora atual
+           
 
 
             try {
@@ -537,7 +538,7 @@ class PedidosController extends Controller
                 $delivery->destination_city = $destCidade;
                 $delivery->serie = $serie;
                 $delivery->destination_state = $destEstado;
-                $delivery->estimated_delivery = $dataEntrega;
+                $delivery->created_at = now(); // Atribui a data/hora atual
 
 
                 try {
@@ -749,7 +750,7 @@ class PedidosController extends Controller
             $delivery->serie = $serie;
             $delivery->destination_city = $destCidade;
             $delivery->destination_state = $destEstado;
-            $delivery->estimated_delivery = $dataEntrega;
+            $delivery->created_at = now(); // Atribui a data/hora atual
 
 
 
@@ -892,7 +893,7 @@ class PedidosController extends Controller
             $delivery->serie = $serie;
             $delivery->destination_city = $destCidade;
             $delivery->destination_state = $destEstado;
-            $delivery->estimated_delivery = $dataEntrega;
+            $delivery->created_at = now(); // Atribui a data/hora atual
 
 
             try {
@@ -1069,7 +1070,7 @@ class PedidosController extends Controller
         $delivery->destination_city = $destCidade;
         $delivery->serie = $serie;
         $delivery->destination_state = $destEstado;
-        $delivery->estimated_delivery = $dataEntrega;
+        $delivery->created_at = now(); // Atribui a data/hora atual
 
 
         try {
@@ -1360,7 +1361,7 @@ class PedidosController extends Controller
             $delivery->destination_city = $destCidade;
             $delivery->serie = $serie;
             $delivery->destination_state = $destEstado;
-            $delivery->estimated_delivery = $dataEntrega;
+            $delivery->created_at = now(); // Atribui a data/hora atual
 
 
             try {

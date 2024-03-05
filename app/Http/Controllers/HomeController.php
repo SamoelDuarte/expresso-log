@@ -25,7 +25,7 @@ class HomeController extends Controller
 
         $in_progress = Delivery::whereDoesntHave('status', function ($query) {
             $query->where('status', 'Entregue');
-        })->count();
+        })->whereDate('updated_at', '>', '2024-02-25')->count();
 
         $overdue  = Delivery::where('estimated_delivery', '<=', $today)
             ->whereDoesntHave('status', function ($query) {
