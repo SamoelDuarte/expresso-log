@@ -70,7 +70,7 @@ class PedidosController extends Controller
         } catch (Exception $e) {
             // Tratamento da exceção aqui
             $mensagem = 'Error Geral: ' . $e->getMessage() . ' em ' . $e->getFile() . ' na linha ' . $e->getLine();
-            Error::create(['erro' => $mensagem]);
+            Error::create(['erro' => $mensagem.' :: '.$jsonString]);
         }
     }
     public function gerarPedidoLoggi($xmlContent, $dataEntrega)

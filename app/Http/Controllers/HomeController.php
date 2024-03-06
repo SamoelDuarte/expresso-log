@@ -47,9 +47,8 @@ class HomeController extends Controller
             $in_progress_carrie = Delivery::whereDoesntHave('status', function ($query) {
                 $query->where('status', 'Entregue');
             })->where('carrier_id', $carrie->id)->count();
-
-            // Calcula o total pendente (overdue)
-            $finished = $total - $in_progress_carrie;
+              // Calcula o total pendente (overdue)
+              $finished = $total - $in_progress_carrie;
 
             // Calcula as porcentagens
             $percentage_in_progress = ($in_progress_carrie / $total) * 100;
@@ -59,6 +58,34 @@ class HomeController extends Controller
             $percentage_in_progress = number_format($percentage_in_progress, 2);
             $percentage_finished = number_format($percentage_finished, 2);
 
+
+
+            $deliveriesOnTime = Delivery::whereHas('status', function ($query) {
+                $query->where('status', 'Entregue');
+            })->where('carrier_id', $carrie->id)
+                ->where(function ($query) {
+                    $query->whereRaw('(
+                    SELECT MAX(created_at)
+                    FROM status_history
+                    WHERE delivery_id = deliveries.id
+                    AND status = "Entregue"
+                ) <= deliveries.estimated_delivery');
+                })
+                ->count();
+           
+
+            $deliveriesDelayed = $finished - $deliveriesOnTime;
+
+            // Calcula as porcentagens
+            $percentage_delayed = ($deliveriesDelayed / $total) * 100;
+            $percentage_ontime = ($deliveriesOnTime / $total) * 100;
+
+            // Formata as porcentagens com duas casas decimais
+            $percentage_delayed = number_format($percentage_delayed, 2);
+            $percentage_ontime = number_format($percentage_ontime, 2);
+
+
+
             // Adiciona os dados ao array $carriesResult
             $carriesResult[] = [
                 'carrie' => $carrie,
@@ -66,7 +93,11 @@ class HomeController extends Controller
                 'in_progress' => $in_progress_carrie,
                 'finished' => $finished,
                 'percentage_in_progress' => $percentage_in_progress,
-                'percentage_finished' => $percentage_finished
+                'percentage_finished' => $percentage_finished,
+                'deliveriesOnTime' => $deliveriesOnTime,
+                'deliveriesDelayed' => $deliveriesDelayed,
+                'percentage_delayed' => $percentage_delayed,
+                'percentage_ontime' => $percentage_ontime,
             ];
         }
         $data = array(

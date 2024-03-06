@@ -60,7 +60,7 @@
             background-color: #dccfcf !important;
         }
 
-       
+
 
         .color-progress {
             position: absolute;
@@ -72,8 +72,17 @@
             color: white;
             font-size: 10px;
         }
-        .progress-bar-in-progress{
-            background-color: #1ea834;;
+        .color-danger{
+            background-color: rgb(150, 53, 53);
+        }
+
+        .progress-bar-in-progress {
+            background-color: #1ea834;
+            ;
+        }
+        .text-number {
+            font-family: fantasy;
+            color: black
         }
     </style>
 @endsection
@@ -119,11 +128,12 @@
                             @foreach ($carriesResult as $dataCarrie)
                                 <tr>
                                     <td scope="row">{{ $dataCarrie['carrie']->trade_name }}</td>
-                                    <td scope="row">{{ $dataCarrie['total'] }}</td>
+                                    <td scope="row"><p class="text-number">{{ $dataCarrie['total'] }}</p></td>
                                     <td scope="row">
+                                       <div class="row">
                                         <div class="col-md-12">
                                             <div class="row">
-                                                <div class="col-6 text-left">{{ $dataCarrie['finished'] }}</div>
+                                                <div class="col-6 text-left text-number">{{ $dataCarrie['finished'] }}</div>
                                                 <div class="color-progress">
                                                     {{ $dataCarrie['percentage_finished'] }}%</div>
                                             </div>
@@ -132,6 +142,39 @@
                                                     style="width: {{ $dataCarrie['percentage_finished'] }}%;"
                                                     aria-valuenow="{{ $dataCarrie['percentage_finished'] }}"
                                                     aria-valuemin="0" aria-valuemax="100">
+                                                </div>
+                                            </div>
+                                        </div>
+                                       </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="row">
+                                                    <div class="col-4 text-left text-number">{{ $dataCarrie['deliveriesOnTime'] }}</div>
+                                                    <div class="text-progress"><small><b>No Prazo</b></small></div>
+                                                    <div class="color-progress">
+                                                        {{ $dataCarrie['percentage_ontime'] }}%</div>
+                                                </div>
+                                                <div class="progress">
+                                                    <div class="progress-bar bg-success" role="progressbar"
+                                                        style="width: {{ $dataCarrie['percentage_ontime'] }}%;"
+                                                        aria-valuenow="{{ $dataCarrie['percentage_ontime'] }}"
+                                                        aria-valuemin="0" aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="row">
+                                                    <div class="col-4 text-left text-number">{{ $dataCarrie['deliveriesDelayed'] }}</div>
+                                                    <div class="text-progress"><small><b>Em Atrazo</b></small></div>
+                                                    <div class="color-progress color-danger">
+                                                        {{ $dataCarrie['percentage_delayed'] }}%</div>
+                                                </div>
+                                                <div class="progress">
+                                                    <div class="progress-bar color-danger" role="progressbar"
+                                                        style="width: {{ $dataCarrie['percentage_delayed'] }}%;"
+                                                        aria-valuenow="{{ $dataCarrie['percentage_delayed'] }}"
+                                                        aria-valuemin="0" aria-valuemax="100">
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
