@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Carrier;
 use App\Models\Delivery;
 use App\Models\Error as ModelsError;
 use App\Models\StatusHistory;
@@ -25,7 +26,7 @@ class HomeController extends Controller
 
         $in_progress = Delivery::whereDoesntHave('status', function ($query) {
             $query->where('status', 'Entregue');
-        })->whereDate('updated_at', '>', '2024-02-25')->count();
+        })->count();
 
         $overdue  = Delivery::where('estimated_delivery', '<=', $today)
             ->whereDoesntHave('status', function ($query) {
@@ -37,8 +38,19 @@ class HomeController extends Controller
             $query->where('status', 'devolvido');
         })->count();
 
+        $carries = Carrier::all();
 
-        return view('admin.home.index', compact('countToday', 'in_progress', 'overdue', 'returned'));
+        $carriesResult = [];
+        foreach($carries as  $carrie){
+            $total = Delivery::where('carrier_id',$carrie->id)->count();
+
+            $carriesResult[] = array(
+                'carrie' => $carrie ,
+                'total' => $total
+            );
+        }
+
+        return view('admin.home.index', compact('countToday', 'in_progress', 'overdue', 'returned','carriesResult'));
     }
 
     public function filter(Request $request)

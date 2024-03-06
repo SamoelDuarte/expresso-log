@@ -41,6 +41,7 @@
             /* Borda arredondada */
             padding: 5px 10px;
             /* Espaçamento interno */
+            font-size: 10px;
         }
 
         .overdue {
@@ -52,6 +53,7 @@
             /* Borda arredondada */
             padding: 5px 10px;
             /* Espaçamento interno */
+            font-size: 10px;
         }
     </style>
 @endsection
@@ -82,6 +84,32 @@
     <div class="tab-content text-muted mt-2">
         <div class="tab-pane show active" id="movement-tab">
 
+            <div class="card text-left">
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>tranportadora</th>
+                                <th>Total</th>
+                                <th>finalizados</th>
+                                <th>Em Aberto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($carriesResult as $dataCarrie)
+                            <tr>
+                                
+                                <td scope="row">{{ $dataCarrie['carrie']->trade_name }}</td>
+                                <td scope="row">{{ $dataCarrie['total'] }}</td>
+                                <td scope="row"></td>
+                                <td scope="row"></td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-md-2">
                     <div class="card card-home">
@@ -110,7 +138,8 @@
                                         $onTimePercentage = (($in_progress - $overdue) / $in_progress) * 100;
                                     @endphp
                                     <h4><b>{{ $in_progress - $overdue }}</b></h4>
-                                    <small>No Prazo <h4 class="on-time"><b>{{ number_format($onTimePercentage, 2) }}%</b>
+                                    <small class="d-flex">No Prazo <h4 class="on-time">
+                                            <b>{{ number_format($onTimePercentage, 2) }}%</b>
                                         </h4></small>
                                 </div>
                                 <div class="col-md-6">
@@ -118,7 +147,8 @@
                                         $overduePercentage = ($overdue / $in_progress) * 100;
                                     @endphp
                                     <h4><b>{{ $overdue }}</b></h4>
-                                    <small>Atrazado <h4 class="overdue"><b>{{ number_format($overduePercentage, 2) }}%</b>
+                                    <small class="d-flex">Atrazado <h4 class="overdue">
+                                            <b>{{ number_format($overduePercentage, 2) }}%</b>
                                         </h4></small>
                                 </div>
                             </div>
@@ -128,8 +158,6 @@
                 <div class="col-md-12">
                     <canvas id="statusChart"></canvas>
                 </div>
-
-
             </div>
             <div class="row">
                 {{-- <div class="col-md-6 p-0">
@@ -276,7 +304,7 @@
                     tableError(start, end)
                 }
 
-              
+
 
                 function tableError(start, end) {
                     let dateStart = start;
@@ -321,58 +349,58 @@
         Page.init();
 
         // Função para carregar os dados e criar o gráfico
-function fetchDataAndCreateChart() {
-    // Faça uma solicitação AJAX para obter os dados
-    $.ajax({
-        url: '/home/status', // Substitua 'url_para_obter_dados' pela sua URL de backend
-        method: 'GET',
-        success: function(data) {
-            // Ordenar os dados pelo valor de 'count' (quantidade) em ordem decrescente
-            data.sort(function(a, b) {
-                return b.count - a.count;
-            });
+        function fetchDataAndCreateChart() {
+            // Faça uma solicitação AJAX para obter os dados
+            $.ajax({
+                url: '/home/status', // Substitua 'url_para_obter_dados' pela sua URL de backend
+                method: 'GET',
+                success: function(data) {
+                    // Ordenar os dados pelo valor de 'count' (quantidade) em ordem decrescente
+                    data.sort(function(a, b) {
+                        return b.count - a.count;
+                    });
 
-            // Extrair os labels (status) e os valores (quantidades) dos dados ordenados
-            var labels = data.map(function(item, index) {
-                return `${item.status} (${item.count})`; // Adiciona o número após o status
-            });
+                    // Extrair os labels (status) e os valores (quantidades) dos dados ordenados
+                    var labels = data.map(function(item, index) {
+                        return `${item.status} (${item.count})`; // Adiciona o número após o status
+                    });
 
-            var values = data.map(function(item) {
-                return item.count;
-            });
+                    var values = data.map(function(item) {
+                        return item.count;
+                    });
 
-            // Configuração do gráfico
-            var ctx = document.getElementById('statusChart').getContext('2d');
-            var chart = new Chart(ctx, {
-                type: 'horizontalBar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Quantidade',
-                        data: values,
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        xAxes: [{
-                            ticks: {
-                                beginAtZero: true
+                    // Configuração do gráfico
+                    var ctx = document.getElementById('statusChart').getContext('2d');
+                    var chart = new Chart(ctx, {
+                        type: 'horizontalBar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Quantidade',
+                                data: values,
+                                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                xAxes: [{
+                                    ticks: {
+                                        beginAtZero: true
+                                    }
+                                }]
                             }
-                        }]
-                    }
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error(error); // Lidar com erros de solicitação AJAX
                 }
             });
-        },
-        error: function(xhr, status, error) {
-            console.error(error); // Lidar com erros de solicitação AJAX
         }
-    });
-}
 
-// Chame a função para carregar os dados e criar o gráfico
-fetchDataAndCreateChart();
+        // Chame a função para carregar os dados e criar o gráfico
+        fetchDataAndCreateChart();
     </script>
 @endsection
