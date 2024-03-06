@@ -1135,9 +1135,9 @@ class PedidosController extends Controller
         $chaveNf = $XmlArray['protNFe']['infProt']['chNFe'];
 
         $entrega = Delivery::where('invoice_key', $chaveNf)->first();
-
-        if ($entrega) {
-
+   
+        if (!$entrega) {
+       
             //Definindo parâmetros
             $privateKey = env('PRIVATE_KEY_JT');
             $apiAccount = env('API_ACCOUNT_JT');
