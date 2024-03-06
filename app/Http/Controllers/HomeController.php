@@ -41,16 +41,46 @@ class HomeController extends Controller
         $carries = Carrier::all();
 
         $carriesResult = [];
-        foreach($carries as  $carrie){
-            $total = Delivery::where('carrier_id',$carrie->id)->count();
+        foreach ($carries as $carrie) {
+            $total = Delivery::where('carrier_id', $carrie->id)->count();
 
-            $carriesResult[] = array(
-                'carrie' => $carrie ,
-                'total' => $total
-            );
+            $in_progress_carrie = Delivery::whereDoesntHave('status', function ($query) {
+                $query->where('status', 'Entregue');
+            })->where('carrier_id', $carrie->id)->count();
+
+            // Calcula o total pendente (overdue)
+            $finished = $total - $in_progress_carrie;
+
+            // Calcula as porcentagens
+            $percentage_in_progress = ($in_progress_carrie / $total) * 100;
+            $percentage_finished = ($finished / $total) * 100;
+
+            // Formata as porcentagens com duas casas decimais
+            $percentage_in_progress = number_format($percentage_in_progress, 2);
+            $percentage_finished = number_format($percentage_finished, 2);
+
+            // Adiciona os dados ao array $carriesResult
+            $carriesResult[] = [
+                'carrie' => $carrie,
+                'total' => $total,
+                'in_progress' => $in_progress_carrie,
+                'finished' => $finished,
+                'percentage_in_progress' => $percentage_in_progress,
+                'percentage_finished' => $percentage_finished
+            ];
         }
+        $data = array(
+            'carriesResult' => $carriesResult,
+            'countToday' => $countToday,
+            'in_progress' => $in_progress,
+            'overdue' => $overdue,
+            'returned' => $returned,
+        );
 
-        return view('admin.home.index', compact('countToday', 'in_progress', 'overdue', 'returned','carriesResult'));
+
+
+
+        return view('admin.home.index', $data);
     }
 
     public function filter(Request $request)

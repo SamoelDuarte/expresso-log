@@ -55,6 +55,26 @@
             /* Espaçamento interno */
             font-size: 10px;
         }
+
+        .progress {
+            background-color: #dccfcf !important;
+        }
+
+       
+
+        .color-progress {
+            position: absolute;
+            right: 0;
+            top: 0;
+            padding: 0.1rem 0.5rem;
+            border-radius: 15px;
+            background-color: blue;
+            color: white;
+            font-size: 10px;
+        }
+        .progress-bar-in-progress{
+            background-color: #1ea834;;
+        }
     </style>
 @endsection
 
@@ -89,21 +109,50 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>tranportadora</th>
-                                <th>Total</th>
-                                <th>finalizados</th>
-                                <th>Em Aberto</th>
+                                <th width='25%'>tranportadora</th>
+                                <th width='5%'>Total</th>
+                                <th width='35%'>finalizados</th>
+                                <th width='35%'>Em Aberto</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($carriesResult as $dataCarrie)
-                            <tr>
-                                
-                                <td scope="row">{{ $dataCarrie['carrie']->trade_name }}</td>
-                                <td scope="row">{{ $dataCarrie['total'] }}</td>
-                                <td scope="row"></td>
-                                <td scope="row"></td>
-                            </tr>
+                                <tr>
+                                    <td scope="row">{{ $dataCarrie['carrie']->trade_name }}</td>
+                                    <td scope="row">{{ $dataCarrie['total'] }}</td>
+                                    <td scope="row">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                <div class="col-6 text-left">{{ $dataCarrie['finished'] }}</div>
+                                                <div class="color-progress">
+                                                    {{ $dataCarrie['percentage_finished'] }}%</div>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" role="progressbar"
+                                                    style="width: {{ $dataCarrie['percentage_finished'] }}%;"
+                                                    aria-valuenow="{{ $dataCarrie['percentage_finished'] }}"
+                                                    aria-valuemin="0" aria-valuemax="100">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td scope="row">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                <div class="col-6 text-left">{{ $dataCarrie['in_progress'] }}</div>
+                                                <div class="color-progress">
+                                                    {{ $dataCarrie['percentage_in_progress'] }}%</div>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar progress-bar-in-progress" role="progressbar"
+                                                    style="width: {{ $dataCarrie['percentage_in_progress'] }}%;"
+                                                    aria-valuenow="{{ $dataCarrie['percentage_in_progress'] }}"
+                                                    aria-valuemin="0" aria-valuemax="100">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
                             @endforeach
                         </tbody>
                     </table>
