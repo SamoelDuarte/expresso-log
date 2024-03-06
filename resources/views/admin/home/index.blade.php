@@ -172,7 +172,7 @@
                                                 <div class="row">
                                                     <div class="col-4 text-left text-number">
                                                         {{ $dataCarrie['deliveriesDelayed'] }}</div>
-                                                    <div class="text-progress"><small><b>Em Atrazo</b></small></div>
+                                                    <div class="text-progress"><small><b>Fora do Prazo</b></small></div>
                                                     <div class="color-progress color-danger">
                                                         {{ $dataCarrie['percentage_delayed'] }}%</div>
                                                 </div>
@@ -224,7 +224,7 @@
                                                 <div class="row">
                                                     <div class="col-4 text-left text-number">
                                                         {{ $dataCarrie['inProgressDelayed'] }}</div>
-                                                    <div class="text-progress"><small><b>Em Atrazo</b></small></div>
+                                                    <div class="text-progress"><small><b>Fora do Prazo</b></small></div>
                                                     <div class="color-progress color-danger">
                                                         {{ $dataCarrie['percentageInProgressDelayed'] }}%</div>
                                                 </div>
