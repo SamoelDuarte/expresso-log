@@ -115,6 +115,55 @@
     <div class="tab-content text-muted mt-2">
         <div class="tab-pane show active" id="movement-tab">
 
+          
+
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="card card-home">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Recebidas Hoje</h6>
+                            <p class="card-text"><b>{{ $countToday }}</b></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card card-home">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Devolução</h6>
+                            <p class="card-text"><b>{{ $returned }}</b></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card card-home">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted linha-bottom">Entregas Em Aberto -
+                                {{ $in_progress }}
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    @php
+                                        $onTimePercentage = (($in_progress - $overdue) / $in_progress) * 100;
+                                    @endphp
+                                    <h4><b>{{ $in_progress - $overdue }}</b></h4>
+                                    <small class="d-flex">No Prazo <h4 class="on-time">
+                                            <b>{{ number_format($onTimePercentage, 2) }}%</b>
+                                        </h4></small>
+                                </div>
+                                <div class="col-md-6">
+                                    @php
+                                        $overduePercentage = ($overdue / $in_progress) * 100;
+                                    @endphp
+                                    <h4><b>{{ $overdue }}</b></h4>
+                                    <small class="d-flex">Atrazado <h4 class="overdue">
+                                            <b>{{ number_format($overduePercentage, 2) }}%</b>
+                                        </h4></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="card text-left">
                 <div class="card-body">
                     <table class="table">
@@ -244,69 +293,10 @@
                     </table>
                 </div>
             </div>
-
             <div class="row">
-                <div class="col-md-2">
-                    <div class="card card-home">
-                        <div class="card-body">
-                            <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Recebidas Hoje</h6>
-                            <p class="card-text"><b>{{ $countToday }}</b></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="card card-home">
-                        <div class="card-body">
-                            <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Devolução</h6>
-                            <p class="card-text"><b>{{ $returned }}</b></p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card card-home">
-                        <div class="card-body">
-                            <h6 class="card-subtitle mb-2 text-muted linha-bottom">Entregas Em Aberto -
-                                {{ $in_progress }}
-                            </h6>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    @php
-                                        $onTimePercentage = (($in_progress - $overdue) / $in_progress) * 100;
-                                    @endphp
-                                    <h4><b>{{ $in_progress - $overdue }}</b></h4>
-                                    <small class="d-flex">No Prazo <h4 class="on-time">
-                                            <b>{{ number_format($onTimePercentage, 2) }}%</b>
-                                        </h4></small>
-                                </div>
-                                <div class="col-md-6">
-                                    @php
-                                        $overduePercentage = ($overdue / $in_progress) * 100;
-                                    @endphp
-                                    <h4><b>{{ $overdue }}</b></h4>
-                                    <small class="d-flex">Atrazado <h4 class="overdue">
-                                            <b>{{ number_format($overduePercentage, 2) }}%</b>
-                                        </h4></small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div class="col-md-12">
                     <canvas id="statusChart"></canvas>
                 </div>
-            </div>
-            <div class="row">
-                {{-- <div class="col-md-6 p-0">
-                        <div class="col-md-12 mb-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div id="chart">
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> --}}
 
             </div>
         </div>
