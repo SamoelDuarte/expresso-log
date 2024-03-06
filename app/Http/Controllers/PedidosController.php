@@ -1155,11 +1155,11 @@ class PedidosController extends Controller
 
             $invoiceMoney = number_format($invoiceMoney, 2, '.', '');
 
-            // dd($headerSignature);
+          
             //Montando o JSON do envio
             $pedido = [
                 "customerCode" => 'J0086026981',
-                "digest" => '1RSteqUoNxyCYPg2yHwAng==',
+                "digest" => 'Zy+vQdOi9CKk8snUA517nA==',
                 "txlogisticId" => (string)$xmlObj->NFe->infNFe->ide->nNF,
                 "expressType" => "EZ", // Você pode definir este valor conforme necessário
                 "orderType" => "1", // Você pode definir este valor conforme necessário
@@ -1252,7 +1252,7 @@ class PedidosController extends Controller
             // dd($pedido);
             $pedido = json_encode($pedido);
 
-
+           
             //Codificando o pedido para envio
             $req_pedido = rawurlencode($pedido);
 
@@ -1290,9 +1290,11 @@ class PedidosController extends Controller
                 //Fechando a requisição
                 curl_close($curl);
 
+                dd($responseArray);
                 $billcode = $responseArray['data']['orderList'][0]['billCode'];
                 //Exibindo a resposta
                 echo '<br><br>' . $response;
+               
 
 
                 echo json_encode(array('mensagem' => 'sucesso'));

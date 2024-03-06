@@ -47,9 +47,33 @@ class HomeController extends Controller
             $in_progress_carrie = Delivery::whereDoesntHave('status', function ($query) {
                 $query->where('status', 'Entregue');
             })->where('carrier_id', $carrie->id)->count();
-              // Calcula o total pendente (overdue)
-              $finished = $total - $in_progress_carrie;
+            // Calcula o total pendente (overdue)
 
+            $inProgressOnTime = Delivery::whereDoesntHave('status', function ($query) {
+                $query->where('status', 'Entregue');
+            })->where('carrier_id', $carrie->id)
+                ->where(function ($query) {
+                    $query->whereRaw('(
+                    SELECT MAX(created_at)
+                    FROM status_history
+                    WHERE delivery_id = deliveries.id
+                    AND status != "Entregue"
+                ) <= deliveries.estimated_delivery');
+                })
+                ->count();
+
+            $inProgressDelayed =    $in_progress_carrie - $inProgressOnTime;
+            // Porcentagem de entregas em progresso no prazo
+            $percentageInProgressOnTime = ($inProgressOnTime / $in_progress_carrie) * 100;
+
+        
+
+            // Porcentagem de entregas em progresso atrasadas
+            $percentageInProgressDelayed = ($inProgressDelayed / $in_progress_carrie) * 100;
+
+            $percentageInProgressOnTime = number_format($percentageInProgressOnTime, 2);
+            $percentageInProgressDelayed = number_format($percentageInProgressDelayed, 2);
+            $finished = $total - $in_progress_carrie;
             // Calcula as porcentagens
             $percentage_in_progress = ($in_progress_carrie / $total) * 100;
             $percentage_finished = ($finished / $total) * 100;
@@ -57,8 +81,6 @@ class HomeController extends Controller
             // Formata as porcentagens com duas casas decimais
             $percentage_in_progress = number_format($percentage_in_progress, 2);
             $percentage_finished = number_format($percentage_finished, 2);
-
-
 
             $deliveriesOnTime = Delivery::whereHas('status', function ($query) {
                 $query->where('status', 'Entregue');
@@ -72,7 +94,6 @@ class HomeController extends Controller
                 ) <= deliveries.estimated_delivery');
                 })
                 ->count();
-           
 
             $deliveriesDelayed = $finished - $deliveriesOnTime;
 
@@ -83,9 +104,6 @@ class HomeController extends Controller
             // Formata as porcentagens com duas casas decimais
             $percentage_delayed = number_format($percentage_delayed, 2);
             $percentage_ontime = number_format($percentage_ontime, 2);
-
-
-
             // Adiciona os dados ao array $carriesResult
             $carriesResult[] = [
                 'carrie' => $carrie,
@@ -98,6 +116,10 @@ class HomeController extends Controller
                 'deliveriesDelayed' => $deliveriesDelayed,
                 'percentage_delayed' => $percentage_delayed,
                 'percentage_ontime' => $percentage_ontime,
+                'inProgressOnTime' => $inProgressOnTime,
+                'inProgressDelayed' => $inProgressDelayed,
+                'percentageInProgressOnTime' => $percentageInProgressOnTime,
+                'percentageInProgressDelayed' => $percentageInProgressDelayed,
             ];
         }
         $data = array(
