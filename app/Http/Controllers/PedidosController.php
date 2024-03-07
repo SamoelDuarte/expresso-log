@@ -1159,7 +1159,7 @@ class PedidosController extends Controller
             //Montando o JSON do envio
             $pedido = [
                 "customerCode" => 'J0086026981',
-                "digest" => 'Zy+vQdOi9CKk8snUA517nA==',
+                "digest" => 'l4QSoiB0lE1YczavncT7wA==',
                 "txlogisticId" => (string)$xmlObj->NFe->infNFe->ide->nNF,
                 "expressType" => "EZ", // Você pode definir este valor conforme necessário
                 "orderType" => "1", // Você pode definir este valor conforme necessário
