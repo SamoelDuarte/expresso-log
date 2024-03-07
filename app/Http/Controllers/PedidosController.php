@@ -1290,7 +1290,7 @@ class PedidosController extends Controller
                 //Fechando a requisição
                 curl_close($curl);
 
-                dd($responseArray);
+                // dd($responseArray);
                 $billcode = $responseArray['data']['orderList'][0]['billCode'];
                 //Exibindo a resposta
                 echo '<br><br>' . $response;
@@ -1299,10 +1299,9 @@ class PedidosController extends Controller
 
                 echo json_encode(array('mensagem' => 'sucesso'));
             } catch (RequestException $e) {
-                echo "Erro: na J&T" . $e->getMessage();
-                if ($e->getResponse()->getReasonPhrase() == "Internal Server Error") {
+               
                     Error::create(['erro' => 'Erro servidor interno J&T' . $e->getMessage()]);
-                }
+               
             }
 
 
