@@ -428,7 +428,7 @@ class PedidosController extends Controller
                                 array(
                                     "nPed" => "1",
                                     "serie" => (string)$xmlObj->NFe->infNFe->ide->serie,
-                                    "nDoc" => (string)$xmlObj->NFe->infNFe->ide->nNF,
+                                    "nDoc" => (string)$xmlObj->protNFe->infProt->chNFe,
                                     "dEmi" => $formattedDate,
                                     "vBC" => (float)$xmlObj->NFe->infNFe->det[0]->imposto->ICMS->ICMS00->vBC,
                                     "vICMS" => (float)$xmlObj->NFe->infNFe->det[0]->imposto->ICMS->ICMS00->vICMS,
@@ -1160,7 +1160,7 @@ class PedidosController extends Controller
             $pedido = [
                 "customerCode" => 'J0086026981',
                 "digest" => 'l4QSoiB0lE1YczavncT7wA==',
-                "txlogisticId" => (string)$xmlObj->NFe->infNFe->ide->nNF,
+                "txlogisticId" => (string)$xmlObj->protNFe->infProt->chNFe,
                 "expressType" => "EZ", // Você pode definir este valor conforme necessário
                 "orderType" => "1", // Você pode definir este valor conforme necessário
                 "serviceType" => "02", // Você pode definir este valor conforme necessário
@@ -1240,13 +1240,16 @@ class PedidosController extends Controller
 
 
             $pedido += [
-                "invoiceNumber" => (string)$xmlObj->NFe->infNFe->ide->nNF,
+                "invoiceNumber" => (string)$xmlObj->protNFe->infProt->chNFe,
                 "invoiceSerialNumber" => (string)$xmlObj->NFe->infNFe->ide->serie,
                 "invoiceMoney" => (string)$xmlObj->NFe->infNFe->total->ICMSTot->vNF,
                 "taxCode" => (string)$xmlObj->NFe->infNFe->emit->CNPJ,
-                "invoiceAccessKey" => (string)$xmlObj->NFe->infNFe->attributes()['Id'],
+                "invoiceAccessKey" => (string)$xmlObj->protNFe->infProt->chNFe,
+                // "invoiceAccessKey" => (string)$xmlObj->NFe->infNFe->attributes()['Id'],
                 "invoiceIssueDate" => (string)$xmlObj->NFe->infNFe->ide->dhEmi,
             ];
+            // dd($xmlObj->protNFe->infProt->chNFe);
+            // $XmlArray['protNFe']['infProt']['chNFe']
 
 
             // dd($pedido);
