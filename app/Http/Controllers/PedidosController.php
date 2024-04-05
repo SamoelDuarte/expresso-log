@@ -33,7 +33,7 @@ class PedidosController extends Controller
             $XmlArray = json_decode($jsonString, true);
             $documento = $XmlArray['NFe']['infNFe']['transp']['transporta']['CNPJ'];
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
-           
+
             switch ($documento) {
                     // Transportadora DBA
                 case "50160966000164":
@@ -46,6 +46,7 @@ class PedidosController extends Controller
 
                 case "23820639001352":
                 case "24230747094913":
+                case "24230747093941":
                     $this->gerarPedidoGFL($xmlContent, $dataEntrega);
                     break;
 
@@ -65,12 +66,12 @@ class PedidosController extends Controller
                     break;
 
                 default:
-                    Error::create(['erro' => 'Transportadora não Integrada CNPJ:' . $documento ." , Nota : ".$numNota]);
+                    Error::create(['erro' => 'Transportadora não Integrada CNPJ:' . $documento . " , Nota : " . $numNota]);
             }
         } catch (Exception $e) {
             // Tratamento da exceção aqui
             $mensagem = 'Error Geral: ' . $e->getMessage() . ' em ' . $e->getFile() . ' na linha ' . $e->getLine();
-            Error::create(['erro' => $mensagem.' :: numero da nota '.$numNota]);
+            Error::create(['erro' => $mensagem . ' :: numero da nota ' . $numNota]);
         }
     }
     public function gerarPedidoLoggi($xmlContent, $dataEntrega)
@@ -240,7 +241,7 @@ class PedidosController extends Controller
             $delivery->serie = $serie;
             $delivery->destination_state = $destEstado;
             $delivery->created_at = now(); // Atribui a data/hora atual
-           
+
 
 
             try {
@@ -766,7 +767,7 @@ class PedidosController extends Controller
                 Error::create(['erro' => 'Nota já processada' . $numNota]);
                 exit;
             }
-            Error::create(['erro' => 'Error GFL : '."Numero da nota :". $numNota. $e->getMessage()]);
+            Error::create(['erro' => 'Error GFL : ' . "Numero da nota :" . $numNota . $e->getMessage()]);
         }
 
         try {
@@ -790,7 +791,7 @@ class PedidosController extends Controller
     }
     public function gerarPedidoDBA($xmlContent, $dataEntrega)
     {
-       
+
         $xmlObject = simplexml_load_string($xmlContent); // Transformar o XML em um objeto SimpleXMLElement
         $jsonString = json_encode($xmlObject); // Transformar o objeto em uma string JSON
 
@@ -815,7 +816,7 @@ class PedidosController extends Controller
             ],
             'body' => $xmlContent,
         ]);
-     
+
 
         // Converter o corpo em uma string
         $responseData = $response->getBody()->getContents();
@@ -830,19 +831,18 @@ class PedidosController extends Controller
                 $query->where('number', $documento);
             })->first();
 
-          
+
             try {
                 $doc = "";
-             
+
                 if (isset($XmlArray['NFe']['infNFe']['dest']['CPF'])) {
                     $doc =  $XmlArray['NFe']['infNFe']['dest']['CPF'];
-                }else{
+                } else {
                     $doc =  $XmlArray['NFe']['infNFe']['dest']['CNPJ'];
                 }
-          
             } catch (Exception $e) {
-               
-                Error::create(['erro' => 'Numero da nota'.$XmlArray['NFe']['infNFe']['ide']['nNF'].'Dados :' . print_r($XmlArray['NFe']['infNFe']['dest'])]);
+
+                Error::create(['erro' => 'Numero da nota' . $XmlArray['NFe']['infNFe']['ide']['nNF'] . 'Dados :' . print_r($XmlArray['NFe']['infNFe']['dest'])]);
                 exit;
             }
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
@@ -863,7 +863,7 @@ class PedidosController extends Controller
             $destBairro = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xBairro'];
             $destCidade = $XmlArray['NFe']['infNFe']['dest']['enderDest']['xMun'];
             $destEstado = $XmlArray['NFe']['infNFe']['dest']['enderDest']['UF'];
-       
+
 
 
             $embarcador = Shipper::first();
@@ -1135,9 +1135,9 @@ class PedidosController extends Controller
         $chaveNf = $XmlArray['protNFe']['infProt']['chNFe'];
 
         $entrega = Delivery::where('invoice_key', $chaveNf)->first();
-   
+
         if (!$entrega) {
-       
+
             //Definindo parâmetros
             $privateKey = env('PRIVATE_KEY_JT');
             $apiAccount = env('API_ACCOUNT_JT');
@@ -1155,7 +1155,7 @@ class PedidosController extends Controller
 
             $invoiceMoney = number_format($invoiceMoney, 2, '.', '');
 
-          
+
             //Montando o JSON do envio
             $pedido = [
                 "customerCode" => 'J0086026981',
@@ -1255,7 +1255,7 @@ class PedidosController extends Controller
             // dd($pedido);
             $pedido = json_encode($pedido);
 
-           
+
             //Codificando o pedido para envio
             $req_pedido = rawurlencode($pedido);
 
@@ -1297,14 +1297,13 @@ class PedidosController extends Controller
                 $billcode = $responseArray['data']['orderList'][0]['billCode'];
                 //Exibindo a resposta
                 echo '<br><br>' . $response;
-               
+
 
 
                 echo json_encode(array('mensagem' => 'sucesso'));
             } catch (RequestException $e) {
-               
-                    Error::create(['erro' => 'Erro servidor interno J&T' . $e->getMessage()]);
-               
+
+                Error::create(['erro' => 'Erro servidor interno J&T' . $e->getMessage()]);
             }
 
 

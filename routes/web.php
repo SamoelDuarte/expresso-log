@@ -1079,8 +1079,8 @@ Route::get('/updateStatusJET', function () {
 });
 
 Route::get('/updateStatusGFL', function () {
-    $numbersToSearch = ['23820639001352', '24230747094913'];
-
+    $numbersToSearch = ['23820639001352', '24230747094913','24230747093941'];
+    
     $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
 
 
