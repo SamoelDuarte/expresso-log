@@ -16,6 +16,7 @@ class VerifyCsrfToken extends Middleware
        '/verify-token',
        '/consulta-cep',
        '/getStatus',
+       '/getStatus/correio',
        '/glf'
     ];
 }

@@ -17,6 +17,7 @@ use App\Models\Carrier;
 use App\Models\Delivery;
 use App\Models\Error;
 use App\Models\StatusHistory;
+use Cagartner\CorreiosConsulta\CorreiosConsulta;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -48,9 +49,8 @@ Route::middleware('auth.token')->group(function () {
 
     Route::prefix('/getStatus')->controller(DeliveryController::class)->group(function () {
         Route::post('/', 'getStatus');
+        Route::post('/correio', 'getStatusCorreio');
     });
-
- 
 });
 
 Route::prefix('/admin')->controller(AdminController::class)->group(function () {
@@ -1059,10 +1059,10 @@ Route::get('/updateStatusJET', function () {
         foreach ($resonseArray['data'][0]['details'] as  $detail) {
 
             // dd($detail);
-             // Verifique se o código já existe na tabela status_history.
-             $existeRegistro = StatusHistory::where('external_code', $detail['scanTime'])->exists();
+            // Verifique se o código já existe na tabela status_history.
+            $existeRegistro = StatusHistory::where('external_code', $detail['scanTime'])->exists();
 
-             if (!$existeRegistro) {
+            if (!$existeRegistro) {
                 StatusHistory::create([
                     'delivery_id' => $value->id,
                     'external_code' => $detail['scanTime'],
@@ -1070,17 +1070,23 @@ Route::get('/updateStatusJET', function () {
                     'observation' => $detail['scanNetworkCity'],
                     'detail' => $detail['scanNetworkProvince'],
                 ]);
-             }
-
-           
+            }
         }
         $value->update(['updated_at' => Carbon::now()->format('Y-m-d H:i:s')]);
     }
 });
 
+Route::get('/correio', function () {
+   
+});
+
+
+
+
+
 Route::get('/updateStatusGFL', function () {
-    $numbersToSearch = ['23820639001352', '24230747094913','24230747093941'];
-    
+    $numbersToSearch = ['23820639001352', '24230747094913', '24230747093941'];
+
     $deliveryes = DeliveryController::getDeliverys($numbersToSearch);
 
 
@@ -1363,7 +1369,6 @@ Route::get('/getEtiqueta', function () {
 });
 
 Route::get('/atualiza', function () {
-    
 });
 
 Route::get('/getPorNota', function () {
@@ -1458,18 +1463,18 @@ Route::get('/statusAll', function () {
     dd($statusList);
 });
 
-Route::get('/dash',function(){
+Route::get('/dash', function () {
     $statusCounts = DB::table('deliveries')
-    ->leftJoin('status_history', function ($join) {
-        $join->on('deliveries.id', '=', 'status_history.delivery_id')
-            ->whereRaw('status_history.id = (select max(id) from status_history where status_history.delivery_id = deliveries.id)');
-    })
-    ->whereNotIn('status_history.status', ['entregue', 'devolvido']) // Exclui deliveries com status de "entregue" e "devolvido"
-    ->orWhereNull('status_history.status') // Também inclui deliveries sem status_history
-    ->whereDate('status_history.created_at', '>', '2024-02-25') // Considera apenas as entregas após a data específica de criação do status_history
-    ->select('status_history.status', DB::raw('count(*) as count'))
-    ->groupBy('status_history.status')
-    ->get();
+        ->leftJoin('status_history', function ($join) {
+            $join->on('deliveries.id', '=', 'status_history.delivery_id')
+                ->whereRaw('status_history.id = (select max(id) from status_history where status_history.delivery_id = deliveries.id)');
+        })
+        ->whereNotIn('status_history.status', ['entregue', 'devolvido']) // Exclui deliveries com status de "entregue" e "devolvido"
+        ->orWhereNull('status_history.status') // Também inclui deliveries sem status_history
+        ->whereDate('status_history.created_at', '>', '2024-02-25') // Considera apenas as entregas após a data específica de criação do status_history
+        ->select('status_history.status', DB::raw('count(*) as count'))
+        ->groupBy('status_history.status')
+        ->get();
 
     dd($statusCounts);
 });

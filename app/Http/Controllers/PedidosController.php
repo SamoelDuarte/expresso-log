@@ -1236,9 +1236,6 @@ class PedidosController extends Controller
                     "totalPrice" => (string)$item->prod->vProd,
                 ];
             }
-
-
-
             $pedido += [
                 "invoiceNumber" => (string)$xmlObj->protNFe->infProt->chNFe,
                 "invoiceSerialNumber" => (string)$xmlObj->NFe->infNFe->ide->serie,
@@ -1248,11 +1245,7 @@ class PedidosController extends Controller
                 // "invoiceAccessKey" => (string)$xmlObj->NFe->infNFe->attributes()['Id'],
                 "invoiceIssueDate" => (string)$xmlObj->NFe->infNFe->ide->dhEmi,
             ];
-            // dd($xmlObj->protNFe->infProt->chNFe);
-            // $XmlArray['protNFe']['infProt']['chNFe']
-
-
-            // dd($pedido);
+        
             $pedido = json_encode($pedido);
 
 
