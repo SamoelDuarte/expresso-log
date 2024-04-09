@@ -119,7 +119,7 @@ class DeliveryController extends Controller
                 if($evento['descricao'] == "Objeto entregue ao destinatário"){
                     $evento['descricao'] = "Entregue";
                 }else if ($evento['descricao'] == "Objeto saiu para entrega ao destinatário"){
-                    $evento['descricao'] = "Saiu para entreguar";
+                    $evento['descricao'] = "Saiu para entregar";
                     
                 }else if ($evento['descricao'] == "Objeto em transferência - por favor aguarde"){
                     $evento['descricao'] = "Em transferência entre cidades";
