@@ -115,6 +115,16 @@ class DeliveryController extends Controller
            
 
             foreach ($objeto['eventos'] as $evento) {
+
+                if($evento['descricao'] == "Objeto entregue ao destinatário"){
+                    $evento = "Entregue";
+                }else if ($evento['descricao'] == "Objeto saiu para entrega ao destinatário"){
+                    $evento = "Saiu para ntreguar";
+                    
+                }else if ($evento['descricao'] == "Objeto em transferência - por favor aguarde"){
+                    $evento = "Em transferência entre cidades";
+
+                }
                 $ocorrencias[] = [
                     'data' => $evento['dtHrCriado'],
                     'status' => $evento['descricao'],
