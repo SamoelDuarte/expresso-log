@@ -129,7 +129,7 @@ class DeliveryController extends Controller
             'Ocorrencias' => $ocorrencias,
         ];
 // Reverte a ordem dos índices no array $resultado
-$resultado = array_reverse($resultado);
+$resultado['Ocorrencias'] = array_reverse($resultado['Ocorrencias']);
         // Converte o array para JSON e exibe
         echo json_encode($resultado, JSON_PRETTY_PRINT);
     }
