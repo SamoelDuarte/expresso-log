@@ -599,7 +599,7 @@ class PedidosController extends Controller
                         "TomadorServico" => [
                             "cpf" => null,
                             "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
-                            "inscricaoEstadual" => null,
+                            "inscricaoEstadual" => $XmlArray['NFe']['infNFe']['emit']['IE'],
                             "nome" => null,
                             "razaoSocial" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
                             "telefone" => null,
@@ -609,7 +609,7 @@ class PedidosController extends Controller
                         "Remetente" => [
                             "cpf" => null,
                             "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
-                            "inscricaoEstadual" => null,
+                            "inscricaoEstadual" => $XmlArray['NFe']['infNFe']['emit']['IE'],
                             "nome" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
                             "razaoSocial" => null,
                             "telefone" => null,
@@ -628,6 +628,7 @@ class PedidosController extends Controller
                         "Destinatario" => [
                             "cpf" => empty($XmlArray['NFe']['infNFe']['dest']['CPF']) ? null : $XmlArray['NFe']['infNFe']['dest']['CPF'],
                             "cnpj" => empty($XmlArray['NFe']['infNFe']['dest']['CNPJ']) ? null : $XmlArray['NFe']['infNFe']['dest']['CNPJ'],
+                            "inscricaoEstadual" => empty($XmlArray['NFe']['infNFe']['dest']['IE']) ? null : $XmlArray['NFe']['infNFe']['dest']['IE'],
                             "nome" => $XmlArray['NFe']['infNFe']['dest']['xNome'],
                             "Endereco" => [
                                 "cep" => $XmlArray['NFe']['infNFe']['dest']['enderDest']['CEP'],
@@ -643,7 +644,7 @@ class PedidosController extends Controller
                         "Expedidor" => [
                             "cpf" => null,
                             "cnpj" => $XmlArray['NFe']['infNFe']['emit']['CNPJ'],
-                            "inscricaoEstadual" => null,
+                            "inscricaoEstadual" => $XmlArray['NFe']['infNFe']['emit']['IE'],
                             "nome" => $XmlArray['NFe']['infNFe']['emit']['xNome'],
                             "razaoSocial" => null,
                             "telefone" => null,
@@ -700,7 +701,6 @@ class PedidosController extends Controller
             })->first();
 
 
-            // dd($documento);
 
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
             $serie = $XmlArray['NFe']['infNFe']['ide']['serie'];
