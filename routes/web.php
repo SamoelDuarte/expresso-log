@@ -1077,11 +1077,7 @@ Route::get('/updateStatusJET', function () {
 });
 
 Route::get('/correio', function () {
-   
 });
-
-
-
 
 
 Route::get('/updateStatusGFL', function () {
@@ -1369,7 +1365,41 @@ Route::get('/getEtiqueta', function () {
 });
 
 Route::get('/atualiza', function () {
+
+    // Exemplo de uso
+    try {
+        alterarSenha('everton@2maker.com.br', '<-(~_sVGK$_2ie7C');
+        echo 'Senha alterada com sucesso.';
+    } catch (Exception $e) {
+        echo 'Erro: ' . $e->getMessage();
+    }
 });
+
+function alterarSenha($email, $novaSenha)
+{
+    // Encontrar o usuário pelo e-mail
+    $user = User::where('email', $email)->first();
+
+    // Verificar se o usuário existe
+    if (!$user) {
+        throw new Exception('Usuário não encontrado.');
+    }
+
+    // Gerar um novo salt
+    $novoSalt = Utils::createPasswordSalt();
+
+    // Criar um hash para a nova senha
+    $novoHash = Utils::createPasswordHash($novaSenha, $novoSalt);
+
+    // Atualizar a senha e o salt do usuário
+    $user->salt = $novoSalt;
+    $user->password = $novoHash;
+
+    // Salvar as mudanças no banco de dados
+    $user->save();
+
+    return true;
+}
 
 Route::get('/getPorNota', function () {
 
