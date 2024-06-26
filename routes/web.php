@@ -1080,7 +1080,6 @@ Route::get('/updateStatusJET', function () {
 Route::get('/correio', function () {
 });
 
-
 Route::get('/updateStatusGFL', function () {
     $numbersToSearch = ['23820639001352', '24230747094913', '24230747093941'];
 
@@ -1245,7 +1244,7 @@ Route::get('/updateAlerta', function () {
     $ontem = Carbon::yesterday();
 
     // Consulta na tabela StatusHistory
-    $statusArray = StatusHistory::select('id', 'delivery_id', 'status', 'send', \DB::raw('MAX(updated_at) as max_created_at'))
+    $statusArray = StatusHistory::select('id', 'delivery_id', 'status', 'send', DB::raw('MAX(updated_at) as max_created_at'))
         ->whereDate('updated_at', $ontem)
         ->whereIn('status', ['entregue', 'finalizado', 'entrega realizada (mobile)', 'entrega realizada', 'Saiu para Entrega'])
         ->groupBy('id', 'delivery_id', 'status', 'send')
@@ -1310,7 +1309,7 @@ Route::get('/getEtiqueta', function () {
 
     // Montando o JSON do envio
     $pedido = [
-        "billCodes" => $value->external_code,
+        // "billCodes" => $value->external_code,
 
     ];
 
@@ -1367,41 +1366,6 @@ Route::get('/getEtiqueta', function () {
 });
 
 Route::get('/atualiza', function () {
- // Exemplo de uso
-    try {
-        alterarSenha('everton@2maker.com.br', '<-(~_sVGK$_2ie7C');
-        echo 'Senha alterada com sucesso.';
-    } catch (Exception $e) {
-        echo 'Erro: ' . $e->getMessage();
-    }
-});
-
-function alterarSenha($email, $novaSenha)
-{
-    // Encontrar o usuário pelo e-mail
-    $user = User::where('email', $email)->first();
-
-    // Verificar se o usuário existe
-    if (!$user) {
-        throw new Exception('Usuário não encontrado.');
-    }
-
-    // Gerar um novo salt
-    $novoSalt = Utils::createPasswordSalt();
-
-    // Criar um hash para a nova senha
-    $novoHash = Utils::createPasswordHash($novaSenha, $novoSalt);
-
-    // Atualizar a senha e o salt do usuário
-    $user->salt = $novoSalt;
-    $user->password = $novoHash;
-
-    // Salvar as mudanças no banco de dados
-    $user->save();
-
-    return true;
-}
-
     // Exemplo de uso
     try {
         alterarSenha('everton@2maker.com.br', '<-(~_sVGK$_2ie7C');
@@ -1436,7 +1400,6 @@ function alterarSenha($email, $novaSenha)
 
     return true;
 }
-
 Route::get('/getPorNota', function () {
 
 
@@ -1554,7 +1517,7 @@ Route::get('/upStatus', function () {
 
         $deliveries = Delivery::whereHas('status', function ($query) use ($formattedDate) {
             $query->where('status', 'Entregue')
-                  ->whereDate('updated_at', $formattedDate);
+                ->whereDate('updated_at', $formattedDate);
         })->get();
 
         $client = new Client();
@@ -1588,11 +1551,8 @@ Route::get('/upStatus', function () {
                 echo "Erro ao atualizar a fatura: $invoice<br>";
             }
         }
-
     } catch (\Exception $e) {
         // Captura exceções globais, como erros de conexão ou configuração
         echo "Erro ao processar atualizações: " . $e->getMessage();
     }
 });
-
-

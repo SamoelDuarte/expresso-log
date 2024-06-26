@@ -83,7 +83,6 @@
         }
 
         .text-number {
-            font-family: fantasy;
             color: black
         }
     </style>
