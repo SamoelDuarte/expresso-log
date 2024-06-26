@@ -21,6 +21,7 @@ use Cagartner\CorreiosConsulta\CorreiosConsulta;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -1080,10 +1081,6 @@ Route::get('/correio', function () {
    
 });
 
-
-
-
-
 Route::get('/updateStatusGFL', function () {
     $numbersToSearch = ['23820639001352', '24230747094913', '24230747093941'];
 
@@ -1262,6 +1259,7 @@ Route::get('/updateAlerta', function () {
         $status->save();
     }
 });
+
 Route::get('/alerta_entregue', function () {
     // Buscar os registros de StatusHistory com send igual a 1
     $statusArray = StatusHistory::where('send', 1)->limit(15)->get();
@@ -1287,7 +1285,7 @@ Route::get('/alerta_entregue', function () {
         ];
 
         // Criar a requisição POST para a URL desejada
-        $request = new Request('POST', 'https://lojamirante.com.br/Cron/atualiza_status_pedido', $headers);
+        $request = new Request('POST', 'https://www.lojamirante.com.br/Cron/atualiza_status_pedido', $headers);
 
         // Enviar a requisição de forma assíncrona e esperar pela resposta
         $res = $client->sendAsync($request, $options)->wait();
@@ -1369,8 +1367,40 @@ Route::get('/getEtiqueta', function () {
 });
 
 Route::get('/atualiza', function () {
+ // Exemplo de uso
+    try {
+        alterarSenha('everton@2maker.com.br', '<-(~_sVGK$_2ie7C');
+        echo 'Senha alterada com sucesso.';
+    } catch (Exception $e) {
+        echo 'Erro: ' . $e->getMessage();
+    }
 });
 
+function alterarSenha($email, $novaSenha)
+{
+    // Encontrar o usuário pelo e-mail
+    $user = User::where('email', $email)->first();
+
+    // Verificar se o usuário existe
+    if (!$user) {
+        throw new Exception('Usuário não encontrado.');
+    }
+
+    // Gerar um novo salt
+    $novoSalt = Utils::createPasswordSalt();
+
+    // Criar um hash para a nova senha
+    $novoHash = Utils::createPasswordHash($novaSenha, $novoSalt);
+
+    // Atualizar a senha e o salt do usuário
+    $user->salt = $novoSalt;
+    $user->password = $novoHash;
+
+    // Salvar as mudanças no banco de dados
+    $user->save();
+
+    return true;
+}
 Route::get('/getPorNota', function () {
 
 
@@ -1478,3 +1508,55 @@ Route::get('/dash', function () {
 
     dd($statusCounts);
 });
+
+
+use GuzzleHttp\Promise\Utils as GuzzleUtils; // Usando um alias diferente
+
+Route::get('/upStatus', function () {
+    try {
+        $formattedDate = Carbon::parse('2024-06-25')->format('Y-m-d');
+
+        $deliveries = Delivery::whereHas('status', function ($query) use ($formattedDate) {
+            $query->where('status', 'Entregue')
+                  ->whereDate('updated_at', $formattedDate);
+        })->get();
+
+        $client = new Client();
+        $promises = [];
+
+        foreach ($deliveries as $delivery) {
+            $options = [
+                'multipart' => [
+                    [
+                        'name' => 'numero',
+                        'contents' => $delivery->invoice,
+                    ],
+                    [
+                        'name' => 'status',
+                        'contents' => "Entregue",
+                    ]
+                ]
+            ];
+
+            $promises[$delivery->invoice] = $client->postAsync('https://www.lojamirante.com.br/Cron/atualiza_status_pedido', $options);
+        }
+
+        // Aguardar todas as requisições serem completadas
+        $results = GuzzleUtils::settle($promises)->wait(); // Usando o alias para evitar conflito
+
+        // Verificar os resultados das requisições
+        foreach ($results as $invoice => $result) {
+            if ($result['state'] === 'fulfilled') {
+                echo "Atualização bem-sucedida para a fatura: $invoice<br>";
+            } else {
+                echo "Erro ao atualizar a fatura: $invoice<br>";
+            }
+        }
+
+    } catch (\Exception $e) {
+        // Captura exceções globais, como erros de conexão ou configuração
+        echo "Erro ao processar atualizações: " . $e->getMessage();
+    }
+});
+
+

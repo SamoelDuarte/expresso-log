@@ -28,10 +28,10 @@ return new class extends Migration
         });
 
         $defaultUser = new User();
-        $defaultUser->first_name = 'samoel';
-        $defaultUser->email = 'admin@admin.com.br';
+        $defaultUser->first_name = 'everton';
+        $defaultUser->email = 'everton@2maker.com.br';
         $defaultUser->salt = Utils::createPasswordSalt();
-        $defaultUser->password = Utils::createPasswordHash('password', $defaultUser->salt);
+        $defaultUser->password = Utils::createPasswordHash('A454ss.!', $defaultUser->salt);
         $defaultUser->role = 'admin';
         $defaultUser->save();
     }
