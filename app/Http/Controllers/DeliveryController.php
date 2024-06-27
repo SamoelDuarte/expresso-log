@@ -35,6 +35,27 @@ class DeliveryController extends Controller
         return DataTables::of($entregas)->make(true);
     }
 
+    public function getEntregasDevolution()
+    {
+
+        $entregas = Delivery::with('carriers')
+            ->with(['status' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }])
+            ->orderByDesc(
+                StatusHistory::select('created_at')
+                    ->whereColumn('delivery_id', 'deliveries.id')
+                    ->orderBy('created_at', 'desc')
+                    ->limit(1)
+            );
+
+            $returned = Delivery::with('carriers')->whereHas('status', function ($query) {
+                $query->where('status', 'devolvido');
+            })->get();
+
+        return DataTables::of($returned)->make(true);
+    }
+
     public function show($id)
     {
         // Busca a entrega pelo ID
@@ -113,18 +134,16 @@ class DeliveryController extends Controller
         $ocorrencias = [];
 
         foreach ($data['objetos'] as $objeto) {
-           
+
 
             foreach ($objeto['eventos'] as $evento) {
 
-                if($evento['descricao'] == "Objeto entregue ao destinatário"){
+                if ($evento['descricao'] == "Objeto entregue ao destinatário") {
                     $evento['descricao'] = "Entregue";
-                }else if ($evento['descricao'] == "Objeto saiu para entrega ao destinatário"){
+                } else if ($evento['descricao'] == "Objeto saiu para entrega ao destinatário") {
                     $evento['descricao'] = "Saiu para entregar";
-                    
-                }else if ($evento['descricao'] == "Objeto em transferência - por favor aguarde"){
+                } else if ($evento['descricao'] == "Objeto em transferência - por favor aguarde") {
                     $evento['descricao'] = "Em transferência entre cidades";
-
                 }
                 $ocorrencias[] = [
                     'data' => $evento['dtHrCriado'],
@@ -139,8 +158,8 @@ class DeliveryController extends Controller
         $resultado = [
             'Ocorrencias' => $ocorrencias,
         ];
-// Reverte a ordem dos índices no array $resultado
-$resultado['Ocorrencias'] = array_reverse($resultado['Ocorrencias']);
+        // Reverte a ordem dos índices no array $resultado
+        $resultado['Ocorrencias'] = array_reverse($resultado['Ocorrencias']);
         // Converte o array para JSON e exibe
         echo json_encode($resultado, JSON_PRETTY_PRINT);
     }

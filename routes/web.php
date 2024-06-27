@@ -72,6 +72,7 @@ Route::middleware('auth.admin')->group(function () {
         Route::get('/', 'index')->name('admin.dashboard');
         Route::get('/errors/filter', 'filter');
         Route::get('/status', 'statusDash');
+        Route::get('/devolucao', 'devolucao')->name('home.devolucao');
     });
 
     Route::prefix('/transportadora')->controller(CarrierController::class)->group(function () {
@@ -86,6 +87,7 @@ Route::middleware('auth.admin')->group(function () {
     Route::prefix('/entregas')->controller(DeliveryController::class)->group(function () {
         Route::get('/', 'index')->name('admin.entrega.index');
         Route::get('/getEntregas', 'getEntregas');
+        Route::get('/getEntregasDevolution', 'getEntregasDevolution');
         Route::get('/getinfoEntrega/{id}', 'show');
     });
 });

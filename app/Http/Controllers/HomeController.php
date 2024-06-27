@@ -24,6 +24,24 @@ class HomeController extends Controller
                 ->whereDate('created_at', $today);
         })->count();
 
+        // Obtém a data de 7 dias atrás
+    $sevenDaysAgo = $today->copy()->subDays(7);
+
+    // Conta as entregas com status "Arquivo Recebido" nos últimos 7 dias
+    $countLast7Days = Delivery::whereHas('status', function ($query) use ($today, $sevenDaysAgo) {
+        $query->where('status', 'Arquivo Recebido')
+              ->whereBetween('created_at', [$sevenDaysAgo, $today]);
+    })->count();
+
+    // Obtém a data de 30 dias atrás
+    $thirtyDaysAgo = $today->copy()->subDays(30);
+
+    // Conta as entregas com status "Arquivo Recebido" nos últimos 30 dias
+    $countLast30Days = Delivery::whereHas('status', function ($query) use ($today, $thirtyDaysAgo) {
+        $query->where('status', 'Arquivo Recebido')
+              ->whereBetween('created_at', [$thirtyDaysAgo, $today]);
+    })->count();
+
         $in_progress = Delivery::whereDoesntHave('status', function ($query) {
             $query->where('status', 'Entregue');
         })->count();
@@ -125,6 +143,8 @@ class HomeController extends Controller
         $data = array(
             'carriesResult' => $carriesResult,
             'countToday' => $countToday,
+            'count_last_7_days' => $countLast7Days,
+            'count_last_30_days' => $countLast30Days,
             'in_progress' => $in_progress,
             'overdue' => $overdue,
             'returned' => $returned,
@@ -158,6 +178,10 @@ class HomeController extends Controller
 
 
         return response()->json(['errors' => $errors]);
+    }
+
+    public function devolucao(){
+        return view('admin.home.devolucao');
     }
 
     public function statusDash(Request $request)

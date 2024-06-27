@@ -85,6 +85,13 @@
         .text-number {
             color: black
         }
+
+        .card-icon {
+            display: flex;
+            justify-content: space-between;
+            flex-direction: row;
+            align-items: flex-start;
+        }
     </style>
 @endsection
 
@@ -109,13 +116,8 @@
         </ul>
 
     </div>
-
-
     <div class="tab-content text-muted mt-2">
         <div class="tab-pane show active" id="movement-tab">
-
-          
-
             <div class="row">
                 <div class="col-md-2">
                     <div class="card card-home">
@@ -128,8 +130,29 @@
                 <div class="col-md-2">
                     <div class="card card-home">
                         <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Ultimos 7 Dias</h6>
+                            <p class="card-text"><b>{{ $count_last_7_days }}</b></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card card-home">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Ultimos 30 Dias</h6>
+                            <p class="card-text"><b>{{ $count_last_30_days }}</b></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card card-home">
+                        <div class="card-body">
                             <h6 class="card-subtitle mb-2 text-muted  linha-bottom">Devolução</h6>
-                            <p class="card-text"><b>{{ $returned }}</b></p>
+                            <div class="card-icon">
+                                <p class="card-text"><b>{{ $returned }}</b></p>
+                                <a class="btn btn-sm btn-primary" href="{{ route('home.devolucao') }}"
+                                    style="background:#dedede ;  color: black;"><i class="fas fa-eye"></i></a>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -331,6 +354,21 @@
                     </div>
                 </div>
             </div>
+
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="modalDetalhes" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <!-- Aqui serão exibidas as informações detalhadas da entrega via AJAX -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -339,7 +377,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-
     <script>
         var paymentMethodChart = null;
         const Page = {
