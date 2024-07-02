@@ -1245,7 +1245,7 @@ class PedidosController extends Controller
                 // "invoiceAccessKey" => (string)$xmlObj->NFe->infNFe->attributes()['Id'],
                 "invoiceIssueDate" => (string)$xmlObj->NFe->infNFe->ide->dhEmi,
             ];
-        
+
             $pedido = json_encode($pedido);
 
 
@@ -1286,14 +1286,19 @@ class PedidosController extends Controller
                 //Fechando a requisição
                 curl_close($curl);
 
-                // dd($responseArray);
-                $billcode = $responseArray['data']['orderList'][0]['billCode'];
-                //Exibindo a resposta
-                echo '<br><br>' . $response;
 
+                // Verificando a estrutura do array antes de acessar os valores
+                if (isset($responseArray['data']['orderList'][0]['billCode']) && !empty($responseArray['data']['orderList'][0]['billCode'])) {
+                    $billcode = $responseArray['data']['orderList'][0]['billCode'];
+                    // Exibindo a resposta
+                    echo '<br><br>' . $response;
 
-
-                echo json_encode(array('mensagem' => 'sucesso'));
+                    echo json_encode(array('mensagem' => 'sucesso'));
+                } else {
+                    // Exibindo o erro caso o billCode não exista ou esteja vazio
+                    echo json_encode(array('error' => 'Resposta da api : ' . json_encode($responseArray)));
+                    exit;
+                }
             } catch (RequestException $e) {
 
                 Error::create(['erro' => 'Erro servidor interno J&T' . $e->getMessage()]);
@@ -1304,8 +1309,6 @@ class PedidosController extends Controller
             $transp = Carrier::whereHas('documents', function ($query) use ($documento) {
                 $query->where('number', $documento);
             })->first();
-
-
 
 
             $numNota = $XmlArray['NFe']['infNFe']['ide']['nNF'];
