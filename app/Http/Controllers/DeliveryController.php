@@ -204,31 +204,37 @@ class DeliveryController extends Controller
         }
     }
     public static function getDeliverys($numbersToSearch)
-    {
-        // Primeiro, obtemos os IDs únicos dos deliveries que correspondem aos critérios, excluindo status específicos
-        $uniqueDeliveries = Delivery::select('external_code', DB::raw('MIN(id) as id'))
-            ->whereHas('carriers', function ($query) use ($numbersToSearch) {
-                $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
-                    $documentQuery->whereIn('number', $numbersToSearch);
-                });
-            })
-            ->whereDoesntHave('status', function ($query) {
-                $query->whereIn('status', ['finalizado', 'Entregue', 'Entrega Realizada', 'Entrega Realizada (Mobile)', 'devolvido']);
-            })
-            ->where(function ($query) {
-                $query->whereNull('updated_at')
-                    ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'));
-            })
-            ->groupBy('external_code')
-            ->pluck('id');
+{
+    // Define a data limite de dois meses atrás
+    $twoMonthsAgo = Carbon::now()->subMonths(2)->format('Y-m-d H:i:s');
 
-        // Depois, usamos os IDs únicos para obter as entregas, garantindo que cada external_code seja único
-        $deliveries = Delivery::with('carriers.documents')
-            ->whereIn('id', $uniqueDeliveries)
-            ->orderBy('id')
-            ->limit(20)
-            ->get();
+    // Primeiro, obtemos os IDs únicos dos deliveries que correspondem aos critérios, excluindo status específicos
+    $uniqueDeliveries = Delivery::select('external_code', DB::raw('MIN(id) as id'))
+        ->whereHas('carriers', function ($query) use ($numbersToSearch) {
+            $query->whereHas('documents', function ($documentQuery) use ($numbersToSearch) {
+                $documentQuery->whereIn('number', $numbersToSearch);
+            });
+        })
+        ->whereDoesntHave('status', function ($query) {
+            $query->whereIn('status', ['finalizado', 'Entregue', 'Entrega Realizada', 'Entrega Realizada (Mobile)', 'devolvido']);
+        })
+        ->where(function ($query) use ($twoMonthsAgo) {
+            // Aqui garantimos que a data seja no máximo de dois meses atrás
+            $query->whereNull('updated_at')
+                ->orWhere('updated_at', '<=', Carbon::now()->subHour()->format('Y-m-d H:i:s'))
+                ->where('created_at', '>=', $twoMonthsAgo);  // Verifica se foi criado nos últimos dois meses
+        })
+        ->groupBy('external_code')
+        ->pluck('id');
 
-        return $deliveries;
-    }
+    // Depois, usamos os IDs únicos para obter as entregas, garantindo que cada external_code seja único
+    $deliveries = Delivery::with('carriers.documents')
+        ->whereIn('id', $uniqueDeliveries)
+        ->orderBy('id')
+        ->limit(20)
+        ->get();
+
+    return $deliveries;
+}
+
 }
